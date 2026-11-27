@@ -32,36 +32,37 @@ import dynamic from "next/dynamic";
 
 // Paleta categórica validada (orden fijo, segura para daltonismo en pares adyacentes).
 // El color 1 (azul) es el predeterminado de una sola serie; el 2 (naranja) sirve para resaltar.
-export const COLORES_GRAFICO = ["#1f63b0", "#d9622b", "#1a9a72", "#d99a00", "#d0679a", "#16801f", "#6250d6", "#c93f3e"];
+// Tema Radar: el color 1 es el azul marino de la marca (--blue) y el 4 el azul claro (--purple).
+export const COLORES_GRAFICO = ["#1D3E7F", "#d9622b", "#1a9a72", "#5B82C8", "#d0679a", "#d99a00", "#6250d6", "#c93f3e"];
 export const COLOR_RESALTADO = "#d9622b";
 
 // Tema sobrio: ejes y rejilla discretos, texto con los colores de la interfaz.
 const TEMA_SBP = {
   color: COLORES_GRAFICO,
   backgroundColor: "transparent",
-  textStyle: { fontFamily: '"Segoe UI", system-ui, -apple-system, "Helvetica Neue", Roboto, Arial, sans-serif', color: "#17212b" },
-  title: { textStyle: { color: "#17212b", fontWeight: 600, fontSize: 14 }, subtextStyle: { color: "#4b5866" } },
-  legend: { textStyle: { color: "#4b5866" }, icon: "roundRect", itemWidth: 12, itemHeight: 12 },
+  textStyle: { fontFamily: 'Inter, "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Roboto, Arial, sans-serif', color: "#0f172a" },
+  title: { textStyle: { color: "#0f172a", fontWeight: 700, fontSize: 14 }, subtextStyle: { color: "#334155" } },
+  legend: { textStyle: { color: "#334155" }, icon: "roundRect", itemWidth: 12, itemHeight: 12 },
   tooltip: {
     backgroundColor: "#ffffff",
-    borderColor: "#9aa6b2",
+    borderColor: "#d7dde9",
     borderWidth: 1,
-    textStyle: { color: "#17212b", fontSize: 13 },
-    extraCssText: "box-shadow: 0 2px 6px rgba(23,33,43,0.12); border-radius: 4px;",
+    textStyle: { color: "#0f172a", fontSize: 13 },
+    extraCssText: "box-shadow: 0 12px 30px -12px rgba(15,23,42,0.25); border-radius: 10px;",
   },
   categoryAxis: {
-    axisLine: { lineStyle: { color: "#9aa6b2" } },
+    axisLine: { lineStyle: { color: "#b9c8e6" } },
     axisTick: { show: false },
-    axisLabel: { color: "#4b5866" },
+    axisLabel: { color: "#334155" },
     splitLine: { show: false },
   },
   valueAxis: {
     axisLine: { show: false },
     axisTick: { show: false },
-    axisLabel: { color: "#4b5866" },
-    splitLine: { lineStyle: { color: "#e3e8ed" } },
+    axisLabel: { color: "#334155" },
+    splitLine: { lineStyle: { color: "#e5eaf3" } },
   },
-  bar: { itemStyle: { borderRadius: [0, 3, 3, 0] }, barMaxWidth: 28 },
+  bar: { itemStyle: { borderRadius: [0, 4, 4, 0] }, barMaxWidth: 28 },
   line: { symbolSize: 8, lineStyle: { width: 2 } },
 };
 
@@ -135,7 +136,7 @@ export default function Grafico({ opcion, titulo, descripcion, altura = 360, for
   // Valores por defecto: tooltip al pasar sobre cada categoría y márgenes ajustados.
   // Lo que traiga `opcion` siempre tiene prioridad.
   const base = {
-    tooltip: { trigger: "axis", axisPointer: { type: "shadow", shadowStyle: { color: "rgba(13, 59, 102, 0.06)" } } },
+    tooltip: { trigger: "axis", axisPointer: { type: "shadow", shadowStyle: { color: "rgba(29, 62, 127, 0.07)" } } },
     ...opcion,
   };
   if (!Array.isArray(base.grid)) base.grid = { top: 24, right: 24, bottom: 32, ...base.grid };

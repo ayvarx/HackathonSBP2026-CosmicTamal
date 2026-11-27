@@ -1,5 +1,6 @@
 "use client";
 // ConmutadorPerfil — Selector compacto de perfil en la cabecera (muestra el perfil actual).
+// Estilo ".app-perfil" del frontend de Amet (components/topbar.css).
 // Envía el formulario a la acción de servidor cambiarPerfil, que firma la cookie.
 // Funciona aun sin JavaScript (formulario normal con botón "Cambiar").
 //
@@ -24,17 +25,14 @@ export default function ConmutadorPerfil({ perfilActual, perfiles }) {
   }
 
   return (
-    <form action={cambiarPerfil} onSubmit={alEnviar} className="flex flex-wrap items-center gap-2 text-sm">
+    <form action={cambiarPerfil} onSubmit={alEnviar} className="app-perfil">
       <input type="hidden" name="volver" defaultValue={ruta} />
-      <label htmlFor="conmutador-perfil" className="text-sobre-primario-suave">
-        Perfil
-      </label>
+      <label htmlFor="conmutador-perfil">Perfil</label>
       <select
         id="conmutador-perfil"
         name="perfil"
         defaultValue={perfilActual}
         key={perfilActual}
-        className="min-h-8 rounded-control border border-sobre-primario-suave bg-primario-oscuro px-2 py-1 font-semibold text-sobre-primario"
       >
         {perfiles.map((p) => (
           <option key={p.valor} value={p.valor}>
@@ -42,13 +40,8 @@ export default function ConmutadorPerfil({ perfilActual, perfiles }) {
           </option>
         ))}
       </select>
-      <button
-        type="submit"
-        className="min-h-8 cursor-pointer rounded-control border border-sobre-primario-suave px-3 py-1 font-semibold text-sobre-primario hover:bg-primario-oscuro"
-      >
-        Cambiar
-      </button>
-      <Link href={`/perfil?volver=${encodeURIComponent(ruta)}`} className="text-sobre-primario-suave underline hover:text-sobre-primario">
+      <button type="submit">Cambiar</button>
+      <Link href={`/perfil?volver=${encodeURIComponent(ruta)}`}>
         ¿Qué puede hacer cada perfil?
       </Link>
     </form>

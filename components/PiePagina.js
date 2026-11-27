@@ -4,10 +4,11 @@
 // Props:
 //   perfil (string)  Perfil actual, para recordarlo al pie.
 import { NOMBRE_PERFIL } from "@/lib/auth";
+import LogoRadar from "./LogoRadar";
 
 export default function PiePagina({ perfil }) {
   return (
-    <footer className="mt-12 border-t border-borde bg-superficie">
+    <footer className="pie-radar mt-12">
       <div className="contenedor flex flex-col gap-2 py-6 text-xs text-texto-tenue md:flex-row md:justify-between">
         <div className="max-w-2xl space-y-1">
           <p>
@@ -19,8 +20,11 @@ export default function PiePagina({ perfil }) {
             Superintendencia de Bancos de Panamá.
           </p>
         </div>
-        <p className="md:text-right">
-          Prototipo académico · Perfil actual: <span className="font-semibold">{NOMBRE_PERFIL[perfil]}</span>
+        <p className="flex items-start gap-2 md:justify-end md:text-right">
+          <LogoRadar size={20} decorativo />
+          <span>
+            Prototipo académico · Perfil actual: <span className="font-semibold">{NOMBRE_PERFIL[perfil]}</span>
+          </span>
         </p>
       </div>
     </footer>

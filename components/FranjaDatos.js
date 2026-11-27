@@ -1,6 +1,7 @@
 "use client";
 // FranjaDatos — Franja fija (siempre visible al desplazarse) con la fuente, el período en
 // consulta y el aviso de datos ficticios que exige la lámina 9 de la presentación.
+// Estilo ".persistent-disclaimer" / ".fiction-label" del frontend de Amet (definido en globals.css).
 //
 // El período se toma de la URL si la pantalla lo filtra (?periodo=AAAAMMDD; en comparaciones
 // también ?anterior=AAAAMMDD). Si la URL no lo trae, se muestra el último corte cargado
@@ -27,27 +28,23 @@ function ContenidoFranja({ periodo, anterior, origen }) {
     textoPeriodo = anterior ? `${formatearFecha(anterior)} → ${formatearFecha(periodo)}` : formatearFecha(periodo);
   }
   return (
-    <div className="sticky top-0 z-30 border-y border-aviso-borde bg-aviso-fondo text-aviso-texto">
-      <div className="contenedor flex flex-col gap-x-6 gap-y-1 py-2 text-[0.8rem] leading-snug lg:flex-row lg:items-center">
-        <p className="flex shrink-0 flex-wrap gap-x-4 gap-y-0.5">
+    <div className="franja-fija">
+      <div className="contenedor">
+        <div className="persistent-disclaimer" role="note" aria-label="Fuente y aviso de datos">
           <span>
-            <span className="font-semibold">Fuente:</span> {FUENTE}
+            <b>Fuente:</b> {FUENTE}
           </span>
           <span>
-            <span className="font-semibold">Período en consulta:</span>{" "}
-            <span className="cifra">{textoPeriodo}</span>
+            <b>Período en consulta:</b> <span className="cifra">{textoPeriodo}</span>
             {periodo && origen === "vigente" && <span> (último corte)</span>}
           </span>
-        </p>
-        <p className="flex items-start gap-2 font-semibold lg:ml-auto">
-          <span
-            aria-hidden="true"
-            className="mt-px inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-[1.5px] border-current text-[0.65rem] leading-none"
-          >
-            !
+          <span className="fiction-label">
+            <span aria-hidden="true" className="icono-aviso">
+              !
+            </span>
+            <span>{AVISO}</span>
           </span>
-          <span>{AVISO}</span>
-        </p>
+        </div>
       </div>
     </div>
   );

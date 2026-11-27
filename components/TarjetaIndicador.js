@@ -1,4 +1,5 @@
 // TarjetaIndicador — Cifra destacada con su contexto (panel principal, resúmenes). Servidor y cliente.
+// Aspecto de ".metric-card" del frontend de Amet (clase .tarjeta-indicador en globals.css).
 //
 // Uso:
 //   <TarjetaIndicador
@@ -20,9 +21,9 @@ import IndicadorMovimiento from "./IndicadorMovimiento";
 
 export default function TarjetaIndicador({ titulo, valor, unidad, detalle, movimiento, enlace }) {
   return (
-    <article className="tarjeta flex h-full flex-col gap-1">
+    <article className="tarjeta tarjeta-indicador flex h-full flex-col gap-1">
       <h3 className="text-sm font-semibold text-texto-suave">{titulo}</h3>
-      <p className="cifra text-2xl font-semibold tracking-tight text-texto">
+      <p className="cifra text-2xl font-extrabold tracking-tight text-texto">
         {valor}
         {unidad && <span className="ml-1 text-sm font-normal text-texto-suave">{unidad}</span>}
       </p>
