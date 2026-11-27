@@ -1,6 +1,6 @@
 -- =====================================================================
 -- 03_indicadores.sql — Indicadores complementarios (NO sustituyen los rankings).
--- Morosidad, vencimientos, tasa promedio ponderada y concentración.
+-- Saldo con mora, vencimientos, tasa promedio ponderada y concentración.
 --
 -- Todo se calcula sobre el UNIVERSO LOCAL VÁLIDO de cada período (filas con
 -- filtro IS NULL en res_filas) y con NUMERIC exacto. Se puede ejecutar muchas
@@ -48,7 +48,10 @@ WHERE r.filtro IS NULL;
 --    'macro' (total del sistema por actividad) y 'sistema' (todo el período).
 --    En cada nivel las columnas que no aplican quedan en NULL.
 -- ---------------------------------------------------------------------
-CREATE OR REPLACE VIEW v_ind_cartera WITH (security_invoker = true) AS
+-- Se borra antes de recrearla porque sus columnas cambiaron (CREATE OR REPLACE
+-- no puede quitar ni renombrar columnas de una vista).
+DROP VIEW IF EXISTS v_ind_cartera CASCADE;
+CREATE VIEW v_ind_cartera WITH (security_invoker = true) AS
 WITH a AS (
   SELECT fecha, codigo_banco, macroactividad,
          CASE WHEN GROUPING(codigo_banco) = 0 AND GROUPING(macroactividad) = 0 THEN 'banco_macro'
@@ -59,7 +62,9 @@ WITH a AS (
          COUNT(*)                                               AS operaciones,
          SUM(pv_30 + pv_60 + pv_90 + pv_120 + pv_180 + pv_1a + pv_1_5a + pv_5_10a + pv_10a) AS por_vencer,
          SUM(v_30 + v_60 + v_90 + v_120 + v_180 + v_1a + v_mas_1a)                         AS vencido,
-         -- Saldo de los préstamos con más de 90 días de mora (mora grave).
+         -- Misma base para los dos indicadores de mora: el SALDO de los préstamos
+         -- con días de mora (> 0) y con mora grave (> 90), sobre el saldo total.
+         SUM(CASE WHEN dias_mora > 0 THEN saldo ELSE 0 END)     AS saldo_mora,
          SUM(CASE WHEN dias_mora > 90 THEN saldo ELSE 0 END)    AS saldo_mora_90,
          COUNT(*) FILTER (WHERE dias_mora > 0)                  AS operaciones_morosas,
          SUM(tasa * saldo)                                      AS tasa_por_saldo,
@@ -80,8 +85,10 @@ SELECT a.fecha, a.nivel, a.codigo_banco, b.nombre_ficticio AS banco, a.macroacti
        a.operaciones::INTEGER               AS operaciones,
        a.por_vencer::NUMERIC(24,2)          AS por_vencer,
        a.vencido::NUMERIC(24,2)             AS vencido,
-       -- Índice de morosidad = saldo vencido / saldo, en %, 4 decimales.
-       CASE WHEN a.saldo > 0 THEN ROUND(a.vencido * 100 / a.saldo, 4) ELSE 0 END::NUMERIC(12,4)        AS morosidad_pct,
+       -- Saldo con mora (> 0 días) / saldo, en %, 4 decimales.
+       a.saldo_mora::NUMERIC(24,2)          AS saldo_mora,
+       CASE WHEN a.saldo > 0 THEN ROUND(a.saldo_mora * 100 / a.saldo, 4) ELSE 0 END::NUMERIC(12,4)     AS mora_pct,
+       -- Saldo con mora mayor a 90 días / saldo (misma base).
        a.saldo_mora_90::NUMERIC(24,2)       AS saldo_mora_90,
        CASE WHEN a.saldo > 0 THEN ROUND(a.saldo_mora_90 * 100 / a.saldo, 4) ELSE 0 END::NUMERIC(12,4)  AS mora_90_pct,
        a.operaciones_morosas::INTEGER       AS operaciones_morosas,

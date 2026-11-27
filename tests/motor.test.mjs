@@ -172,7 +172,7 @@ test('parámetros: la regla de movimiento significativo es configurable', async 
   assert.equal((await q.guardarParametro('min_cambio_posicion', 'dos', 'administrador')).ok, false);
   assert.equal((await q.guardarParametro('min_cambio_posicion', '2', 'publico')).ok, false);
   await q.guardarParametro('min_cambio_posicion', '2', 'administrador');
-  await q.guardarParametro('min_var_saldo_pct', '10', 'administrador');
+  await q.guardarParametro('min_var_saldo_pct', '20', 'administrador');
 });
 
 test('un período repetido se rechaza; con "reemplazar" se sustituye', async (t) => {

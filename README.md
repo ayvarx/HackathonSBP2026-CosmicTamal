@@ -160,7 +160,7 @@ Para cada banco, ranking y par de períodos, el movimiento es **significativo** 
 
 1. **Salto de posición:** `|Cambio_Posicion| >= min_cambio_posicion` (por defecto **2**).
 2. **Cambio de líder:** el banco gana o pierde el primer lugar (se marca en los dos bancos). Activo si `marcar_cambio_lider = si` (por defecto **si**).
-3. **Variación de saldo:** `|Var_Saldo_Pct| >= min_var_saldo_pct` (por defecto **10** %).
+3. **Variación de saldo:** `|Var_Saldo_Pct| >= min_var_saldo_pct` (por defecto **20** %).
 4. **Entrada al ranking:** el banco pasa de saldo `0.00` a tener saldo (no hay porcentaje definible). Esta condición es fija.
 
 La columna `Motivo` de las exportaciones y de las pantallas indica cuál o cuáles condiciones se cumplieron.

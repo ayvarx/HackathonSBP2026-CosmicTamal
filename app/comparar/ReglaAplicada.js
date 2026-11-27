@@ -6,7 +6,7 @@
 import Link from "next/link";
 
 // Mismos valores por defecto que usa movimientos() en lib/consultas.js si falta un parámetro.
-const PREDETERMINADOS = { min_cambio_posicion: "2", marcar_cambio_lider: "si", min_var_saldo_pct: "10" };
+const PREDETERMINADOS = { min_cambio_posicion: "2", marcar_cambio_lider: "si", min_var_saldo_pct: "20" };
 
 export default function ReglaAplicada({ parametros = [], esAdministrador = false }) {
   const porClave = Object.fromEntries(parametros.map((p) => [p.clave, p]));

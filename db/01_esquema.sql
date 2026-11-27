@@ -141,7 +141,7 @@ INSERT INTO parametros (clave, valor, descripcion) VALUES
    'Un banco tiene movimiento significativo si sube o baja al menos esta cantidad de posiciones (|Cambio_Posicion| >= valor).'),
   ('marcar_cambio_lider', 'si',
    'Si vale "si", todo cambio de líder (posición 1) se marca como significativo.'),
-  ('min_var_saldo_pct', '10',
+  ('min_var_saldo_pct', '20',
    'Un banco tiene movimiento significativo si su saldo varía al menos este porcentaje (|Var_Saldo_Pct| >= valor).')
 ON CONFLICT (clave) DO NOTHING;
 

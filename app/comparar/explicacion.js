@@ -75,23 +75,20 @@ export function bancosCruzados(m, movimientosRanking) {
 }
 
 /**
- * Elige los "principales movimientos" de un ranking, en este orden de prioridad:
- *   1) cambio de líder, 2) cambio de posición (los saltos más grandes primero),
- *   3) movimientos significativos sin cambio de posición (p. ej. por variación de saldo).
- * Dentro de cada grupo desempata la variación de saldo más grande (en valor absoluto).
- * Si ningún banco cumple, se explica al menos el de mayor variación de saldo.
+ * Movimientos que se explican en tarjetas: primero TODOS los significativos (aunque no
+ * cambien de puesto) y después los cambios de posición no significativos. Así el conteo
+ * "N movimientos son significativos" coincide con las tarjetas marcadas como tales.
+ * Dentro de cada grupo: cambio de líder, salto de posición más grande, mayor variación de saldo.
  */
-export function principalesMovimientos(movimientosRanking, maximo = 4) {
-  const prioridad = (m) => (m.cambio_de_lider === "SI" ? 0 : m.cambio_posicion !== 0 ? 1 : m.significativo ? 2 : 3);
-  const ordenados = [...movimientosRanking].sort(
-    (a, b) =>
-      prioridad(a) - prioridad(b) ||
-      Math.abs(b.cambio_posicion) - Math.abs(a.cambio_posicion) ||
-      compararDecimales(quitarSigno(b.var_saldo), quitarSigno(a.var_saldo)) ||
-      a.posicion_actual - b.posicion_actual
-  );
-  const relevantes = ordenados.filter((m) => prioridad(m) < 3);
-  return (relevantes.length ? relevantes : ordenados.slice(0, 1)).slice(0, maximo);
+export function principalesMovimientos(movimientosRanking) {
+  const orden = (a, b) =>
+    (a.cambio_de_lider === "SI" ? 0 : 1) - (b.cambio_de_lider === "SI" ? 0 : 1) ||
+    Math.abs(b.cambio_posicion) - Math.abs(a.cambio_posicion) ||
+    compararDecimales(quitarSigno(b.var_saldo), quitarSigno(a.var_saldo)) ||
+    a.posicion_actual - b.posicion_actual;
+  const significativos = movimientosRanking.filter((m) => m.significativo).sort(orden);
+  const otros = movimientosRanking.filter((m) => !m.significativo && m.cambio_posicion !== 0).sort(orden);
+  return [...significativos, ...otros];
 }
 
 /** Frase sobre la posición: sube, baja o se mantiene, y con quién se cruzó. */
@@ -203,7 +200,13 @@ export function introduccionRanking(ranking, movimientosRanking, anterior, actua
     lider.codigo_banco === liderAnterior.codigo_banco
       ? `${lider.banco} se mantiene como líder con un saldo de ${formatearMonto(lider.saldo_actual)}. `
       : `${lider.banco} desplaza a ${liderAnterior.banco} del primer lugar con un saldo de ${formatearMonto(lider.saldo_actual)}. `;
+  const otros = movimientosRanking.filter((m) => !m.significativo && m.cambio_posicion !== 0).length;
   texto += cambian === 0 ? "Ningún banco cambió de posición" : `${cambian} de los ${movimientosRanking.length} bancos cambiaron de posición`;
-  texto += ` y ${significativos === 1 ? "1 movimiento es significativo" : `${significativos} movimientos son significativos`} según la regla vigente.`;
+  texto += `. ${significativos === 1 ? "1 movimiento es significativo" : `${significativos} movimientos son significativos`} según la regla vigente`;
+  texto += otros
+    ? ` y ${otros === 1 ? "1 cambio de posición no lo es" : `${otros} cambios de posición no lo son`}; se detallan abajo.`
+    : significativos
+      ? "; se detallan abajo."
+      : ".";
   return texto;
 }

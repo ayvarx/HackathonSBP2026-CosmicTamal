@@ -1,7 +1,7 @@
 "use client";
 // Gráficos de la pantalla de indicadores. Son componentes de cliente porque los
 // formateadores del tooltip son funciones (no pueden viajar desde el servidor).
-// Los gráficos solo DIBUJAN: la cifra exacta siempre está en la tabla de al lado.
+// Los gráficos solo DIBUJAN: la cifra exacta está en la tabla ("Ver como tabla").
 import Grafico, { COLORES_GRAFICO, COLOR_RESALTADO } from "@/components/Grafico";
 import { aNumeroParaGrafico, formatearMonto, formatearPorcentaje, nombreRanking } from "@/lib/formato";
 
@@ -102,9 +102,9 @@ export function MapaArbol({ filas, bancoElegido }) {
   );
 }
 
-/** Barras horizontales de morosidad (%) por banco, con el banco elegido resaltado. */
+/** Barras horizontales del % del saldo con mora (> 0 días) por banco, con el banco elegido resaltado. */
 export function BarrasMorosidad({ filas, bancoElegido }) {
-  const ordenadas = [...filas].sort((a, b) => n(b.morosidad_pct) - n(a.morosidad_pct));
+  const ordenadas = [...filas].sort((a, b) => n(b.mora_pct) - n(a.mora_pct));
   const opcion = {
     grid: { left: 130, right: 24, top: 8, bottom: 28 },
     xAxis: { type: "value" },
@@ -112,15 +112,15 @@ export function BarrasMorosidad({ filas, bancoElegido }) {
     series: [{
       type: "bar",
       data: ordenadas.map((f) => ({
-        value: n(f.morosidad_pct),
+        value: n(f.mora_pct),
         itemStyle: { color: f.codigo_banco === bancoElegido ? COLOR_RESALTADO : COLORES_GRAFICO[0] },
       })),
     }],
   };
   return (
     <Grafico
-      titulo="Morosidad por banco (saldo vencido / saldo)"
-      descripcion="Ordenado de mayor a menor morosidad."
+      titulo="Saldo con mora (> 0 días) por banco, % del saldo"
+      descripcion="Ordenado de mayor a menor."
       altura={Math.max(300, ordenadas.length * 28 + 50)}
       formatoValor="porcentaje"
       opcion={opcion}
@@ -128,20 +128,25 @@ export function BarrasMorosidad({ filas, bancoElegido }) {
   );
 }
 
-/** Línea de la morosidad a lo largo de los períodos cargados. */
+/** Líneas del % del saldo con mora (> 0 y > 90 días) a lo largo de los períodos cargados. */
 export function LineaMorosidad({ puntos }) {
-  // puntos: [{etiqueta, morosidad_pct}]
+  // puntos: [{etiqueta, mora_pct, mora_90_pct}]
+  const etiqueta = { show: true, formatter: (p) => `${p.value.toFixed(2)} %`, position: "top" };
   const opcion = {
-    grid: { left: 56, right: 24, top: 24, bottom: 32 },
+    legend: { bottom: 0 },
+    grid: { left: 56, right: 24, top: 24, bottom: 48 },
     xAxis: { type: "category", data: puntos.map((p) => p.etiqueta) },
-    yAxis: { type: "value", scale: true },
-    series: [{ type: "line", data: puntos.map((p) => n(p.morosidad_pct)), label: { show: true, formatter: (p) => `${p.value.toFixed(2)} %`, position: "top" } }],
+    yAxis: { type: "value" },
+    series: [
+      { name: "Saldo con mora (> 0 días)", type: "line", data: puntos.map((p) => n(p.mora_pct)), label: etiqueta },
+      { name: "Saldo con mora mayor a 90 días", type: "line", data: puntos.map((p) => n(p.mora_90_pct)), label: etiqueta },
+    ],
   };
   return (
     <Grafico
-      titulo="Evolución de la morosidad"
-      descripcion="Saldo vencido sobre saldo total en cada corte cargado."
-      altura={260}
+      titulo="Evolución del saldo con mora"
+      descripcion="Saldo de los préstamos con mora sobre el saldo total en cada corte cargado."
+      altura={280}
       formatoValor="porcentaje"
       opcion={opcion}
     />

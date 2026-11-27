@@ -30,13 +30,14 @@ import {
   RANKINGS,
   rankings,
 } from "@/lib/consultas";
-import { formatearFecha, formatearMonto, nombreRanking } from "@/lib/formato";
+import { compararDecimales, formatearFecha, formatearMonto, nombreRanking } from "@/lib/formato";
 import {
   descomposicionCuadra,
   explicarMovimiento,
   introduccionRanking,
   ordinal,
   principalesMovimientos,
+  quitarSigno,
   unirLista,
 } from "./explicacion";
 import { opcionCascada, opcionPosiciones } from "./graficos";
@@ -222,7 +223,10 @@ export default async function PaginaComparar({ searchParams }) {
   const descPorBanco = new Map(desc.map((d) => [d.codigo_banco, d]));
   const principales = principalesMovimientos(movsRanking);
   const explicaciones = principales.map((m) => ({ m, ...explicarMovimiento(m, descPorBanco.get(m.codigo_banco), movsRanking) }));
-  const seleccionado = movsRanking.find((m) => m.codigo_banco === bancoPedido) ?? principales[0];
+  const seleccionado =
+    movsRanking.find((m) => m.codigo_banco === bancoPedido) ??
+    principales[0] ??
+    [...movsRanking].sort((a, b) => compararDecimales(quitarSigno(b.var_saldo), quitarSigno(a.var_saldo)))[0];
   const descSeleccionado = seleccionado ? descPorBanco.get(seleccionado.codigo_banco) : undefined;
 
   // --- Bancos a comparar lado a lado ---------------------------------------------------
@@ -280,7 +284,7 @@ export default async function PaginaComparar({ searchParams }) {
           parametros={{ anterior, actual }}
           texto="Descargar reporte de movimientos"
           variante="primario"
-          descripcion={`${textoPar} · los 6 rankings.`}
+          descripcion="Los 6 rankings del par de períodos elegido."
         />
       </EncabezadoPagina>
 
@@ -367,6 +371,7 @@ export default async function PaginaComparar({ searchParams }) {
                 <p className="flex flex-wrap items-center gap-x-2 gap-y-1 font-semibold">
                   <span>{e.banco}</span>
                   <IndicadorMovimiento valor={e.m.cambio_posicion} significativo={e.m.significativo} />
+                  <span className="etiqueta">{e.m.significativo ? "Significativo" : "Cambio de posición"}</span>
                   {e.m.cambio_de_lider === "SI" && <span className="etiqueta">Cambio de líder</span>}
                 </p>
                 <p className="mt-1 text-sm">{e.frases.join(" ")}</p>

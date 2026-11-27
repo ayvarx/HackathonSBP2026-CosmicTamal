@@ -91,7 +91,7 @@ Parámetros: tabla `parametros` en [`db/01_esquema.sql`](../db/01_esquema.sql). 
 | :--- | :---: | :--- |
 | `min_cambio_posicion` | `2` | `ABS(Cambio_Posicion) >= valor` (y distinto de 0). Entero de 1 a 11. |
 | `marcar_cambio_lider` | `si` | Si vale `si`, todo cambio de líder es significativo (`si` o `no`). |
-| `min_var_saldo_pct` | `10` | `ABS(Var_Saldo_Pct) >= valor`. Decimal mayor o igual a 0, hasta 4 decimales. |
+| `min_var_saldo_pct` | `20` | `ABS(Var_Saldo_Pct) >= valor`. Decimal mayor o igual a 0, hasta 4 decimales. |
 | (fija) | | El banco pasa de saldo `0.00` a tener saldo en el ranking. |
 
 El campo `Motivo` concatena las condiciones cumplidas (por ejemplo "Sube 3 posiciones; Saldo varía 12.3456%"). El administrador cambia los umbrales en `/admin/parametros` o con `POST /api/admin/parametros`; `guardarParametro()` ([`lib/consultas.js`](../lib/consultas.js)) valida el valor, actualiza la tabla y registra el cambio en la bitácora. `reglaSignificativo()` ([`lib/consultas-admin.js`](../lib/consultas-admin.js)) la redacta en palabras y `efectoRegla()` cuenta cuántos movimientos marca en cada par de períodos.

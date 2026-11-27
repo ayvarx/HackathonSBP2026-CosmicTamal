@@ -1,5 +1,5 @@
 // Indicadores (/indicadores) — análisis adicionales sobre el universo local válido:
-// morosidad, escalera de vencimientos, tasa ponderada y concentración.
+// saldo con mora, escalera de vencimientos, tasa ponderada y concentración.
 // Todo se calcula en SQL (db/03_indicadores.sql).
 import EncabezadoPagina from "@/components/EncabezadoPagina";
 import EstadoVacio from "@/components/EstadoVacio";
@@ -17,6 +17,7 @@ import {
 import {
   BarrasApiladasVencimientos, BarrasMorosidad, EscaleraTramos, LineaMorosidad, MapaArbol, MapaCalor,
 } from "./GraficosIndicadores";
+import AlternarVista from "./AlternarVista";
 
 export const dynamic = "force-dynamic"; // los datos cambian al cargar cortes
 export const metadata = { title: "Indicadores" };
@@ -44,7 +45,7 @@ export default async function PaginaIndicadores({ searchParams }) {
   const encabezado = (
     <EncabezadoPagina
       titulo="Indicadores complementarios"
-      descripcion="Morosidad, vencimientos, tasa de interés y concentración del crédito."
+      descripcion="Saldo con mora, vencimientos, tasa de interés y concentración del crédito."
     />
   );
 
@@ -103,56 +104,61 @@ export default async function PaginaIndicadores({ searchParams }) {
         <>
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <TarjetaIndicador titulo="Saldo de la cartera" valor={formatearMonto(cartera.saldo)} detalle={`${formatearEntero(cartera.operaciones)} operaciones válidas`} />
-            <TarjetaIndicador titulo="Morosidad" valor={formatearPorcentaje(cartera.morosidad_pct)} detalle={`Saldo vencido: ${formatearMonto(cartera.vencido)}`} />
-            <TarjetaIndicador titulo="Mora mayor a 90 días" valor={formatearPorcentaje(cartera.mora_90_pct)} detalle={`Saldo: ${formatearMonto(cartera.saldo_mora_90)}`} />
+            <TarjetaIndicador titulo="Saldo con mora (> 0 días)" valor={formatearPorcentaje(cartera.mora_pct)} detalle={`Saldo: ${formatearMonto(cartera.saldo_mora)}`} />
+            <TarjetaIndicador titulo="Saldo con mora mayor a 90 días" valor={formatearPorcentaje(cartera.mora_90_pct)} detalle={`Saldo: ${formatearMonto(cartera.saldo_mora_90)}`} />
             <TarjetaIndicador titulo="Tasa promedio ponderada" valor={formatearPorcentaje(cartera.tasa_ponderada)} detalle="Anual, ponderada por saldo" />
           </div>
           <Nota>
-            Morosidad = saldo vencido ÷ saldo.
+            Ambos indicadores = saldo de los préstamos con días de mora (más de 0 o más de 90) ÷ saldo de la cartera.
           </Nota>
-          <p className="mt-2 text-sm text-texto-suave">
-            Saldo por vencer {formatearMonto(cartera.por_vencer)} + saldo vencido {formatearMonto(cartera.vencido)} = saldo {formatearMonto(cartera.saldo)}.{" "}
-            Préstamos con tramos descuadrados: <strong>{formatearEntero(cartera.filas_descuadradas)}</strong>.
-          </p>
         </>
       )}
 
       <Seccion
         id="morosidad"
-        titulo={`Morosidad por banco${ranking ? ` en ${nombreRanking(ranking)}` : ""}`}
-        nota="Saldo vencido ÷ saldo de la cartera local válida del banco."
+        titulo={`Saldo con mora por banco${ranking ? ` en ${nombreRanking(ranking)}` : ""}`}
+        nota="Saldo de los préstamos con días de mora ÷ saldo de la cartera local válida del banco."
       >
-        <BarrasMorosidad filas={porBanco} bancoElegido={banco} />
-        <TablaOrdenable
-          titulo={`Morosidad y tasa por banco · ${formatearFecha(fecha, "mes")}`}
-          columnas={[
-            { clave: "banco", titulo: "Banco" },
-            { clave: "saldo", titulo: "Saldo", tipo: "monto" },
-            { clave: "vencido", titulo: "Saldo vencido", tipo: "monto" },
-            { clave: "morosidad_pct", titulo: "Morosidad", tipo: "porcentaje" },
-            { clave: "mora_90_pct", titulo: "Mora > 90 días", tipo: "porcentaje" },
-            { clave: "tasa_ponderada", titulo: "Tasa ponderada", tipo: "porcentaje" },
-          ]}
-          filas={porBanco}
-          claveFila="codigo_banco"
-          ordenInicial={{ clave: "morosidad_pct", direccion: "desc" }}
-          filaResaltada={banco}
-          compacta
+        <AlternarVista
+          grafico={<BarrasMorosidad filas={porBanco} bancoElegido={banco} />}
+          tabla={
+            <TablaOrdenable
+              titulo={`Saldo con mora y tasa por banco · ${formatearFecha(fecha, "mes")}`}
+              columnas={[
+                { clave: "banco", titulo: "Banco" },
+                { clave: "saldo", titulo: "Saldo", tipo: "monto" },
+                { clave: "saldo_mora", titulo: "Saldo con mora (> 0 días)", tipo: "monto" },
+                { clave: "mora_pct", titulo: "% con mora (> 0 días)", tipo: "porcentaje" },
+                { clave: "mora_90_pct", titulo: "% con mora > 90 días", tipo: "porcentaje" },
+                { clave: "tasa_ponderada", titulo: "Tasa ponderada", tipo: "porcentaje" },
+              ]}
+              filas={porBanco}
+              claveFila="codigo_banco"
+              ordenInicial={{ clave: "mora_pct", direccion: "desc" }}
+              filaResaltada={banco}
+              compacta
+            />
+          }
         />
-        <LineaMorosidad puntos={evolucion.map((e) => ({ etiqueta: formatearFecha(e.fecha, "mes"), morosidad_pct: e.morosidad_pct }))} />
-        <TablaOrdenable
-          titulo={`Evolución por período · ${alcance}`}
-          columnas={[
-            { clave: "fecha", titulo: "Período", tipo: "fecha" },
-            { clave: "saldo", titulo: "Saldo", tipo: "monto" },
-            { clave: "vencido", titulo: "Saldo vencido", tipo: "monto" },
-            { clave: "morosidad_pct", titulo: "Morosidad", tipo: "porcentaje" },
-            { clave: "tasa_ponderada", titulo: "Tasa ponderada", tipo: "porcentaje" },
-          ]}
-          filas={evolucion}
-          claveFila="fecha"
-          ordenInicial={{ clave: "fecha", direccion: "asc" }}
-          compacta
+        <AlternarVista
+          grafico={<LineaMorosidad puntos={evolucion.map((e) => ({ etiqueta: formatearFecha(e.fecha, "mes"), mora_pct: e.mora_pct, mora_90_pct: e.mora_90_pct }))} />}
+          tabla={
+            <TablaOrdenable
+              titulo={`Evolución por período · ${alcance}`}
+              columnas={[
+                { clave: "fecha", titulo: "Período", tipo: "fecha" },
+                { clave: "saldo", titulo: "Saldo", tipo: "monto" },
+                { clave: "saldo_mora", titulo: "Saldo con mora (> 0 días)", tipo: "monto" },
+                { clave: "mora_pct", titulo: "% con mora (> 0 días)", tipo: "porcentaje" },
+                { clave: "mora_90_pct", titulo: "% con mora > 90 días", tipo: "porcentaje" },
+                { clave: "tasa_ponderada", titulo: "Tasa ponderada", tipo: "porcentaje" },
+              ]}
+              filas={evolucion}
+              claveFila="fecha"
+              ordenInicial={{ clave: "fecha", direccion: "asc" }}
+              compacta
+            />
+          }
         />
       </Seccion>
 
@@ -163,22 +169,49 @@ export default async function PaginaIndicadores({ searchParams }) {
       >
         {cartera ? (
           <>
-            <EscaleraTramos tramos={tramos} />
-            <TablaOrdenable
-              titulo={`Saldo por tramo · ${alcance}`}
-              columnas={[
-                { clave: "tipo", titulo: "Tipo", ordenable: false },
-                { clave: "etiqueta", titulo: "Tramo", ordenable: false },
-                { clave: "monto", titulo: "Monto", tipo: "monto", ordenable: false },
-                { clave: "pct_saldo", titulo: "% del saldo", tipo: "porcentaje", ordenable: false },
-              ]}
-              filas={tramos}
-              claveFila="clave"
-              compacta
+            <AlternarVista
+              grafico={<EscaleraTramos tramos={tramos} />}
+              tabla={
+                <TablaOrdenable
+                  titulo={`Saldo por tramo · ${alcance}`}
+                  columnas={[
+                    { clave: "tipo", titulo: "Tipo", ordenable: false },
+                    { clave: "etiqueta", titulo: "Tramo", ordenable: false },
+                    { clave: "monto", titulo: "Monto", tipo: "monto", ordenable: false },
+                    { clave: "pct_saldo", titulo: "% del saldo", tipo: "porcentaje", ordenable: false },
+                  ]}
+                  filas={tramos}
+                  claveFila="clave"
+                  compacta
+                />
+              }
             />
+            <p className="text-sm text-texto-suave">
+              Monto por vencer {formatearMonto(cartera.por_vencer)} + monto vencido {formatearMonto(cartera.vencido)} = saldo {formatearMonto(cartera.saldo)}.{" "}
+              Préstamos con tramos descuadrados: <strong>{formatearEntero(cartera.filas_descuadradas)}</strong>.
+            </p>
           </>
         ) : null}
-        <BarrasApiladasVencimientos filas={apiladas} />
+        <AlternarVista
+          grafico={<BarrasApiladasVencimientos filas={apiladas} />}
+          tabla={
+            <TablaOrdenable
+              titulo={`Perfil de vencimiento por banco (% de su saldo) · ${formatearFecha(fecha, "mes")}`}
+              columnas={[
+                { clave: "banco", titulo: "Banco" },
+                { clave: "hasta_1a", titulo: "Por vencer hasta 1 año", tipo: "porcentaje" },
+                { clave: "de_1_a_5a", titulo: "Por vencer de 1 a 5 años", tipo: "porcentaje" },
+                { clave: "mas_5a", titulo: "Por vencer a más de 5 años", tipo: "porcentaje" },
+                { clave: "vencido_hasta_90", titulo: "Vencido hasta 90 días", tipo: "porcentaje" },
+                { clave: "vencido_mas_90", titulo: "Vencido a más de 90 días", tipo: "porcentaje" },
+              ]}
+              filas={apiladas}
+              claveFila="codigo_banco"
+              filaResaltada={banco}
+              compacta
+            />
+          }
+        />
         <p className="text-sm text-texto-suave">
           Bloques: por vencer hasta 1 año (tramos de 30 días a 1 año), de 1 a 5 años, a más de 5 años (5 a 10 y más de 10), vencido hasta 90 días y vencido a más de 90 días.
         </p>

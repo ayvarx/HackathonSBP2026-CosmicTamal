@@ -1,38 +1,23 @@
 // Qué cambió con este corte (/admin/resumen?periodo=AAAAMMDD) — Se abre sola al terminar una carga.
-// Muestra la cascada E1–E4 del período, los cambios de líder y los movimientos significativos
-// frente al período anterior, cada uno con una explicación automática (plantillas fijas sobre
-// la descomposición de saldo que calcula el motor SQL), y el enlace al reporte descargable.
+// Muestra la cascada E1–E4 del período, los cambios de líder y la explicación automática de los
+// principales movimientos frente al período anterior; la tabla completa vive en /comparar.
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import BotonDescarga from "@/components/BotonDescarga";
 import EncabezadoPagina from "@/components/EncabezadoPagina";
 import EstadoVacio from "@/components/EstadoVacio";
 import Filtros from "@/components/Filtros";
-import TablaOrdenable from "@/components/TablaOrdenable";
 import TarjetaIndicador from "@/components/TarjetaIndicador";
 import { exigirPerfil } from "@/lib/auth";
 import { FILTROS } from "@/lib/consultas";
 import { cortesCargados, esPeriodo, periodoMasReciente, restarMontos, resumenCorte } from "@/lib/consultas-admin";
-import { formatearEntero, formatearFecha, formatearMonto, formatearMontoCompacto, nombreRanking } from "@/lib/formato";
+import { formatearEntero, formatearFecha, formatearMonto, formatearMontoCompacto } from "@/lib/formato";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Qué cambió con este corte" };
 
 // Parámetros de la URL que solo sirven para el aviso de "recién cargado".
 const PARAMETROS_AVISO = ["cargado", "archivo", "segundos", "reemplazado"];
-
-const COLUMNAS_MOVIMIENTOS = [
-  { clave: "ranking", titulo: "Ranking", tipo: "ranking" },
-  { clave: "banco", titulo: "Banco" },
-  { clave: "posicion_anterior", titulo: "Posición anterior", tipo: "entero" },
-  { clave: "posicion_actual", titulo: "Posición actual", tipo: "entero" },
-  { clave: "cambio_posicion", titulo: "Cambio", tipo: "movimiento", ayuda: "Posición anterior − posición actual: positivo = sube" },
-  { clave: "saldo_anterior", titulo: "Saldo anterior", tipo: "monto" },
-  { clave: "saldo_actual", titulo: "Saldo actual", tipo: "monto" },
-  { clave: "var_saldo", titulo: "Variación", tipo: "monto_signo" },
-  { clave: "var_saldo_pct", titulo: "Variación %", tipo: "porcentaje", decimales: 4 },
-  { clave: "motivo", titulo: "Por qué es significativo", ordenable: false },
-];
 
 /** Fila de la tabla de la cascada: valor anterior, actual y diferencia. */
 function FilaCascada({ concepto, anterior, actual, destacada = false }) {
@@ -89,7 +74,6 @@ export default async function PaginaResumenCorte({ searchParams }) {
   const cortes = await cortesCargados();
   const { cascada: c, cascada_anterior: ca } = resumen;
   const conAnterior = Boolean(resumen.anterior);
-  const filasTabla = resumen.significativos.map((m) => ({ ...m, clave: `${m.ranking}|${m.codigo_banco}` }));
 
   return (
     <>
@@ -257,45 +241,12 @@ export default async function PaginaResumenCorte({ searchParams }) {
             )}
           </section>
 
-          {/* Todos los movimientos significativos */}
-          <section aria-labelledby="titulo-significativos" className="mb-8">
-            <h2 id="titulo-significativos" className="mb-1">Todos los movimientos significativos</h2>
-            <p className="mb-3 text-sm text-texto-suave">
-              Por ranking:{" "}
-              {resumen.significativos_por_ranking.map((r) => `${r.nombre} ${r.significativos}`).join(" · ")}.
-            </p>
-            <TablaOrdenable
-              titulo={`Movimientos significativos de ${resumen.etiqueta_anterior} a ${resumen.etiqueta}`}
-              columnas={COLUMNAS_MOVIMIENTOS}
-              filas={filasTabla}
-              claveFila="clave"
-              mensajeVacio="Con la regla vigente no hay movimientos significativos."
-              compacta
-              altoMaximo="32rem"
-            />
-
-            {resumen.significativos.length > 0 && (
-              <details className="tarjeta mt-4 text-sm">
-                <summary className="cursor-pointer font-semibold">
-                  Ver la explicación de cada movimiento significativo ({formatearEntero(resumen.significativos.length)})
-                </summary>
-                {resumen.significativos_por_ranking
-                  .filter((r) => r.significativos > 0)
-                  .map((r) => (
-                    <div key={r.ranking} className="mt-3">
-                      <h3 className="mb-1">{nombreRanking(r.ranking)}</h3>
-                      <ul className="list-disc space-y-1 pl-5">
-                        {resumen.significativos
-                          .filter((m) => m.ranking === r.ranking)
-                          .map((m) => (
-                            <li key={m.codigo_banco}>{m.explicacion.texto}</li>
-                          ))}
-                      </ul>
-                    </div>
-                  ))}
-              </details>
-            )}
-          </section>
+          {/* La tabla completa de movimientos significativos vive en Comparar. */}
+          <p className="mb-8 text-sm">
+            <Link href={`/comparar?anterior=${resumen.anterior}&periodo=${periodo}`}>
+              Ver los {formatearEntero(resumen.total_significativos)} movimientos significativos en Comparar
+            </Link>
+          </p>
         </>
       )}
     </>
