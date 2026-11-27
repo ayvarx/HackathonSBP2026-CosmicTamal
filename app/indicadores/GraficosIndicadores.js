@@ -71,7 +71,7 @@ export function EscaleraTramos({ tramos }) {
       type: "bar",
       data: tramos.map((t) => ({
         value: n(t.monto),
-        itemStyle: { color: t.tipo === "Vencido" ? COLOR_RESALTADO : COLORES_GRAFICO[0], borderRadius: [3, 3, 0, 0] },
+        itemStyle: { color: t.tipo === "Vencido" ? COLOR_RESALTADO : COLORES_GRAFICO[0] },
       })),
     }],
   };
@@ -101,7 +101,7 @@ export function BarrasApiladasVencimientos({ filas }) {
     xAxis: { type: "value", max: 100 },
     yAxis: { type: "category", data: filas.map((f) => f.banco), inverse: true },
     series: bloques.map((b) => ({
-      name: b.nombre, type: "bar", stack: "total", itemStyle: { color: b.color, borderRadius: 0 },
+      name: b.nombre, type: "bar", stack: "total", itemStyle: { color: b.color },
       data: filas.map((f) => n(f[b.clave])),
     })),
   };

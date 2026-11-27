@@ -167,7 +167,7 @@ export default async function PaginaPanel({ searchParams }) {
       data: bancos.map((b) => `${b.posicion}. ${b.banco}`),
       axisLabel: { align: "left", margin: 180, width: 172, overflow: "truncate" },
     },
-    series: [{ type: "bar", name: "Cartera local válida", itemStyle: { color: "#106003", borderRadius: [0, 4, 4, 0] }, data: bancos.map((b) => aNumeroParaGrafico(b.total_cartera_local_valida)) }],
+    series: [{ type: "bar", name: "Cartera local válida", itemStyle: { color: "#106003" }, data: bancos.map((b) => aNumeroParaGrafico(b.total_cartera_local_valida)) }],
   };
 
   // Datos para los componentes portados de Amet (app/_inicio/).
@@ -212,9 +212,11 @@ export default async function PaginaPanel({ searchParams }) {
           titulo={esPublico ? "Resumen del corte" : "Panel principal"}
           descripcion={anterior ? <small>frente a {textoAnterior}</small> : undefined}
         >
-          <Link className="ghost" href={urlRankings({ periodo: fecha })}>
-            Ver rankings →
-          </Link>
+          {esAnalista && (
+            <Link className="ghost" href={urlRankings({ periodo: fecha })}>
+              Ver rankings →
+            </Link>
+          )}
           <Link className="ghost" href="/reportes">
             Exportar →
           </Link>
@@ -257,7 +259,6 @@ export default async function PaginaPanel({ searchParams }) {
         movimientos={{ significativos: significativos.length, total: movs.length }}
         reconciliaciones={rec.resumen}
         composicion={composicionOrdenada}
-        rankings={actividades}
         enlaces={{
           rankings: urlRankings({ periodo: fecha }),
           movimientos: esAnalista ? { href: urlComparar, texto: "Ver todos los movimientos" } : undefined,
@@ -270,26 +271,19 @@ export default async function PaginaPanel({ searchParams }) {
         <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-2">
           <div className="flex min-w-0 flex-col gap-3 overflow-x-auto [&_table]:w-full [&_table]:text-[13px] [&_td]:whitespace-nowrap [&_td]:px-2 [&_th]:whitespace-nowrap [&_th]:px-2">
             <TablaOrdenable
-              titulo="Composición por macroactividad"
               columnas={[
                 { clave: "Ranking", titulo: "Ranking", tipo: "ranking", enlace: urlRankings({ periodo: fecha }) + "&ranking={Ranking}" },
                 { clave: "Saldo", titulo: "Saldo", tipo: "monto" },
                 { clave: "Operaciones", titulo: "Operaciones", tipo: "entero" },
-                { clave: "Participacion", titulo: "Participación", tipo: "porcentaje", decimales: 2 },
               ]}
-              filas={composicion.map((c) => ({ Ranking: c.ranking, Saldo: c.saldo, Operaciones: c.operaciones, Participacion: c.participacion_pct }))}
+              filas={composicionOrdenada.map((c) => ({ Ranking: c.ranking, Saldo: c.saldo, Operaciones: c.operaciones }))}
               claveFila="Ranking"
-              filaTotal={{
-                Ranking: "Total",
-                Saldo: resumen.universo.saldo_universo_local_valido,
-                Operaciones: resumen.universo.universo_local_valido,
-              }}
               compacta
             />
           </div>
           <div id="cartera-bancos" className="grafico-izquierda flex min-w-0 scroll-mt-24 flex-col gap-3">
             <Grafico
-              titulo={`Cartera local válida por banco · ${formatearFecha(fecha)}`}
+              titulo="Cartera local válida por banco"
               opcion={opcionBancos}
               altura={360}
               formatoValor="monto"

@@ -16,10 +16,10 @@ export default function CalidadPage({ q, totalAlertas }) {
   return (
     <div className="calidad">
       <ul className="cal-resumen" aria-label="Resumen del corte">
-        <li><span>Registros leídos</span><strong>{formatearEntero(leidas)}</strong><small>Filas del archivo</small></li>
+        <li><span>Registros leídos</span><strong>{formatearEntero(leidas)}</strong></li>
         <li><span>Préstamos válidos</span><strong>{formatearEntero(validas)}</strong><small>{pct(validas, leidas)} del archivo</small></li>
         <li><span>Descartados</span><strong>{formatearEntero(descartados)}</strong><small>{pct(descartados, leidas)} del archivo</small></li>
-        <li><span>Alertas de coherencia</span><strong>{formatearEntero(totalAlertas)}</strong><small>{totalAlertas ? "Revise el detalle abajo" : "Sin alertas"}</small></li>
+        <li><span>Alertas de coherencia</span><strong>{formatearEntero(totalAlertas)}</strong></li>
       </ul>
     </div>
   );

@@ -8,7 +8,8 @@
 // para el alto de barras y puntos. Las etiquetas muestran el texto exacto del motor
 // (formatearMonto) y cada gráfico va acompañado de una tabla con las cifras oficiales.
 
-import { aNumeroParaGrafico, formatearFecha, formatearMonto, nombreRanking } from "@/lib/formato";
+import { aNumeroParaGrafico, formatearFecha, nombreRanking } from "@/lib/formato";
+import { montoCompacto } from "./explicacion";
 
 // Misma paleta que components/Grafico.js (COLORES_GRAFICO). Se copia porque un componente
 // de servidor no puede leer constantes exportadas por un módulo "use client".
@@ -110,18 +111,18 @@ export function opcionCascada({ m, d }) {
   const trasSalidos = trasNuevos + salidos;
 
   const pasos = [
-    { nombre: "Saldo anterior", base: 0, alto: anterior, color: TOTAL, texto: formatearMonto(m.saldo_anterior), detalle: formatearFecha(m.fecha_anterior) },
-    { nombre: "Préstamos nuevos", base: anterior, alto: nuevos, color: VERDE_SUBE, texto: formatearMonto(d.saldo_nuevos, { signo: true }), detalle: `${d.prestamos_nuevos} préstamos` },
-    { nombre: "Préstamos que salieron", base: trasSalidos, alto: -salidos, color: ROJO_BAJA, texto: formatearMonto(d.saldo_salidos), detalle: `${d.prestamos_salidos} préstamos` },
+    { nombre: "Saldo anterior", base: 0, alto: anterior, color: TOTAL, texto: montoCompacto(m.saldo_anterior, { signo: false }), detalle: formatearFecha(m.fecha_anterior) },
+    { nombre: "Préstamos nuevos", base: anterior, alto: nuevos, color: VERDE_SUBE, texto: montoCompacto(d.saldo_nuevos), detalle: `${d.prestamos_nuevos} préstamos` },
+    { nombre: "Préstamos que salieron", base: trasSalidos, alto: -salidos, color: ROJO_BAJA, texto: montoCompacto(d.saldo_salidos), detalle: `${d.prestamos_salidos} préstamos` },
     {
       nombre: "Préstamos que continúan",
       base: continuan >= 0 ? trasSalidos : trasSalidos + continuan,
       alto: Math.abs(continuan),
       color: continuan >= 0 ? VERDE_SUBE : ROJO_BAJA,
-      texto: formatearMonto(d.variacion_continuan, { signo: true }),
+      texto: montoCompacto(d.variacion_continuan),
       detalle: `${d.prestamos_continuan} préstamos`,
     },
-    { nombre: "Saldo actual", base: 0, alto: actual, color: TOTAL, texto: formatearMonto(m.saldo_actual), detalle: formatearFecha(m.fecha_actual) },
+    { nombre: "Saldo actual", base: 0, alto: actual, color: TOTAL, texto: montoCompacto(m.saldo_actual, { signo: false }), detalle: formatearFecha(m.fecha_actual) },
   ];
 
   // El eje no empieza en cero: si no, las variaciones (≈10 % del saldo) casi no se verían.
@@ -154,7 +155,7 @@ export function opcionCascada({ m, d }) {
         barMaxWidth: 72,
         data: pasos.map((p) => ({
           value: p.alto,
-          itemStyle: { color: p.color, borderRadius: 0 },
+          itemStyle: { color: p.color, borderRadius: [3, 3, 0, 0] },
           label: { show: true, position: "top", formatter: p.texto, fontSize: 11, color: "#192b17" },
           tooltip: { formatter: `${p.nombre}<br/>${p.texto} · ${p.detalle}` },
         })),

@@ -8,8 +8,8 @@
 //   partes [{ nombre, valor, color }], posicionesPeriodos [{ periodo, etiqueta, posicion }],
 //   otras [{ clave, nombre, posicion, saldo, activa, href }], hrefCerrar, children (pie opcional).
 import Link from "next/link";
-import { formatearEntero, formatearMonto, formatearPorcentaje, signoDecimal } from "@/lib/formato";
-import { porcentajeDe, restarMontos } from "./numeros";
+import { formatearEntero, formatearPorcentaje, signoDecimal } from "@/lib/formato";
+import { montoResumido, porcentajeDe, restarMontos } from "./numeros";
 
 const pct = (parte, total) => {
   const p = porcentajeDe(parte, total, 1);
@@ -46,13 +46,13 @@ export default function BancoDetalle({
       </header>
 
       <div className="bd-kpis">
-        <div><span>Saldo en esta actividad</span><strong className="cifra">{formatearMonto(saldo)}</strong></div>
+        <div><span>Saldo en esta actividad</span><strong className="cifra">{montoResumido(saldo)}</strong></div>
         <div><span>Peso en su cartera (ponderación)</span><strong className="cifra">{formatearPorcentaje(ponderacion)}</strong></div>
         <div><span>Préstamos que lo forman</span><strong className="cifra">{formatearEntero(operaciones)}</strong></div>
         <div>
           <span>Diferencia con el puesto 1</span>
           <strong className={`cifra ${signo < 0 ? "bd-neg" : ""}`}>
-            {signo === 0 ? "Ninguna (es el líder)" : `${formatearMonto(brecha)} (${pct(brecha, lider)})`}
+            {signo === 0 ? "Ninguna (es el líder)" : `${montoResumido(brecha)} (${pct(brecha, lider)})`}
           </strong>
         </div>
       </div>
@@ -79,7 +79,7 @@ export default function BancoDetalle({
                 <li key={p.nombre}>
                   <div className="bd-parte-head">
                     <span><i style={{ background: p.color }} /> {p.nombre}</span>
-                    <b>{formatearMonto(p.valor)} · {formatearPorcentaje(share, 1)}</b>
+                    <b>{montoResumido(p.valor)} · {formatearPorcentaje(share, 1)}</b>
                   </div>
                   <div className="bd-parte-barra"><div style={{ width: `${share}%`, background: p.color }} /></div>
                 </li>
@@ -95,7 +95,7 @@ export default function BancoDetalle({
               <li key={o.clave} className={o.activa ? "activa" : ""}>
                 <span>{o.href && !o.activa ? <Link href={o.href} scroll={false}>{o.nombre}</Link> : o.nombre}</span>
                 <b>Puesto {o.posicion ?? "—"}</b>
-                <em>{formatearMonto(o.saldo)}</em>
+                <em>{montoResumido(o.saldo)}</em>
               </li>
             ))}
           </ul>

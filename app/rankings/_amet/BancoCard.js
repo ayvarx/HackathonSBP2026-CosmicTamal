@@ -13,10 +13,10 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import BotonDescarga from "@/components/BotonDescarga";
-import { aNumeroParaGrafico, formatearMonto, formatearMontoCompacto, formatearPorcentaje } from "@/lib/formato";
-import { porcentajeDe, restarMontos } from "./numeros";
+import { aNumeroParaGrafico, formatearPorcentaje } from "@/lib/formato";
+import { montoResumido, porcentajeDe, restarMontos } from "./numeros";
 
-const millones = (texto) => formatearMontoCompacto(texto).replace(" millones", " M");
+const millones = montoResumido;
 const peso = (parte, total) => {
   const p = porcentajeDe(parte, total, 1);
   return p === null ? "0.0 %" : formatearPorcentaje(p, 1);
@@ -86,7 +86,7 @@ export default function BancoCard({ posicion, banco, saldo, serie, partes, selec
         <span className="bc-toggle" aria-hidden="true">{abierta ? "−" : "+"}</span>
       </button>
 
-      <div className="bc-cifra cifra">{formatearMonto(total)}</div>
+      <div className="bc-cifra cifra">{montoResumido(total)}</div>
       {pendiente && <p className="bc-sub">Abriendo el detalle…</p>}
 
       {abierta && (
@@ -113,7 +113,7 @@ export default function BancoCard({ posicion, banco, saldo, serie, partes, selec
                       style={{ height: `${Math.max(6, ((aNumeroParaGrafico(s.valor) ?? 0) / max) * 64)}px`, animationDelay: `${i * 120}ms` }}
                     />
                     <span className="bc-col-fecha">{s.etiqueta}</span>
-                    {mes === i && <span className="bc-tip">{s.etiqueta}: {formatearMonto(s.valor)}</span>}
+                    {mes === i && <span className="bc-tip">{s.etiqueta}: {montoResumido(s.valor)}</span>}
                   </div>
                 ))}
               </div>
@@ -137,7 +137,7 @@ export default function BancoCard({ posicion, banco, saldo, serie, partes, selec
                   e.stopPropagation();
                   setParte(parte === i ? null : i);
                 }}
-                title={`${p.nombre}: ${formatearMonto(p.valor)}`}
+                title={`${p.nombre}: ${montoResumido(p.valor)}`}
               />
             ))}
           </div>
@@ -151,14 +151,14 @@ export default function BancoCard({ posicion, banco, saldo, serie, partes, selec
               >
                 <i style={{ background: p.color }} />
                 <span>{p.nombre}</span>
-                <b>{formatearMonto(p.valor)}</b>
+                <b>{montoResumido(p.valor)}</b>
                 <em>{peso(p.valor, total)}</em>
               </li>
             ))}
           </ul>
           {parteActiva && (
             <p className="bc-detalle">
-              {parteActiva.nombre}: {formatearMonto(parteActiva.valor)} ({peso(parteActiva.valor, total)} del saldo del banco)
+              {parteActiva.nombre}: {montoResumido(parteActiva.valor)} ({peso(parteActiva.valor, total)} del saldo del banco)
             </p>
           )}
         </>

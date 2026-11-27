@@ -14,7 +14,6 @@ import {
   formatearMonto,
   formatearPorcentaje,
 } from "@/lib/formato";
-import { montoEnMillones } from "./Dashboard";
 import "./visitor.css";
 import "./depth.css";
 import "./inicio.css";
@@ -22,7 +21,6 @@ import "./inicio.css";
 export default function VisitorHome({ fecha, cortes, actividades, urlRankings, urlsDescarga, lideres }) {
   const [vista, setVista] = useState({ tipo: "inicio" });
   const codigos = actividades.map((a) => a.ranking);
-  const bancos = actividades[0]?.filas.length ?? 0;
   const actividad = actividades.find((a) => a.ranking === vista.ranking);
 
   const abrirActividad = (codigo) => setVista({ tipo: "actividad", ranking: codigo || codigos[0] });
@@ -32,9 +30,6 @@ export default function VisitorHome({ fecha, cortes, actividades, urlRankings, u
     <div className="visitante">
       <header className="hero">
         <h1>Rankings de crédito por actividad</h1>
-        <p className="hero-sub">
-          Qué bancos lideran cada actividad económica.
-        </p>
         <div className="hero-acciones">
           <Link href={urlRankings}>Ver rankings completos →</Link>
           <a className="secundario" href="#resumen">
@@ -45,10 +40,6 @@ export default function VisitorHome({ fecha, cortes, actividades, urlRankings, u
           <div>
             <span>Actividades evaluadas</span>
             <strong>{formatearEntero(actividades.length)}</strong>
-          </div>
-          <div>
-            <span>Bancos</span>
-            <strong>{formatearEntero(bancos)}</strong>
           </div>
           <div>
             <span>Cortes cargados</span>
@@ -71,7 +62,6 @@ export default function VisitorHome({ fecha, cortes, actividades, urlRankings, u
               {actividades.map((a) => (
                 <button key={a.ranking} type="button" className="tarjeta-tema" onClick={() => abrirActividad(a.ranking)}>
                   <span className="tt-etiqueta">{a.nombre}</span>
-                  <strong className="tt-cifra">{montoEnMillones(a.saldo_total, 1)}</strong>
                 </button>
               ))}
             </div>

@@ -216,7 +216,7 @@ export default async function PaginaDetalle({ searchParams }) {
           { clave: "Banco", titulo: "Banco" },
           { clave: "Subactividad", titulo: "Subactividad", tipo: "subactividad" },
           { clave: "Tipo_Actividad", titulo: "Actividad CINU", tipo: "codigo" },
-          { clave: "Facilidad", titulo: "Facilidad SB21", tipo: "codigo", ayuda: "07 = tarjeta de crédito" },
+          { clave: "Facilidad", titulo: "Facilidad", tipo: "codigo" },
           { clave: "Saldo", titulo: "Saldo", tipo: "monto" },
           { clave: "Tasa", titulo: "Tasa de interés", tipo: "porcentaje", decimales: 2 },
           { clave: "Dias_Mora", titulo: "Días de mora", tipo: "entero" },

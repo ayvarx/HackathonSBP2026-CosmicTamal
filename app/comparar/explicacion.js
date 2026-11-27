@@ -3,7 +3,7 @@
 // Los montos exactos se muestran con formatearMonto; las cifras compactas ("22.6 M") son solo
 // de lectura rápida. Las comparaciones de montos se hacen con compararDecimales (texto exacto).
 
-import { compararDecimales, nombreRanking } from "@/lib/formato";
+import { compararDecimales } from "@/lib/formato";
 
 /** "-6408501.43" → "6408501.43" (valor absoluto como texto, sin aritmética). */
 export function quitarSigno(texto) {
@@ -47,18 +47,10 @@ export function principalesMovimientos(movimientosRanking) {
   return { significativos, otros };
 }
 
-/** Frase de una línea: líder, cuántos cambian de posición y cuántos son significativos. */
-export function resumenRanking(ranking, movimientosRanking) {
+/** Si cambió el líder del ranking: { nuevo, anterior } con los nombres; si no, null. */
+export function cambioLider(movimientosRanking) {
   const lider = movimientosRanking.find((m) => m.posicion_actual === 1);
   const liderAnterior = movimientosRanking.find((m) => m.posicion_anterior === 1);
-  if (!lider || !liderAnterior) return "";
-  const cambian = movimientosRanking.filter((m) => m.cambio_posicion !== 0).length;
-  const significativos = movimientosRanking.filter((m) => m.significativo).length;
-  const textoLider =
-    lider.codigo_banco === liderAnterior.codigo_banco
-      ? `${lider.banco} sigue líder en ${nombreRanking(ranking)}`
-      : `${lider.banco} desplaza a ${liderAnterior.banco} del primer lugar en ${nombreRanking(ranking)}`;
-  return `${textoLider} · ${cambian} de ${movimientosRanking.length} bancos cambian de posición · ${significativos} ${
-    significativos === 1 ? "significativo" : "significativos"
-  }.`;
+  if (!lider || !liderAnterior || lider.codigo_banco === liderAnterior.codigo_banco) return null;
+  return { nuevo: lider.banco, anterior: liderAnterior.banco };
 }

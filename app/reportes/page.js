@@ -12,7 +12,7 @@ import TablaOrdenable from "@/components/TablaOrdenable";
 import { exigirPerfil, puede } from "@/lib/auth";
 import { RANKINGS, catalogos, periodos } from "@/lib/consultas";
 import { ErrorExportacion, COLUMNAS_PERSONALIZADO, leerFiltros, reportePersonalizado } from "@/lib/consultas-reportes";
-import { formatearEntero, formatearFecha, nombreBanco, nombreRanking } from "@/lib/formato";
+import { formatearEntero, formatearFecha, nombreBanco } from "@/lib/formato";
 import DescargaMovimientos from "./DescargaMovimientos";
 import { etiquetaColumna } from "./etiquetas";
 import FormularioPersonalizado from "./FormularioPersonalizado";
@@ -48,7 +48,6 @@ export default async function PaginaReportes({ searchParams }) {
       <>
         <EncabezadoPagina titulo="Reportes y descargas" />
         <EstadoVacio titulo="Aún no hay cortes cargados" accion={puede(perfil, "cargar_cortes") ? { href: "/admin", texto: "Cargar un corte" } : undefined}>
-          Las descargas estarán disponibles cuando se cargue un corte.
         </EstadoVacio>
       </>
     );
@@ -59,7 +58,6 @@ export default async function PaginaReportes({ searchParams }) {
   const ranking = typeof params.ranking === "string" && RANKINGS.some((r) => r.clave === params.ranking) ? params.ranking : "";
   const unRanking = ranking ? { ranking } : {};
   const unPeriodo = periodo ? { fecha: periodo } : {};
-  const textoAlcance = `${periodo ? formatearFecha(periodo) : "todos los períodos cargados"}${ranking ? `, ranking ${nombreRanking(ranking)}` : ""}`;
 
   // Reporte personalizado (solo analista+): vista previa si se pidió.
   let vista = null;
@@ -101,7 +99,6 @@ export default async function PaginaReportes({ searchParams }) {
             ]}
           />
         </div>
-        <p className="mt-2 text-sm text-texto-suave">Se descargará: {textoAlcance}.</p>
         <div className="mt-3 flex flex-row flex-wrap items-start justify-end gap-2" role="group" aria-label="Descargar">
           <BotonDescarga href="/api/exportar/rankings" parametros={{ ...unPeriodo, ...unRanking }} texto="Rankings" variante="primario" />
           <BotonDescarga href="/api/exportar/subactividades" parametros={{ ...unPeriodo, ...unRanking }} texto="Subactividades" />
@@ -137,7 +134,7 @@ export default async function PaginaReportes({ searchParams }) {
                 </div>
               </div>
               {vista.filas.length === 0 ? (
-                <EstadoVacio titulo="Sin filas">Ninguna fila cumple la selección. Amplíe los rankings o bancos.</EstadoVacio>
+                <EstadoVacio titulo="Sin filas">Ninguna fila cumple la selección.</EstadoVacio>
               ) : (
                 <TablaOrdenable titulo="Vista previa del reporte personalizado" columnas={columnasTabla} filas={filasVista} claveFila="_n" compacta />
               )}

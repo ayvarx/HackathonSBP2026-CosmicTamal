@@ -22,15 +22,13 @@ import { exigirPerfil } from "@/lib/auth";
 import {
   descomposicion,
   movimientos,
-  parametros,
   periodos,
   RANKINGS,
   rankings,
 } from "@/lib/consultas";
-import { compararDecimales, formatearFecha, formatearMonto, formatearPorcentaje, nombreRanking } from "@/lib/formato";
-import { montoCompacto, principalesMovimientos, quitarSigno, resumenRanking, unirLista } from "./explicacion";
+import { compararDecimales, formatearFecha, formatearPorcentaje, nombreRanking } from "@/lib/formato";
+import { cambioLider, montoCompacto, principalesMovimientos, quitarSigno, unirLista } from "./explicacion";
 import { opcionCascada, opcionPosiciones } from "./graficos";
-import ReglaAplicada from "./ReglaAplicada";
 import SeccionEntidades, { MAX_BANCOS, MIN_BANCOS } from "./SeccionEntidades";
 
 export const dynamic = "force-dynamic"; // los datos cambian al cargar cortes
@@ -39,8 +37,6 @@ export const metadata = { title: "Comparar" };
 const ORDEN_RANKINGS = RANKINGS.map((r) => r.clave);
 const ENCABEZADO = {
   titulo: "Comparar períodos y bancos",
-  descripcion:
-    "Cambios de posición y variación de saldo entre dos cortes.",
 };
 
 // --------------------------------------------------------------------------------------
@@ -97,9 +93,7 @@ export default async function PaginaComparar({ searchParams }) {
           titulo={listaPeriodos.length === 0 ? "Aún no hay cortes cargados" : "Se necesitan al menos dos cortes para comparar"}
           accion={perfil === "administrador" ? { href: "/admin", texto: "Ir a Administración para cargar un corte" } : undefined}
         >
-          {listaPeriodos.length === 0
-            ? "Cuando el Administrador cargue al menos dos cortes AT03, aquí se compararán sus rankings."
-            : `Solo está cargado ${formatearFecha(listaPeriodos[0].fecha)}. Cuando el Administrador cargue otro corte, la comparación se calcula sola.`}
+          {listaPeriodos.length === 0 ? null : `Solo está cargado ${formatearFecha(listaPeriodos[0].fecha)}.`}
         </EstadoVacio>
       </>
     );
@@ -168,18 +162,17 @@ export default async function PaginaComparar({ searchParams }) {
   // ------------------------------------------------------------------------------------
   let datos;
   try {
-    const [params, movs, desc, rankingsActual, ...posicionesPorFecha] = await Promise.all([
-      parametros(),
+    const [movs, desc, rankingsActual, ...posicionesPorFecha] = await Promise.all([
       movimientos({ anterior, actual }),
       descomposicion({ anterior, actual, ranking }),
       rankings({ fecha: actual }),
       ...fechas.map((fecha) => rankings({ fecha, ranking })),
     ]);
-    datos = { params, movs, desc, rankingsActual, posiciones: posicionesPorFecha.flat() };
+    datos = { movs, desc, rankingsActual, posiciones: posicionesPorFecha.flat() };
   } catch (error) {
     return <ErrorDatos detalle={error?.message} />;
   }
-  const { params, movs, desc, rankingsActual, posiciones } = datos;
+  const { movs, desc, rankingsActual, posiciones } = datos;
 
   if (movs.length === 0) {
     return (
@@ -187,8 +180,6 @@ export default async function PaginaComparar({ searchParams }) {
         <EncabezadoPagina {...ENCABEZADO} />
         <Filtros campos={camposFiltro} />
         <EstadoVacio titulo="No hay movimientos para ese par de períodos">
-          No hay movimientos entre {formatearFecha(anterior)} y {formatearFecha(actual)}. Pruebe con otro par
-          de períodos.
         </EstadoVacio>
       </>
     );
@@ -252,9 +243,9 @@ export default async function PaginaComparar({ searchParams }) {
     ...m,
     banco_texto: `${m.banco} (${m.codigo_banco})`,
     lider: m.cambio_de_lider === "SI" ? "Sí" : "No",
-    es_significativo: m.significativo ? "Sí" : "No",
   }));
 
+  const liderNuevo = cambioLider(movsRanking);
   const textoPar = `${formatearFecha(anterior)} → ${formatearFecha(actual)}`;
 
   const conteos = [
@@ -262,7 +253,7 @@ export default async function PaginaComparar({ searchParams }) {
     {
       titulo: "Cambios de líder",
       valor: rankingsConCambioLider.length,
-      unidad: rankingsConCambioLider.length ? `en ${unirLista(rankingsConCambioLider.map(nombreRanking))}` : "rankings",
+      unidad: rankingsConCambioLider.length ? unirLista(rankingsConCambioLider.map(nombreRanking)) : "",
     },
     { titulo: "Cambios de posición", valor: cambiosPosicion, unidad: `de ${movs.length}` },
   ];
@@ -283,8 +274,7 @@ export default async function PaginaComparar({ searchParams }) {
             texto="Descargar movimientos"
           />
         </div>
-        <ReglaAplicada parametros={params} />
-        <div className="mt-3 grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-3">
           {conteos.map((c) => (
             <article key={c.titulo} className="tarjeta">
               <h3 className="text-sm font-semibold text-texto-suave">{c.titulo}</h3>
@@ -307,22 +297,27 @@ export default async function PaginaComparar({ searchParams }) {
               { clave: "cambio_posicion", titulo: "Cambio", tipo: "movimiento" },
               { clave: "var_saldo", titulo: "Var. saldo", tipo: "monto_signo" },
               { clave: "var_saldo_pct", titulo: "Var. saldo %", tipo: "porcentaje", decimales: 4 },
-              { clave: "motivo", titulo: "Motivo", ordenable: false },
             ]}
             filas={filasSignificativas}
             claveFila="clave"
             compacta
-            mensajeVacio="Ningún movimiento significativo en este par de períodos."
+            mensajeVacio="Ningún movimiento significativo."
           />
         </div>
       </section>
 
       {/* 2. Ranking elegido ---------------------------------------------------------- */}
       <section id="ranking" aria-labelledby="titulo-ranking" className="mb-8 scroll-mt-24">
-        <h2 id="titulo-ranking" className="mb-1">
-          Ranking {nombreRanking(ranking)}
-        </h2>
-        <p className="mb-3 text-sm text-texto-suave">{resumenRanking(ranking, movsRanking)}</p>
+        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+          <h2 id="titulo-ranking">Ranking {nombreRanking(ranking)}</h2>
+          {liderNuevo && (
+            <p className="cifra text-sm font-semibold">
+              <span className="text-[#106003]">▲ {liderNuevo.nuevo}</span>
+              <span className="text-texto-tenue"> · </span>
+              <span className="text-[#b42318]">▼ {liderNuevo.anterior}</span>
+            </p>
+          )}
+        </div>
 
         {[
           { titulo: "Significativos", lista: grupos.significativos },
@@ -357,7 +352,6 @@ export default async function PaginaComparar({ searchParams }) {
             { clave: "var_saldo", titulo: "Var. saldo", tipo: "monto_signo" },
             { clave: "var_saldo_pct", titulo: "Var. saldo %", tipo: "porcentaje", decimales: 4 },
             { clave: "lider", titulo: "Cambio de líder", alinear: "centro" },
-            { clave: "es_significativo", titulo: "Significativo", alinear: "centro" },
           ]}
           filas={filasRanking}
           claveFila="codigo_banco"
@@ -384,7 +378,6 @@ export default async function PaginaComparar({ searchParams }) {
           <Grafico altura={400} formatoValor="monto" opcion={opcionCascada({ m: seleccionado, d: descSeleccionado })} />
         ) : (
           <EstadoVacio titulo="No hay descomposición para este movimiento">
-            No hay detalle por préstamo para este banco y ranking.
           </EstadoVacio>
         )}
       </section>
@@ -406,19 +399,35 @@ export default async function PaginaComparar({ searchParams }) {
   );
 }
 
-/** Tarjeta compacta de un movimiento: posición, variación de saldo y su descomposición. */
+/** Flecha y color según el signo: ▲ verde sube, ▼ rojo baja, = gris sin cambio. */
+function flechaDe(signo) {
+  if (signo > 0) return { flecha: "▲", color: "text-[#106003]" };
+  if (signo < 0) return { flecha: "▼", color: "text-[#b42318]" };
+  return { flecha: "=", color: "text-texto-tenue" };
+}
+
+/** Signo de un decimal en texto, sin aritmética de punto flotante. */
+function signoTexto(texto) {
+  const t = String(texto ?? "0");
+  if (/^-/.test(t)) return /[1-9]/.test(t) ? -1 : 0;
+  return /[1-9]/.test(t) ? 1 : 0;
+}
+
+/** "▲ +418.6 M" con su color. */
+function Cambio({ valor, texto }) {
+  const { flecha, color } = flechaDe(signoTexto(valor));
+  return <span className={`whitespace-nowrap ${color}`}>{flecha} {texto}</span>;
+}
+
+/** Tarjeta compacta de un movimiento: "7 → 3 ▲ 4", variación de saldo y su descomposición. */
 function TarjetaMovimiento({ m, d, href }) {
-  const sube = m.cambio_posicion > 0;
-  const baja = m.cambio_posicion < 0;
-  const color = sube ? "text-[#106003]" : baja ? "text-[#b42318]" : "text-texto";
-  const flecha = sube ? "▲" : baja ? "▼" : "■";
-  const cambio = m.cambio_posicion > 0 ? `+${m.cambio_posicion}` : String(m.cambio_posicion);
+  const { flecha, color } = flechaDe(Math.sign(m.cambio_posicion));
   const tieneSaldoPct = m.var_saldo_pct !== null && m.var_saldo_pct !== undefined;
   const cifras = d
     ? [
-        { rotulo: "Nuevos", valor: montoCompacto(d.saldo_nuevos) },
-        { rotulo: "Salieron", valor: montoCompacto(d.saldo_salidos) },
-        { rotulo: "Amortización", valor: montoCompacto(d.variacion_continuan) },
+        { rotulo: "Nuevos", valor: d.saldo_nuevos },
+        { rotulo: "Salieron", valor: d.saldo_salidos },
+        { rotulo: "Amortización", valor: d.variacion_continuan },
       ]
     : [];
   return (
@@ -427,25 +436,31 @@ function TarjetaMovimiento({ m, d, href }) {
         <a href={href} className="whitespace-nowrap font-semibold">
           {m.banco}
         </a>
-        <span className="flex gap-1">
-          <span className="etiqueta">{m.significativo ? "Significativo" : "Cambio de posición"}</span>
-          {m.cambio_de_lider === "SI" && <span className="etiqueta">Cambio de líder</span>}
-        </span>
+        {m.cambio_de_lider === "SI" && <span className="etiqueta">Cambio de líder</span>}
       </div>
-      <p className={`cifra text-2xl font-extrabold ${color}`}>
-        <span aria-hidden="true" className="mr-1 text-base">{flecha}</span>
-        {m.posicion_anterior} → {m.posicion_actual} <span className="text-base font-semibold">({cambio})</span>
+      <p className="cifra text-2xl font-extrabold text-texto">
+        {m.posicion_anterior} → {m.posicion_actual}{" "}
+        <span className={`text-base font-semibold ${color}`}>
+          {flecha} {Math.abs(m.cambio_posicion)}
+        </span>
       </p>
-      <p className="cifra text-sm text-texto-suave">
-        {formatearMonto(m.var_saldo, { signo: true })}
-        {tieneSaldoPct ? ` · ${formatearPorcentaje(m.var_saldo_pct, 2, { signo: true })}` : ""}
+      <p className="cifra text-sm font-semibold">
+        <Cambio valor={m.var_saldo} texto={montoCompacto(m.var_saldo)} />
+        {tieneSaldoPct && (
+          <>
+            <span className="text-texto-tenue"> · </span>
+            <Cambio valor={m.var_saldo_pct} texto={formatearPorcentaje(m.var_saldo_pct, 2, { signo: true })} />
+          </>
+        )}
       </p>
       {cifras.length > 0 && (
         <dl className="mt-1 grid grid-cols-3 gap-2 border-t border-borde pt-2 text-xs">
           {cifras.map((c) => (
             <div key={c.rotulo}>
               <dt className="text-texto-tenue">{c.rotulo}</dt>
-              <dd className="cifra font-semibold text-texto">{c.valor}</dd>
+              <dd className="cifra font-semibold">
+                <Cambio valor={c.valor} texto={montoCompacto(c.valor)} />
+              </dd>
             </div>
           ))}
         </dl>
@@ -461,7 +476,6 @@ function ErrorDatos({ detalle }) {
       <EncabezadoPagina {...ENCABEZADO} />
       <MensajeError
         titulo="No se pudieron leer los datos de la comparación"
-        mensaje="La base de datos no respondió. Vuelva a intentarlo."
         detalle={detalle}
         accion={{ href: "/comparar", texto: "Volver a intentar" }}
       />

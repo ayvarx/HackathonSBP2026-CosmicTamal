@@ -7,7 +7,7 @@
 //   &subactividad=...  limita el desglose a una subactividad
 //   &vista=tarjetas    vista de tarjetas por banco (frontend de Amet); por defecto, la tabla
 //
-// Fusión de los dos frontends: la tabla ordenable, el gráfico, el desglose con la nota SB21, la
+// Fusión de los dos frontends: la tabla ordenable, el gráfico, el desglose por subactividad, la
 // ficha y las descargas son de esta aplicación; la cabecera de actividad, el selector de período,
 // las tarjetas por banco (BancoCard) y el detalle del banco (BancoDetalle) vienen de Amet (_amet/).
 //
@@ -28,7 +28,6 @@ import { movimientos, RANKINGS, rankings, subactividades } from "@/lib/consultas
 import {
   elegirPeriodo,
   fechasDisponibles,
-  reclasificacionSB21,
   textoParametro,
   totalesRanking,
 } from "@/lib/consultas-rankings";
@@ -36,7 +35,7 @@ import {
   aNumeroParaGrafico,
   formatearEntero,
   formatearFecha,
-  formatearMonto,
+  formatearMontoCompacto,
   formatearPorcentaje,
   nombreBanco,
   nombreSubactividad,
@@ -60,6 +59,23 @@ const sinCortes = (texto) => String(texto).replace(/ /g, " ");
 // Colores de las subactividades en las tarjetas de Amet (tonos del tema "Radar", bien distintos entre sí).
 const COLORES_SUBACTIVIDAD = ["#106003", "#7EAC39", "#052200", "#419A33", "#136749", "#608D1A", "#297D5F", "#094000", "#267F18"];
 const MAX_CORTES_TARJETA = 6;
+/** Cifra resumida para tarjetas y textos: "5,152.1 M". */
+const compacto = (v) => {
+  const n = Number(v);
+  if (!Number.isFinite(n) || Math.abs(n) < 1e6) return formatearMontoCompacto(v);
+  return `${(n / 1e6).toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} M`;
+};
+
+/** Flecha de cambio: ▲ verde si sube, ▼ rojo si baja, = gris si no cambia. */
+function Flecha({ valor, texto }) {
+  const n = Number(valor) || 0;
+  const [simbolo, color, signo] = n > 0 ? ["▲", "#106003", "+"] : n < 0 ? ["▼", "#b42318", "−"] : ["=", "#6b7280", ""];
+  return (
+    <span style={{ color, fontWeight: 700, whiteSpace: "nowrap" }}>
+      {n === 0 ? simbolo : `${simbolo} ${signo}${String(texto).replace(/^[+\-−]/, "")}`}
+    </span>
+  );
+}
 
 /** Lee todo lo que la pantalla necesita. Si falla la base, la página muestra un error claro. */
 async function cargarDatos(pedido, conTarjetas) {
@@ -72,18 +88,17 @@ async function cargarDatos(pedido, conTarjetas) {
   const { fecha, anterior } = periodo;
   // Vista de tarjetas: saldo y posición del ranking en los cortes hasta el elegido, y los 6 rankings del corte.
   const cortesTarjeta = fechas.slice(0, fechas.indexOf(fecha) + 1).slice(-MAX_CORTES_TARJETA);
-  const [filas, desglose, movs, totales, sb21, historico, todos] = await Promise.all([
+  const [filas, desglose, movs, totales, historico, todos] = await Promise.all([
     rankings({ fecha, ranking: info.clave }),
     subactividades({ fecha, ranking: info.clave }),
     anterior ? movimientos({ anterior, actual: fecha, ranking: info.clave }) : Promise.resolve([]),
     totalesRanking({ fecha, ranking: info.clave }),
-    info.clave === "CONSUMO" ? reclasificacionSB21(fecha) : Promise.resolve(null),
     conTarjetas
       ? Promise.all(cortesTarjeta.map(async (f) => ({ fecha: f, filas: await rankings({ fecha: f, ranking: info.clave }) })))
       : Promise.resolve([]),
     conTarjetas ? rankings({ fecha }) : Promise.resolve([]),
   ]);
-  return { fechas, periodo, info, filas, desglose, movs, totales, sb21, historico, todos };
+  return { fechas, periodo, info, filas, desglose, movs, totales, historico, todos };
 }
 
 export default async function PaginaRankings({ searchParams }) {
@@ -138,7 +153,7 @@ export default async function PaginaRankings({ searchParams }) {
     );
   }
 
-  const { info, filas, desglose, movs, totales, sb21 } = datos;
+  const { info, filas, desglose, movs, totales } = datos;
   const { fecha, anterior } = periodo;
   const ranking = info.clave;
   const esAnalista = alcanzaPerfil(perfil, "analista");
@@ -201,31 +216,23 @@ export default async function PaginaRankings({ searchParams }) {
   // ---------- Desglose por subactividad ----------
   const subVisibles = subactividad ? [subactividad] : nombresSub;
   const saldoSub = new Map(desglose.map((d) => [`${d.codigo_banco}|${d.subactividad}`, d]));
-  const sb21PorBanco = new Map((sb21?.bancos ?? []).map((b) => [b.codigo_banco, b]));
   const filasDesglose = filas.map((f) => {
     const fila = { Posicion: f.posicion, Codigo_Banco: f.codigo_banco, Banco: sinCortes(f.banco) };
     subVisibles.forEach((s, i) => {
       fila[`sub_${i}`] = saldoSub.get(`${f.codigo_banco}|${s}`)?.saldo ?? "0.00";
     });
-    fila.Saldo_Actividad = f.saldo_actividad;
-    if (sb21) fila.Reclasificado = sb21PorBanco.get(f.codigo_banco)?.saldo ?? "0.00";
     return fila;
   });
   const totalSub = new Map(totales.subactividades.map((s) => [s.subactividad, s]));
-  const filaTotalDesglose = { Banco: "Total de los 12 bancos", Saldo_Actividad: totales.total.saldo };
+  const filaTotalDesglose = { Banco: "Total de los 12 bancos" };
   subVisibles.forEach((s, i) => {
     filaTotalDesglose[`sub_${i}`] = totalSub.get(s)?.saldo ?? "0.00";
   });
-  if (sb21) filaTotalDesglose.Reclasificado = sb21.total.saldo;
 
   const columnasDesglose = [
     { clave: "Posicion", titulo: "Posición", tipo: "entero", alinear: "centro" },
     { clave: "Banco", titulo: "Banco", enlace: enlaceBanco },
     ...subVisibles.map((s, i) => ({ clave: `sub_${i}`, titulo: nombreSubactividad(s), tipo: "monto" })),
-    { clave: "Saldo_Actividad", titulo: "Saldo de la actividad", tipo: "monto" },
-    ...(sb21
-      ? [{ clave: "Reclasificado", titulo: "Movido a Tarjeta (SB21)", tipo: "monto" }]
-      : []),
   ];
 
   // Gráfico apilado: una barra por banco, un segmento por subactividad.
@@ -327,10 +334,11 @@ export default async function PaginaRankings({ searchParams }) {
         hrefCerrar={urlRankings(base)}
       >
         {movBanco && (
-          <span>
-            Frente a {textoAnterior}: posición {movBanco.posicion_anterior} → {movBanco.posicion_actual}, saldo{" "}
-            <span className="cifra">{formatearMonto(movBanco.var_saldo, { signo: true })}</span>.
-            {movBanco.significativo ? ` Movimiento significativo: ${movBanco.motivo}.` : ""}
+          <span className="cifra">
+            {textoAnterior}: {movBanco.posicion_anterior} → {movBanco.posicion_actual}{" "}
+            <Flecha valor={movBanco.cambio_posicion} texto={String(Math.abs(movBanco.cambio_posicion))} />
+            {" · "}
+            <Flecha valor={signoDecimal(movBanco.var_saldo)} texto={compacto(movBanco.var_saldo)} />
           </span>
         )}
         {esAnalista && (
@@ -344,9 +352,8 @@ export default async function PaginaRankings({ searchParams }) {
   const hrefDetalle = urlRankings({ periodo: fecha, ranking, banco, subactividad }, "/rankings/detalle");
   const tablaRanking = (
     <TablaConColumnas
-      ocultasInicial={["Posicion_Anterior", "Significativo"]}
+      ocultasInicial={["Total_Cartera_Local_Valida", "Posicion_Anterior", "Significativo"]}
       fijas={["Posicion", "Banco"]}
-      titulo={`Ranking ${info.nombre} · ${formatearFecha(fecha)}`}
       columnas={columnasRanking}
       filas={filasTabla}
       claveFila="Codigo_Banco"
@@ -371,7 +378,6 @@ export default async function PaginaRankings({ searchParams }) {
   );
   const tablaDesglose = (
     <TablaOrdenable
-      titulo={`Desglose de ${info.nombre} por subactividad · ${formatearFecha(fecha)}`}
       columnas={columnasDesglose}
       filas={filasDesglose}
       claveFila="Codigo_Banco"
@@ -446,18 +452,18 @@ export default async function PaginaRankings({ searchParams }) {
               titulo="Posición"
               valor={`${filaBanco.posicion} de ${filas.length}`}
               movimiento={{ valor: movBanco ? movBanco.cambio_posicion : null, significativo: Boolean(movBanco?.significativo) }}
-              detalle={movBanco ? `Antes: posición ${movBanco.posicion_anterior} en ${textoAnterior}.` : undefined}
+              detalle={movBanco ? `${movBanco.posicion_anterior} → ${movBanco.posicion_actual}` : undefined}
             />
             <TarjetaIndicador
               titulo="Saldo de la actividad"
-              valor={formatearMonto(filaBanco.saldo_actividad)}
+              valor={compacto(filaBanco.saldo_actividad)}
               movimiento={movBanco ? { valor: movBanco.var_saldo, tipo: "monto" } : undefined}
-              detalle={movBanco ? `Saldo en ${textoAnterior}: ${formatearMonto(movBanco.saldo_anterior)}` : undefined}
+              detalle={movBanco ? `${textoAnterior}: ${compacto(movBanco.saldo_anterior)}` : undefined}
             />
             <TarjetaIndicador
               titulo="Ponderación"
               valor={formatearPorcentaje(filaBanco.ponderacion_pct)}
-              detalle={`Cartera local: ${formatearMonto(filaBanco.total_cartera_local_valida)}`}
+              detalle={`Cartera local: ${compacto(filaBanco.total_cartera_local_valida)}`}
             />
             <TarjetaIndicador
               titulo="Operaciones válidas"
@@ -494,14 +500,6 @@ export default async function PaginaRankings({ searchParams }) {
             </>
           }
         />
-      )}
-
-      {sb21 && (
-        <p className="tarjeta mb-4 text-sm" role="note">
-          En {formatearFecha(fecha)} pasaron de Crédito personal a Tarjeta{" "}
-          <strong>{formatearEntero(sb21.total.operaciones)}</strong> préstamos de tarjeta de crédito por{" "}
-          <strong className="cifra">{formatearMonto(sb21.total.saldo)}</strong>.
-        </p>
       )}
 
       {/* Desglose por subactividad: en la vista de tarjetas la composición ya está en cada tarjeta (solo tabla). */}

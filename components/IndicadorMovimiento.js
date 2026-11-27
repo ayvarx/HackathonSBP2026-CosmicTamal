@@ -44,20 +44,15 @@ export default function IndicadorMovimiento({ valor, tipo = "posicion", compacto
     const pasos = quitarSigno(String(valor));
     const unidad = pasos === "1" ? "posición" : "posiciones";
     lector = signo === 0 ? "Se mantiene" : `${signo > 0 ? "Sube" : "Baja"} ${pasos} ${unidad}`;
-    visible = compacto ? (signo === 0 ? "0" : pasos) : lector;
+    // Siempre flecha y cifra; la frase queda solo para lectores de pantalla.
+    visible = signo === 0 ? "0" : pasos;
   }
 
   return (
     <span className={`movimiento ${CLASE[signo]}`}>
       <span aria-hidden="true">{FLECHA[signo]}</span>
-      {compacto || tipo !== "posicion" ? (
-        <>
-          <span aria-hidden="true">{visible}</span>
-          <span className="solo-lector">{lector}</span>
-        </>
-      ) : (
-        <span>{visible}</span>
-      )}
+      <span aria-hidden="true">{visible}</span>
+      <span className="solo-lector">{lector}</span>
       {significativo && <span className="etiqueta ml-1">Significativo</span>}
     </span>
   );

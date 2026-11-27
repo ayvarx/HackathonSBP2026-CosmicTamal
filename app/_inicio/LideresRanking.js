@@ -3,7 +3,8 @@
 // Los datos llegan ya calculados desde app/page.js; los montos son texto exacto formateado
 // con lib/formato.js.
 import Link from "next/link";
-import { formatearMonto, formatearPorcentaje, nombreBanco } from "@/lib/formato";
+import { formatearPorcentaje, nombreBanco } from "@/lib/formato";
+import { montoEnMillones } from "./montos";
 import "./dashboard.css";
 import "./inicio.css";
 
@@ -22,7 +23,7 @@ export default function LideresRanking({ lideres }) {
               <dl>
                 <div>
                   <dt>Saldo</dt>
-                  <dd>{formatearMonto(r.lider.saldo_actividad)}</dd>
+                  <dd>{montoEnMillones(r.lider.saldo_actividad, 1)}</dd>
                 </div>
                 <div>
                   <dt>Ponderación</dt>
@@ -30,7 +31,7 @@ export default function LideresRanking({ lideres }) {
                 </div>
               </dl>
               {r.cambio_de_lider && r.lider_anterior && (
-                <p className="lider-estado nuevo">▲ Nuevo líder (antes: {r.lider_anterior.banco})</p>
+                <p className="lider-estado"><span className="cambio-sube">▲ {nombreBanco(r.lider.codigo_banco, r.lider.banco)}</span> · <span className="cambio-baja">▼ {nombreBanco(r.lider_anterior.codigo_banco, r.lider_anterior.banco)}</span></p>
               )}
             </div>
             <Link className="lider-ver" href={r.href}>

@@ -8,7 +8,11 @@ import Filtros from "@/components/Filtros";
 import TarjetaIndicador from "@/components/TarjetaIndicador";
 import TablaOrdenable from "@/components/TablaOrdenable";
 import { exigirPerfil } from "@/lib/auth";
-import { formatearEntero, formatearFecha, formatearMonto, formatearPorcentaje, nombreRanking, ORDEN_RANKINGS } from "@/lib/formato";
+import { formatearEntero, formatearFecha, formatearMontoCompacto, formatearPorcentaje, nombreRanking, ORDEN_RANKINGS } from "@/lib/formato";
+
+// "5,152.10 millones" → "5,152.1 M".
+const M = (v) => formatearMontoCompacto(v).replace(/(\.\d)\d millones$/, "$1 M").replace(/ millones$/, " M");
+const SIN_TARJETA = "[&_.tarjeta]:m-0 [&_.tarjeta]:border-0 [&_.tarjeta]:bg-transparent [&_.tarjeta]:p-0 [&_.tarjeta]:shadow-none [&_select]:min-w-[13rem]";
 import {
   bancosDisponibles, carteraPorBanco, concentracionPorBanco, concentracionPorRanking, escaleraVencimientos,
   evolucionIndicadores, indicadorCartera, participacionEnRanking, periodosDisponibles,
@@ -22,17 +26,10 @@ import AlternarVista from "./AlternarVista";
 export const dynamic = "force-dynamic"; // los datos cambian al cargar cortes
 export const metadata = { title: "Indicadores" };
 
-function Nota({ children }) {
-  return <p className="mt-1 text-sm text-texto-suave">{children}</p>;
-}
-
-function Seccion({ id, titulo, nota, children }) {
+function Seccion({ id, titulo, children }) {
   return (
     <section aria-labelledby={id} className="mt-8 space-y-4">
-      <div>
-        <h2 id={id} className="m-0">{titulo}</h2>
-        {nota && <Nota>{nota}</Nota>}
-      </div>
+      <h2 id={id} className="m-0">{titulo}</h2>
       {children}
     </section>
   );
@@ -42,12 +39,7 @@ export default async function PaginaIndicadores({ searchParams }) {
   await exigirPerfil("publico");
   const parametros = await searchParams;
 
-  const encabezado = (
-    <EncabezadoPagina
-      titulo="Indicadores complementarios"
-      descripcion="Saldo con mora, vencimientos, tasa de interés y concentración del crédito."
-    />
-  );
+  const encabezado = <EncabezadoPagina titulo="Indicadores complementarios" />;
 
   let datos;
   try {
@@ -80,7 +72,8 @@ export default async function PaginaIndicadores({ searchParams }) {
 
   return (
     <>
-      {encabezado}
+      <EncabezadoPagina titulo="Indicadores complementarios">
+        <div className={SIN_TARJETA}>
       <Filtros
         campos={[
           { nombre: "periodo", etiqueta: "Período", predeterminado: fecha, opciones: periodos.map((p) => ({ valor: p, texto: formatearFecha(p, "mes") })) },
@@ -88,9 +81,8 @@ export default async function PaginaIndicadores({ searchParams }) {
           { nombre: "ranking", etiqueta: "Ranking", textoTodos: "Todos los rankings", opciones: ORDEN_RANKINGS.map((r) => ({ valor: r, texto: nombreRanking(r) })) },
         ]}
       />
-      <p className="mt-3 text-sm text-texto-suave">
-        Cartera analizada: <strong>{alcance}</strong>, corte de {formatearFecha(fecha, "mes")}.
-      </p>
+        </div>
+      </EncabezadoPagina>
 
       {!cartera ? (
         <div className="mt-6">
@@ -100,10 +92,10 @@ export default async function PaginaIndicadores({ searchParams }) {
         </div>
       ) : (
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <TarjetaIndicador titulo="Saldo de la cartera" valor={formatearMonto(cartera.saldo)} detalle={`${formatearEntero(cartera.operaciones)} operaciones válidas`} />
-            <TarjetaIndicador titulo="Saldo con mora (> 0 días)" valor={formatearPorcentaje(cartera.mora_pct)} detalle={`Saldo: ${formatearMonto(cartera.saldo_mora)}`} />
-            <TarjetaIndicador titulo="Saldo con mora mayor a 90 días" valor={formatearPorcentaje(cartera.mora_90_pct)} detalle={`Saldo: ${formatearMonto(cartera.saldo_mora_90)}`} />
-            <TarjetaIndicador titulo="Tasa promedio ponderada" valor={formatearPorcentaje(cartera.tasa_ponderada)} detalle="Anual, ponderada por saldo" />
+          <TarjetaIndicador titulo="Saldo de la cartera" valor={M(cartera.saldo)} detalle={`${formatearEntero(cartera.operaciones)} operaciones válidas`} />
+            <TarjetaIndicador titulo="Saldo con mora (> 0 días)" valor={formatearPorcentaje(cartera.mora_pct)} detalle={M(cartera.saldo_mora)} />
+            <TarjetaIndicador titulo="Saldo con mora mayor a 90 días" valor={formatearPorcentaje(cartera.mora_90_pct)} detalle={M(cartera.saldo_mora_90)} />
+            <TarjetaIndicador titulo="Tasa promedio ponderada" valor={formatearPorcentaje(cartera.tasa_ponderada)} />
         </div>
       )}
 
@@ -157,7 +149,6 @@ export default async function PaginaIndicadores({ searchParams }) {
       <Seccion
         id="vencimientos"
         titulo="Escalera de vencimientos"
-        nota="Capital por plazo restante y por días de atraso."
       >
         {cartera ? (
           <>
@@ -205,7 +196,6 @@ export default async function PaginaIndicadores({ searchParams }) {
       <Seccion
         id="concentracion"
         titulo="Concentración del mercado por ranking"
-        nota="HHI: menos de 1,500 baja, de 1,500 a 2,500 moderada, más de 2,500 alta."
       >
         <TablaOrdenable
           titulo={`HHI y participación de los 3 mayores · ${formatearFecha(fecha, "mes")}`}

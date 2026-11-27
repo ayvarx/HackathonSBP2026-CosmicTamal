@@ -159,7 +159,6 @@ export default function TablaExplorador({ conjunto, filas, estadoInicial }) {
           parametros={{ datos: conjunto, f }}
           texto={conFiltros ? "Descargar lo filtrado" : "Descargar"}
           variante="primario"
-          descripcion={`${formatearEntero(resultado.length)} filas · ${visibles.length} columnas visibles, en el orden mostrado.`}
         />
       </div>
 

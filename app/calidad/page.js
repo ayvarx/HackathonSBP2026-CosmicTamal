@@ -1,4 +1,4 @@
-// Calidad de datos (/calidad) — cascada E1→E4, universo local válido, alertas y filas excluidas.
+// Calidad de datos (/calidad) — reporte E1→E4 por período, conteos independientes, alertas y filas excluidas.
 // Pública: cualquier perfil puede consultarla. Datos de lib/consultas.js.
 import EncabezadoPagina from "@/components/EncabezadoPagina";
 import EstadoVacio from "@/components/EstadoVacio";
@@ -26,6 +26,8 @@ const TIPOS_ALERTA = {
 };
 
 // Quita la tarjeta envolvente de Filtros para que los selectores queden en la fila del título.
+// Tablas sin saltos de línea en fechas ni cifras, con celdas más estrechas.
+const SIN_CORTE = "w-full [&_td]:whitespace-nowrap [&_th]:whitespace-nowrap [&_td]:px-2 [&_th]:px-2";
 const SIN_TARJETA = "[&_.tarjeta]:m-0 [&_.tarjeta]:border-0 [&_.tarjeta]:bg-transparent [&_.tarjeta]:p-0 [&_.tarjeta]:shadow-none [&_select]:min-w-[13rem]";
 
 export default async function PaginaCalidad({ searchParams }) {
@@ -91,7 +93,7 @@ export default async function PaginaCalidad({ searchParams }) {
 
   return (
     <>
-      <EncabezadoPagina titulo="Calidad de datos" descripcion={`Período: ${formatearFecha(fecha)}.`}>
+      <EncabezadoPagina titulo="Calidad de datos">
         <div className={SIN_TARJETA}>
           <Filtros campos={campoPeriodo} reiniciar={["pagina"]} conLimpiar={false} />
         </div>
@@ -103,33 +105,35 @@ export default async function PaginaCalidad({ searchParams }) {
       </section>
 
       <section className="mt-8" aria-labelledby="t-periodos">
-        <h2 id="t-periodos" className="mb-3">Todos los períodos</h2>
+        <h2 id="t-periodos" className="mb-3">Reporte de calidad por período</h2>
+        <div className={SIN_CORTE}>
         <TablaOrdenable
-          titulo="Reporte de calidad por período"
           claveFila="fecha"
+          compacta
           filaResaltada={fecha}
           ordenInicial={{ clave: "fecha", direccion: "asc" }}
           filas={todas}
           columnas={[
             { clave: "fecha", titulo: "Período", tipo: "fecha", alinear: "izquierda" },
-            { clave: "filas_leidas", titulo: "Filas leídas", tipo: "entero" },
-            { clave: "e1_duplicados", titulo: "E1 Duplicados", tipo: "entero" },
-            { clave: "e2_destino_extranjero", titulo: "E2 Extranjero", tipo: "entero" },
-            { clave: "e3_saldo_no_positivo", titulo: "E3 Saldo ≤ 0", tipo: "entero" },
-            { clave: "e4_actividad_no_catalogada", titulo: "E4 No catalogada", tipo: "entero" },
-            { clave: "universo_local_valido", titulo: "Universo válido", tipo: "entero" },
-            { clave: "saldo_universo_local_valido", titulo: "Saldo del universo", tipo: "monto" },
-            { clave: "cuadre_cascada", titulo: "¿Cuadra?", tipo: "texto", alinear: "centro" },
+            { clave: "filas_leidas", titulo: "Leídas", tipo: "entero" },
+            { clave: "e1_duplicados", titulo: "E1", tipo: "entero" },
+            { clave: "e2_destino_extranjero", titulo: "E2", tipo: "entero" },
+            { clave: "e3_saldo_no_positivo", titulo: "E3", tipo: "entero" },
+            { clave: "e4_actividad_no_catalogada", titulo: "E4", tipo: "entero" },
+            { clave: "universo_local_valido", titulo: "Universo", tipo: "entero" },
+            { clave: "saldo_universo_local_valido", titulo: "Saldo", tipo: "monto" },
+            { clave: "cuadre_cascada", titulo: "Cuadra", tipo: "texto", alinear: "centro" },
           ]}
         />
+        </div>
       </section>
 
       <section className="mt-8" aria-labelledby="t-indep">
-        <h2 id="t-indep">Conteos independientes</h2>
-        <p className="mb-3 text-texto-suave">Cada filtro contado por separado; una fila puede incumplir varios, así que no suman al total.</p>
+        <h2 id="t-indep" className="mb-3">Conteos independientes</h2>
+        <div className={SIN_CORTE}>
         <TablaOrdenable
-          titulo="Conteos independientes por filtro"
           claveFila="fecha"
+          compacta
           filaResaltada={fecha}
           filas={todas}
           columnas={[
@@ -140,6 +144,7 @@ export default async function PaginaCalidad({ searchParams }) {
             { clave: "indep_actividad_no_catalogada", titulo: "No catalogada", tipo: "entero" },
           ]}
         />
+        </div>
       </section>
 
       <section className="mt-8" aria-labelledby="t-alertas">
@@ -148,7 +153,6 @@ export default async function PaginaCalidad({ searchParams }) {
           <p className="text-texto-suave">Sin alertas de integridad ni de coherencia en este período.</p>
         ) : (
           <TablaOrdenable
-            titulo="Alertas por tipo"
             claveFila="tipo"
             compacta
             filas={resumenAlertas}
@@ -179,7 +183,7 @@ export default async function PaginaCalidad({ searchParams }) {
           <BotonDescarga href="/api/exportar/exclusiones" parametros={{ fecha }} texto="Filas excluidas" />
         </div>
         <TablaOrdenable
-          titulo={`${formatearEntero(ex.total)} ${ex.total === 1 ? "fila excluida" : "filas excluidas"} · ${formatearFecha(fecha)}`}
+          titulo={`${formatearEntero(ex.total)} ${ex.total === 1 ? "fila excluida" : "filas excluidas"}`}
           claveFila="clave"
           compacta
           filas={conClave(ex.filas)}

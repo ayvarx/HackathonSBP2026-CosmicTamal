@@ -1,5 +1,5 @@
 // Verificación (/verificacion) — los seis puntos de verificación de un período.
-// Pública. Los rankings se ven de uno en uno con un selector (?ranking=). Cada sección tiene ancla (#p1 ... #p6) para llegar al dato en pocos segundos.
+// Pública. Los rankings se ven de uno en uno con un selector (?ranking=). Cada sección tiene ancla (#p1 ... #p6).
 import EncabezadoPagina from "@/components/EncabezadoPagina";
 import EstadoVacio from "@/components/EstadoVacio";
 import MensajeError from "@/components/MensajeError";
@@ -10,7 +10,11 @@ import { exigirPerfil } from "@/lib/auth";
 import { calidad, periodos, RANKINGS, rankings, reconciliaciones } from "@/lib/consultas";
 import { elegirPeriodo, reclasificacionSb21, totalesPorSubactividad } from "@/lib/consultas-calidad";
 import Link from "next/link";
-import { formatearEntero, formatearFecha, formatearMonto, nombreRanking } from "@/lib/formato";
+import { formatearEntero, formatearFecha, formatearMontoCompacto, nombreRanking } from "@/lib/formato";
+
+// "5,152.10 millones" → "5,152.1 M".
+const M = (v) => formatearMontoCompacto(v).replace(/(\.\d)\d millones$/, "$1 M").replace(/ millones$/, " M");
+const SIN_TARJETA = "[&_.tarjeta]:m-0 [&_.tarjeta]:border-0 [&_.tarjeta]:bg-transparent [&_.tarjeta]:p-0 [&_.tarjeta]:shadow-none [&_select]:min-w-[13rem]";
 
 export const dynamic = "force-dynamic"; // los datos cambian al cargar cortes
 export const metadata = { title: "Verificación" };
@@ -25,11 +29,10 @@ const PUNTOS = [
 ];
 
 // Tabla de un ranking: posición, banco, saldo, ponderación y operaciones.
-function TablaRanking({ clave, filas }) {
+function TablaRanking({ filas }) {
   return (
     <div className="w-full [&_td]:whitespace-nowrap [&_th]:whitespace-nowrap">
       <TablaOrdenable
-        titulo={`Ranking ${nombreRanking(clave)}`}
         claveFila="codigo_banco"
         compacta
         ordenInicial={{ clave: "posicion", direccion: "asc" }}
@@ -140,17 +143,15 @@ export default async function PaginaVerificacion({ searchParams }) {
 
   return (
     <>
-      <EncabezadoPagina
-        titulo="Verificación y reconciliaciones"
-        descripcion={`Período: ${formatearFecha(fecha)}.`}
-      >
+      <EncabezadoPagina titulo="Verificación y reconciliaciones">
+        <div className={SIN_TARJETA}>
+          <Filtros
+            campos={[{ nombre: "periodo", etiqueta: "Período", predeterminado: fecha, opciones: lista.map((p) => ({ valor: p.fecha, texto: formatearFecha(p.fecha) })) }]}
+            conLimpiar={false}
+          />
+        </div>
         <BotonDescarga href="/api/exportar/rankings" parametros={{ periodo: fecha }} texto="Rankings del período" />
       </EncabezadoPagina>
-
-      <Filtros
-        campos={[{ nombre: "periodo", etiqueta: "Período", predeterminado: fecha, opciones: lista.map((p) => ({ valor: p.fecha, texto: formatearFecha(p.fecha) })) }]}
-        conLimpiar={false}
-      />
 
       <nav aria-label="Puntos de verificación" className="mt-4 flex flex-wrap gap-2">
         {PUNTOS.map(([id, texto]) => (
@@ -161,7 +162,7 @@ export default async function PaginaVerificacion({ searchParams }) {
       <section id="p1" className="mt-8 scroll-mt-24" aria-labelledby="h-p1">
         <h2 id="h-p1">1. Reporte de calidad</h2>
         <p className="mt-2">
-          <strong>{formatearEntero(q.filas_leidas)}</strong> filas leídas · <strong>{formatearEntero(q.universo_local_valido)}</strong> operaciones válidas · saldo válido <strong>{formatearMonto(q.saldo_universo_local_valido)}</strong> · <a href={`/calidad?periodo=${fecha}`}>ver detalle en Calidad</a>
+          <strong>{formatearEntero(q.filas_leidas)}</strong> filas leídas · <strong>{formatearEntero(q.universo_local_valido)}</strong> operaciones válidas · saldo válido <strong>{M(q.saldo_universo_local_valido)}</strong> · <a href={`/calidad?periodo=${fecha}`}>ver detalle en Calidad</a>
         </p>
       </section>
 
@@ -171,10 +172,8 @@ export default async function PaginaVerificacion({ searchParams }) {
           <SelectorRanking claves={principales} elegido={rankingElegido} fecha={fecha} ancla="p2" />
         </div>
         {principales.includes(rankingElegido) ? (
-          <TablaRanking clave={rankingElegido} filas={porRanking(rankingElegido)} />
-        ) : (
-          <p className="text-sm text-texto-suave">Elija un ranking.</p>
-        )}
+          <TablaRanking filas={porRanking(rankingElegido)} />
+        ) : null}
       </section>
 
       <section id="p3" className="mt-8 scroll-mt-24" aria-labelledby="h-p3">
@@ -183,17 +182,14 @@ export default async function PaginaVerificacion({ searchParams }) {
           <SelectorRanking claves={otros} elegido={rankingElegido} fecha={fecha} ancla="p3" />
         </div>
         {otros.includes(rankingElegido) ? (
-          <TablaRanking clave={rankingElegido} filas={porRanking(rankingElegido)} />
-        ) : (
-          <p className="text-sm text-texto-suave">Elija un ranking.</p>
-        )}
+          <TablaRanking filas={porRanking(rankingElegido)} />
+        ) : null}
       </section>
 
       <section id="p4" className="mt-8 scroll-mt-24" aria-labelledby="h-p4">
         <h2 id="h-p4">4. Total de cartera local válida y ponderación</h2>
         <div className="w-full [&_td]:whitespace-nowrap [&_th]:whitespace-nowrap">
         <TablaOrdenable
-          titulo="Total de cartera local válida y ponderación por ranking"
           claveFila="codigo_banco"
           compacta
           filas={filasBancos}
@@ -212,11 +208,10 @@ export default async function PaginaVerificacion({ searchParams }) {
           <h2 id="h-p5" className="mb-0">5. Desglose por subactividad</h2>
           <BotonDescarga href="/api/exportar/subactividades" parametros={{ periodo: fecha }} texto="Desglose por banco" />
         </div>
-        <p className="mb-3 text-sm text-texto-suave">
-          {formatearEntero(sb21.operaciones_movidas)} operaciones · {formatearMonto(sb21.saldo_movido)} pasan de Crédito personal a Tarjeta.
+        <p className="mb-3 text-sm">
+          Crédito personal → Tarjeta: <strong>{formatearEntero(sb21.operaciones_movidas)}</strong> operaciones · <strong>{M(sb21.saldo_movido)}</strong>
         </p>
         <TablaOrdenable
-          titulo="Saldo y operaciones por subactividad (suma de los 12 bancos)"
           claveFila="clave"
           compacta
           filas={resumenSub}
@@ -232,7 +227,6 @@ export default async function PaginaVerificacion({ searchParams }) {
       <section id="p6" className="mt-8 scroll-mt-24" aria-labelledby="h-p6">
         <h2 id="h-p6">6. Períodos procesados y reconciliaciones</h2>
         <TablaOrdenable
-          titulo={`${lista.length} períodos procesados y estado de las reconciliaciones`}
           claveFila="fecha"
           filaResaltada={fecha}
           filas={filasPeriodos}
@@ -246,10 +240,9 @@ export default async function PaginaVerificacion({ searchParams }) {
           ]}
         />
         <details className="mt-4">
-          <summary className="cursor-pointer font-medium">Ver las comprobaciones de {formatearFecha(fecha)} una por una ({detalleRec.length})</summary>
+          <summary className="cursor-pointer font-medium">Comprobaciones de {formatearFecha(fecha)} ({detalleRec.length})</summary>
           <div className="mt-3">
             <TablaOrdenable
-              titulo={`Detalle de reconciliaciones de ${formatearFecha(fecha)}`}
               claveFila="clave"
               compacta
               filas={detalleRec}

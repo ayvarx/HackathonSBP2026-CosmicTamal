@@ -41,3 +41,11 @@ export function porcentajeDe(parte, total, decimales = 1) {
   const texto = decimales ? `${digitos.slice(0, -decimales)}.${digitos.slice(-decimales)}` : digitos;
   return `${negativo ? "-" : ""}${texto}`;
 }
+
+/** Cifra resumida para tarjetas: "5152100000.00" → "5,152.1 M" (montos menores a un millón, completos). */
+export function montoResumido(valor) {
+  const n = Number(valor);
+  if (!Number.isFinite(n)) return "—";
+  if (Math.abs(n) < 1e6) return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return `${(n / 1e6).toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} M`;
+}

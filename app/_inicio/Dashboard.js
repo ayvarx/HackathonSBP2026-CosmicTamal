@@ -11,11 +11,10 @@ import {
   aNumeroParaGrafico,
   formatearEntero,
   formatearFecha,
-  formatearMonto,
-  formatearMontoCompacto,
   formatearPorcentaje,
   nombreRanking,
 } from "@/lib/formato";
+import { montoEnMillones } from "./montos";
 import "./dashboard.css";
 import "./depth.css";
 import "./inicio.css";
@@ -73,7 +72,7 @@ function Kpi({ etiqueta, valor, detalle, color = AZUL, serie, enlace }) {
       </div>
       <strong className="kpi-value">{valor}</strong>
       <div className="kpi-foot">
-        <small>{detalle}</small>
+        {detalle && <small>{detalle}</small>}
         <Sparkline valores={serie} color={color} />
         {enlace && (
           <Link className="kpi-enlace" href={enlace.href}>
@@ -85,28 +84,7 @@ function Kpi({ etiqueta, valor, detalle, color = AZUL, serie, enlace }) {
   );
 }
 
-/**
- * Etiqueta compacta de gráfico en millones ("175.8 M", "50 M", "0"). Solo para ejes y
- * etiquetas de barras: se deriva de formatearMontoCompacto (exacto) sin los decimales ".00".
- */
-export function montoEnMillones(valor, decimales = 0) {
-  if (valor === null || valor === undefined || valor === "") return "";
-  if (Number(valor) === 0) return "0";
-  const texto = formatearMontoCompacto(String(valor));
-  if (!texto.endsWith(" millones")) return texto.replace(/\.00$/, "");
-  // Redondeo aritmético exacto (BigInt) de centésimas de millón a `decimales` cifras.
-  const crudo = texto.replace(" millones", "").replace(/,/g, "");
-  const negativo = crudo.startsWith("-");
-  const [entero, frac = "00"] = crudo.replace("-", "").split(".");
-  const factor = 10n ** BigInt(2 - decimales);
-  let unidades = BigInt(entero + frac.padEnd(2, "0")) / factor;
-  if ((BigInt(entero + frac.padEnd(2, "0")) % factor) * 2n >= factor) unidades += 1n;
-  const base = 10n ** BigInt(decimales);
-  const ent = (unidades / base).toLocaleString("en-US");
-  const dec = decimales > 0 ? (unidades % base).toString().padStart(decimales, "0") : "";
-  const cifra = dec && !/^0+$/.test(dec) ? `${ent}.${dec}` : ent;
-  return `${negativo ? "-" : ""}${cifra} M`;
-}
+export { montoEnMillones };
 
 export default function Dashboard({
   anterior,
@@ -117,7 +95,6 @@ export default function Dashboard({
   movimientos,
   reconciliaciones,
   composicion,
-  rankings,
   enlaces,
 }) {
 
@@ -141,7 +118,7 @@ export default function Dashboard({
         type: "bar",
         name: "Universo válido",
         barMaxWidth: 90,
-        itemStyle: { color: AZUL, borderRadius: [6, 6, 0, 0] },
+        itemStyle: { color: AZUL },
         data: tendencia.map((t) => t.universo),
         label: {
           show: true,
@@ -194,8 +171,6 @@ export default function Dashboard({
     : null;
   const recOk = reconciliaciones.filter((r) => r.todas_cuadran).length;
   const recTodas = recOk === reconciliaciones.length;
-  // Total de la dona en dos líneas cortas para que quepa en el hueco central.
-  const totalCifra = montoEnMillones(universo.saldo_universo_local_valido, 1);
 
   return (
     <div className="dash">
@@ -204,31 +179,30 @@ export default function Dashboard({
           etiqueta="Préstamos válidos (universo local)"
           valor={formatearEntero(universo.universo_local_valido)}
           detalle={
-            variacion == null
-              ? `De ${formatearEntero(universo.filas_leidas)} registros leídos`
-              : `${variacion >= 0 ? "+" : ""}${variacion.toFixed(2)} % vs período anterior · de ${formatearEntero(universo.filas_leidas)} leídos`
+            variacion == null ? null : (
+              <span className={variacion > 0 ? "cambio-sube" : variacion < 0 ? "cambio-baja" : "cambio-igual"}>
+                {`${variacion > 0 ? "▲ +" : variacion < 0 ? "▼ " : "= "}${variacion.toFixed(2)} %`}
+              </span>
+            )
           }
           serie={serie.map((s) => s.universo)}
         />
         <Kpi
           etiqueta="Saldo del universo local válido"
           valor={montoEnMillones(universo.saldo_universo_local_valido, 1)}
-          detalle={`Exacto: ${formatearMonto(universo.saldo_universo_local_valido)}`}
         />
         <Kpi
           etiqueta="Bancos incluidos"
           valor={formatearEntero(numBancos)}
           color={AZUL}
-          detalle={`En los ${formatearEntero(rankings.length)} rankings`}
-          enlace={{ href: enlaces.rankings, texto: "Ver rankings" }}
         />
         <Kpi
           etiqueta="Movimientos significativos"
           valor={anterior ? formatearEntero(movimientos.significativos) : "—"}
           detalle={
             anterior
-              ? `De ${formatearEntero(movimientos.total)} posiciones frente a ${formatearFecha(anterior)}.`
-              : "Sin período anterior."
+              ? `de ${formatearEntero(movimientos.total)} posiciones`
+              : null
           }
           enlace={anterior ? enlaces.movimientos : undefined}
         />
@@ -249,10 +223,6 @@ export default function Dashboard({
           <div className="donut-wrap">
             <div className="donut">
               <Grafico opcion={opcionDona} altura={220} formatoValor="monto" />
-              <div className="donut-center">
-                <strong>{totalCifra}</strong>
-                <small>Saldo total</small>
-              </div>
             </div>
             <ul className="legend">
               {composicion.map((c, i) => (

@@ -135,10 +135,10 @@
 .lideres-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 .lider-card { background: #ffffff; border: 1px solid #d8efd5; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 2px 8px rgba(18, 42, 15,0.06); }
 .lider-card header { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-.lider-card header strong { font-size: 15px; color: #142711; }
+.lider-card header strong { font-size: 18px; color: #142711; }
 .lider-etiqueta { font-size: 11px; font-weight: 700; padding: 3px 8px; border: 1px solid #a6da9f; color: #287f1d; background: #f4faf3; white-space: nowrap; }
 .lider-etiqueta.oblig { border-color: #287f1d; }
-.lider-banco { font-size: 16px; font-weight: 700; color: #1a690f; }
+.lider-banco { font-size: 14px; font-weight: 700; color: #1a690f; }
 .lider-card dl { margin: 2px 0 0; display: grid; gap: 4px; }
 .lider-card dl > div { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; }
 .lider-card dt { color: #4e634b; }
@@ -213,3 +213,7 @@
 a.lider-ver { background: #106003; box-shadow: none; border-radius: 8px; padding: 8px 14px; }
 a.lider-ver:hover { background: #094000; transform: none; }
 a.lider-ver:active { transform: none; box-shadow: none; }
+
+.cambio-sube { color: #267F18; font-weight: 700; }
+.cambio-baja { color: #b42318; font-weight: 700; }
+.cambio-igual { color: #6b6b6b; font-weight: 700; }
