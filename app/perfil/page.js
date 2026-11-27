@@ -97,7 +97,7 @@ export default async function PaginaPerfil({ searchParams }) {
             <tbody>
               {Object.entries(PERMISOS).map(([clave, regla]) => (
                 <tr key={clave}>
-                  <th scope="row" className="font-normal">
+                  <th scope="row" className="font-normal text-left">
                     {regla.descripcion}
                   </th>
                   {PERFILES.map((perfil) => (
