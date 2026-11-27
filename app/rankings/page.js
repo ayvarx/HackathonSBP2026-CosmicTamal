@@ -5,6 +5,11 @@
 //   &ranking=CLAVE     uno de los 6 rankings (por defecto HIPOTECARIO)
 //   &banco=101         resalta un banco y muestra su ficha
 //   &subactividad=...  limita el desglose a una subactividad
+//   &vista=tarjetas    vista de tarjetas por banco (frontend de Amet); por defecto, la tabla
+//
+// Fusión de los dos frontends: la tabla ordenable, el gráfico, el desglose con la nota SB21, la
+// ficha y las descargas son de esta aplicación; la cabecera de actividad, el selector de período,
+// las tarjetas por banco (BancoCard) y el detalle del banco (BancoDetalle) vienen de Amet (_amet/).
 //
 // Todas las cifras vienen del motor SQL (lib/consultas.js); esta página solo las ordena
 // y las formatea para mostrarlas. Componente de servidor.
@@ -34,7 +39,13 @@ import {
   formatearPorcentaje,
   nombreBanco,
   nombreSubactividad,
+  signoDecimal,
 } from "@/lib/formato";
+import BancoDetalle from "./_amet/BancoDetalle";
+import { descargasBanco } from "./_amet/descargaBanco";
+import PeriodSelect from "./_amet/PeriodSelect";
+import RankingsPage, { PestanasVista } from "./_amet/RankingsPage";
+import TarjetasBancos from "./_amet/TarjetasBancos";
 import GraficoRanking from "./GraficoRanking";
 import NotaFuente from "./NotaFuente";
 import { urlRankings } from "./urls";
@@ -51,8 +62,12 @@ const TIPO_RANKING = {
 /** Une las palabras con espacios irrompibles para que el nombre del banco no se parta en la tabla. */
 const sinCortes = (texto) => String(texto).replace(/ /g, " ");
 
+// Colores de las subactividades en las tarjetas de Amet (tonos del tema "Radar", bien distintos entre sí).
+const COLORES_SUBACTIVIDAD = ["#021335", "#1D3E7F", "#93c5fd", "#0ea5e9", "#4C7DB8", "#64748b", "#5B82C8", "#30648C"];
+const MAX_CORTES_TARJETA = 6;
+
 /** Lee todo lo que la pantalla necesita. Si falla la base, la página muestra un error claro. */
-async function cargarDatos(pedido) {
+async function cargarDatos(pedido, conTarjetas) {
   const fechas = await fechasDisponibles();
   const periodo = elegirPeriodo(pedido.periodo, fechas);
   if (!periodo.fecha) return { fechas, periodo };
@@ -60,15 +75,21 @@ async function cargarDatos(pedido) {
   // Un ranking desconocido en la URL no rompe la página: se usa el primero y se avisa.
   const info = RANKINGS.find((r) => r.clave === pedido.ranking) ?? RANKINGS[0];
   const { fecha, anterior } = periodo;
-  const [filas, desglose, movs, totales, conciliacion, sb21] = await Promise.all([
+  // Vista de tarjetas: saldo y posición del ranking en los cortes hasta el elegido, y los 6 rankings del corte.
+  const cortesTarjeta = fechas.slice(0, fechas.indexOf(fecha) + 1).slice(-MAX_CORTES_TARJETA);
+  const [filas, desglose, movs, totales, conciliacion, sb21, historico, todos] = await Promise.all([
     rankings({ fecha, ranking: info.clave }),
     subactividades({ fecha, ranking: info.clave }),
     anterior ? movimientos({ anterior, actual: fecha, ranking: info.clave }) : Promise.resolve([]),
     totalesRanking({ fecha, ranking: info.clave }),
     reconciliaciones(fecha),
     info.clave === "CONSUMO" ? reclasificacionSB21(fecha) : Promise.resolve(null),
+    conTarjetas
+      ? Promise.all(cortesTarjeta.map(async (f) => ({ fecha: f, filas: await rankings({ fecha: f, ranking: info.clave }) })))
+      : Promise.resolve([]),
+    conTarjetas ? rankings({ fecha }) : Promise.resolve([]),
   ]);
-  return { fechas, periodo, info, filas, desglose, movs, totales, conciliacion, sb21 };
+  return { fechas, periodo, info, filas, desglose, movs, totales, conciliacion, sb21, historico, todos };
 }
 
 export default async function PaginaRankings({ searchParams }) {
@@ -80,7 +101,10 @@ export default async function PaginaRankings({ searchParams }) {
     ranking: textoParametro(parametros.ranking).toUpperCase(),
     banco: textoParametro(parametros.banco),
     subactividad: textoParametro(parametros.subactividad),
+    vista: textoParametro(parametros.vista).toLowerCase(),
   };
+  const conTarjetas = pedido.vista === "tarjetas";
+  const vista = conTarjetas ? "tarjetas" : ""; // la tabla es la vista por defecto (sin parámetro)
 
   const encabezadoBase = (
     <EncabezadoPagina
@@ -91,7 +115,7 @@ export default async function PaginaRankings({ searchParams }) {
 
   let datos;
   try {
-    datos = await cargarDatos(pedido);
+    datos = await cargarDatos(pedido, conTarjetas);
   } catch (error) {
     return (
       <>
@@ -237,6 +261,96 @@ export default async function PaginaRankings({ searchParams }) {
   const movBanco = banco ? movPorBanco.get(banco) : null;
   const tipo = TIPO_RANKING[info.tipo];
 
+  // ---------- Cabecera de actividad y pestañas (componentes de Amet) ----------
+  const base = { periodo: fecha, ranking, subactividad, vista }; // filtros actuales SIN banco
+  const gruposChips = ["obligatorio", "recomendado", "bonus"].map((t) => ({
+    titulo: TIPO_RANKING[t].grupo,
+    chips: RANKINGS.filter((r) => r.tipo === t).map((r) => ({
+      clave: r.clave,
+      texto: r.nombre,
+      href: urlRankings({ periodo: fecha, ranking: r.clave, banco, vista }),
+      activo: r.clave === ranking,
+    })),
+  }));
+  const selectorPeriodo = (
+    <PeriodSelect
+      periods={[...datos.fechas].reverse().map((f) => ({ valor: f, texto: `${formatearFecha(f)} (${f})` }))}
+      value={fecha}
+      destinos={Object.fromEntries(datos.fechas.map((f) => [f, urlRankings({ ...base, periodo: f, banco })]))}
+    />
+  );
+  const pestanas = [
+    { id: "tabla", titulo: "Tabla y gráfico", href: urlRankings({ ...base, vista: "", banco }), activa: !conTarjetas },
+    { id: "tarjetas", titulo: "Tarjetas por banco", href: urlRankings({ ...base, vista: "tarjetas", banco }), activa: conTarjetas },
+  ];
+
+  // ---------- Vista de tarjetas: una por banco con su composición (BancoCard) ----------
+  const colorDe = (s) => COLORES_SUBACTIVIDAD[nombresSub.indexOf(s) % COLORES_SUBACTIVIDAD.length];
+  const partesDe = (codigo) =>
+    nombresSub
+      .map((s) => ({ nombre: nombreSubactividad(s), valor: saldoSub.get(`${codigo}|${s}`)?.saldo ?? "0.00", color: colorDe(s) }))
+      .filter((p) => signoDecimal(p.valor) > 0);
+  const tarjetas = conTarjetas
+    ? filas.map((f) => ({
+        codigo: f.codigo_banco,
+        posicion: f.posicion,
+        banco: f.banco,
+        saldo: f.saldo_actividad,
+        serie: datos.historico.map((h) => ({
+          periodo: h.fecha,
+          etiqueta: formatearFecha(h.fecha, "corta"),
+          valor: h.filas.find((x) => x.codigo_banco === f.codigo_banco)?.saldo_actividad ?? "0.00",
+        })),
+        partes: partesDe(f.codigo_banco),
+        seleccionada: f.codigo_banco === banco,
+        hrefSeleccion: urlRankings(f.codigo_banco === banco ? base : { ...base, banco: f.codigo_banco }),
+        descargas: descargasBanco({ fecha, ranking, codigo: f.codigo_banco }),
+      }))
+    : [];
+  const detalleTarjeta =
+    conTarjetas && filaBanco ? (
+      <BancoDetalle
+        banco={nombreBanco(filaBanco.codigo_banco, filaBanco.banco)}
+        posicion={filaBanco.posicion}
+        actividad={info.nombre}
+        saldo={filaBanco.saldo_actividad}
+        ponderacion={filaBanco.ponderacion_pct}
+        operaciones={filaBanco.operaciones_validas}
+        lider={filas[0].saldo_actividad}
+        partes={partesDe(banco)}
+        posicionesPeriodos={datos.historico.map((h) => ({
+          periodo: h.fecha,
+          etiqueta: formatearFecha(h.fecha, "corta"),
+          posicion: h.filas.find((x) => x.codigo_banco === banco)?.posicion,
+        }))}
+        otras={RANKINGS.map((r) => {
+          const fila = datos.todos.find((x) => x.ranking === r.clave && x.codigo_banco === banco);
+          return {
+            clave: r.clave,
+            nombre: r.nombre,
+            posicion: fila?.posicion,
+            saldo: fila?.saldo_actividad ?? "0.00",
+            activa: r.clave === ranking,
+            href: urlRankings({ periodo: fecha, ranking: r.clave, banco, vista }),
+          };
+        })}
+        hrefCerrar={urlRankings(base)}
+      >
+        {movBanco && (
+          <span>
+            Frente a {textoAnterior}: posición {movBanco.posicion_anterior} → {movBanco.posicion_actual}, saldo{" "}
+            <span className="cifra">{formatearMonto(movBanco.var_saldo, { signo: true })}</span>.
+            {movBanco.significativo ? ` Movimiento significativo: ${movBanco.motivo}.` : ""}
+          </span>
+        )}
+        {esAnalista && (
+          <Link href={urlRankings({ periodo: fecha, ranking, banco, subactividad }, "/rankings/detalle")} className="bd-cerrar">
+            Ver los préstamos
+          </Link>
+        )}
+      </BancoDetalle>
+    ) : null;
+
   return (
     <>
       <EncabezadoPagina
@@ -263,37 +377,16 @@ export default async function PaginaRankings({ searchParams }) {
         />
       </EncabezadoPagina>
 
-      {/* Selector de ranking: distingue obligatorios, recomendado y bonus (Sección 5). */}
-      <nav aria-label="Elegir ranking" className="mb-4 flex flex-wrap gap-x-6 gap-y-3">
-        {["obligatorio", "recomendado", "bonus"].map((t) => (
-          <div key={t}>
-            <p className="etiqueta-campo">{TIPO_RANKING[t].grupo}</p>
-            <ul className="flex flex-wrap gap-2">
-              {RANKINGS.filter((r) => r.tipo === t).map((r) => (
-                <li key={r.clave}>
-                  <Link
-                    href={urlRankings({ periodo: fecha, ranking: r.clave, banco })}
-                    className={r.clave === ranking ? "boton" : "boton boton-secundario"}
-                    aria-current={r.clave === ranking ? "page" : undefined}
-                    scroll={false}
-                  >
-                    {r.nombre}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </nav>
+      {/* Cabecera de actividad (Amet): chips de los 6 rankings agrupados en obligatorios, recomendado
+          y bonus (Sección 5) y, al lado, el selector del período de corte. */}
+      <RankingsPage
+        grupos={gruposChips}
+        selector={selectorPeriodo}
+        incluye={nombresSub.map((s) => nombreSubactividad(s))}
+      />
 
       <Filtros
         campos={[
-          {
-            nombre: "periodo",
-            etiqueta: "Período",
-            predeterminado: fecha,
-            opciones: [...datos.fechas].reverse().map((f) => ({ valor: f, texto: `${formatearFecha(f)} (${f})` })),
-          },
           {
             nombre: "banco",
             etiqueta: "Banco",
@@ -317,8 +410,11 @@ export default async function PaginaRankings({ searchParams }) {
         </div>
       )}
 
-      {/* Ficha del banco elegido */}
-      {filaBanco && (
+      {/* Conmutador de vista (pestañas de Amet): tabla + gráfico de esta aplicación o tarjetas por banco. */}
+      <PestanasVista pestanas={pestanas} />
+
+      {/* Ficha del banco elegido (vista de tabla; en la de tarjetas la reemplaza BancoDetalle) */}
+      {filaBanco && !conTarjetas && (
         <section aria-labelledby="titulo-ficha" className="mb-8">
           <h2 id="titulo-ficha" className="mb-3">
             {nombreBanco(filaBanco.codigo_banco, filaBanco.banco)} en {info.nombre}
@@ -358,44 +454,52 @@ export default async function PaginaRankings({ searchParams }) {
             />
           </div>
           <p className="mt-2 text-sm">
-            <Link href={urlRankings({ periodo: fecha, ranking, subactividad })} scroll={false}>
+            <Link href={urlRankings(base)} scroll={false}>
               Quitar la selección del banco
             </Link>
           </p>
         </section>
       )}
 
-      {/* Gráfico + tabla ordenable de los 12 bancos */}
-      <section aria-labelledby="titulo-posiciones" className="mb-10">
-        <h2 id="titulo-posiciones" className="mb-3">Posiciones de los 12 bancos</h2>
-        {/* La tabla va a todo el ancho (tiene la cifra oficial y 11 columnas); el gráfico, debajo. */}
-        <TablaOrdenable
-          titulo={`Ranking ${info.nombre} · ${formatearFecha(fecha)}`}
-          columnas={columnasRanking}
-          filas={filasTabla}
-          claveFila="Codigo_Banco"
-          ordenInicial={{ clave: "Posicion", direccion: "asc" }}
-          filaResaltada={banco || undefined}
-          filaTotal={{ Banco: "Total de los 12 bancos", Saldo_Actividad: totales.total.saldo, Operaciones_Validas: totales.total.operaciones }}
-          compacta
-        />
-        <p className="mb-4 mt-2 text-xs text-texto-tenue">
-          Movimiento = posición anterior − posición actual (positivo sube, negativo baja). Pulse un encabezado para ordenar.
-        </p>
-        <GraficoRanking
-          titulo={`Saldo de ${info.nombre} por banco · ${formatearFecha(fecha)}`}
-          descripcion="Barras en orden de posición. La cifra exacta está en la tabla."
-          barras={filas.map((f) => ({
-            codigo: f.codigo_banco,
-            etiqueta: f.banco,
-            saldo: f.saldo_actividad,
-            posicion: f.posicion,
-            ponderacion: f.ponderacion_pct,
-          }))}
-          resaltado={banco}
-          rutaBase={urlRankings({ periodo: fecha, ranking, subactividad })}
-        />
-      </section>
+      {conTarjetas ? (
+        /* Vista de tarjetas (Amet): una tarjeta por banco con la composición de su saldo. */
+        <section aria-labelledby="titulo-tarjetas" className="mb-10">
+          <h2 id="titulo-tarjetas" className="mb-3">Tarjetas de los 12 bancos · {formatearFecha(fecha)}</h2>
+          <TarjetasBancos tarjetas={tarjetas} detalle={detalleTarjeta} />
+        </section>
+      ) : (
+        /* Gráfico + tabla ordenable de los 12 bancos */
+        <section aria-labelledby="titulo-posiciones" className="mb-10">
+          <h2 id="titulo-posiciones" className="mb-3">Posiciones de los 12 bancos</h2>
+          {/* La tabla va a todo el ancho (tiene la cifra oficial y 11 columnas); el gráfico, debajo. */}
+          <TablaOrdenable
+            titulo={`Ranking ${info.nombre} · ${formatearFecha(fecha)}`}
+            columnas={columnasRanking}
+            filas={filasTabla}
+            claveFila="Codigo_Banco"
+            ordenInicial={{ clave: "Posicion", direccion: "asc" }}
+            filaResaltada={banco || undefined}
+            filaTotal={{ Banco: "Total de los 12 bancos", Saldo_Actividad: totales.total.saldo, Operaciones_Validas: totales.total.operaciones }}
+            compacta
+          />
+          <p className="mb-4 mt-2 text-xs text-texto-tenue">
+            Movimiento = posición anterior − posición actual (positivo sube, negativo baja). Pulse un encabezado para ordenar.
+          </p>
+          <GraficoRanking
+            titulo={`Saldo de ${info.nombre} por banco · ${formatearFecha(fecha)}`}
+            descripcion="Barras en orden de posición. La cifra exacta está en la tabla."
+            barras={filas.map((f) => ({
+              codigo: f.codigo_banco,
+              etiqueta: f.banco,
+              saldo: f.saldo_actividad,
+              posicion: f.posicion,
+              ponderacion: f.ponderacion_pct,
+            }))}
+            resaltado={banco}
+            rutaBase={urlRankings({ periodo: fecha, ranking, subactividad })}
+          />
+        </section>
+      )}
 
       {/* Desglose por subactividad */}
       <section aria-labelledby="titulo-desglose" className="mb-10">
@@ -438,13 +542,16 @@ export default async function PaginaRankings({ searchParams }) {
             filaTotal={filaTotalDesglose}
             compacta
           />
-          <Grafico
-            titulo={`Composición de ${info.nombre} por subactividad · ${formatearFecha(fecha)}`}
-            descripcion="Barras apiladas: cada color es una subactividad. Pulse la leyenda para ocultar o mostrar una."
-            opcion={opcionApilada}
-            altura={Math.max(340, filas.length * 34 + 60)}
-            formatoValor="monto"
-          />
+          {/* En la vista de tarjetas la composición ya se ve en cada tarjeta: no se repite el gráfico apilado. */}
+          {!conTarjetas && (
+            <Grafico
+              titulo={`Composición de ${info.nombre} por subactividad · ${formatearFecha(fecha)}`}
+              descripcion="Barras apiladas: cada color es una subactividad. Pulse la leyenda para ocultar o mostrar una."
+              opcion={opcionApilada}
+              altura={Math.max(340, filas.length * 34 + 60)}
+              formatoValor="monto"
+            />
+          )}
         </div>
       </section>
 
@@ -466,7 +573,7 @@ export default async function PaginaRankings({ searchParams }) {
         ) : (
           <p className="mt-1 max-w-3xl text-sm text-texto-suave">
             El detalle préstamo por préstamo está disponible para los perfiles Analista y Administrador.{" "}
-            <Link href={`/perfil?volver=${encodeURIComponent(urlRankings({ periodo: fecha, ranking, banco, subactividad }))}`}>
+            <Link href={`/perfil?volver=${encodeURIComponent(urlRankings({ ...base, banco }))}`}>
               Cambiar de perfil
             </Link>
           </p>
