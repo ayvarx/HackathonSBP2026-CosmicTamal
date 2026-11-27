@@ -106,7 +106,13 @@ npm run dev           # http://localhost:3000
 ### Modo B: con Supabase
 
 1. En Supabase, copie la cadena de conexión del *Session pooler* y péguela en `DATABASE_URL` dentro de `.env.local` (nunca en un archivo que se suba).
-2. Ejecute los mismos tres comandos: `npm run db:setup`, `npm run db:seed`, `npm run dev`. El esquema activa RLS sin políticas y retira permisos a los roles públicos de Supabase (`anon`, `authenticated`); la aplicación se conecta con el rol dueño. Requiere Postgres 15 o superior (las vistas usan `security_invoker`).
+2. Ejecute los mismos tres comandos: `npm run db:setup`, `npm run db:seed`, `npm run dev`. El esquema activa RLS sin políticas y retira permisos a los roles públicos de Supabase (`anon`, `authenticated`); la aplicación se conecta con el rol dueño de las tablas. Requiere Postgres 15 o superior (las vistas usan `security_invoker`).
+
+El equipo usa un rol propio de la aplicación (`app_sbp`, con permiso solo sobre el esquema `public`) en lugar del rol `postgres`. El nombre de usuario en el pooler es `app_sbp.<ref-del-proyecto>`. Cargar un corte en Supabase tarda entre 9 y 14 segundos (en PGlite, unos 3).
+
+### Despliegue en Vercel (opcional)
+
+La misma aplicación está publicada en Vercel y lee de la misma base de Supabase. Las variables `DATABASE_URL` (puerto 6543, modo transacción del pooler, pensado para funciones sin servidor) y `SESSION_SECRET` se definen en el proyecto de Vercel como secretas; no están en el repositorio. `next.config.mjs` incluye en el despliegue el SQL del motor (`db/`) y los catálogos que el servidor lee al arrancar. La demostración ante el jurado se hace en local (R1); Vercel es un extra.
 
 ### Comandos disponibles (`package.json`)
 
@@ -118,6 +124,9 @@ npm run dev           # http://localhost:3000
 | `npm run db:seed` | Carga todos los `datos/AT03_*.csv`. Opciones: `npm run db:seed -- 202607 202608` (solo esos períodos) y `npm run db:seed -- 202609 --reemplazar` (volver a cargar un período ya cargado; sin esa opción se omite) |
 | `npm test` | Pruebas contra la clave de control (usan PGlite en memoria; no tocan la base de desarrollo) |
 | `npm run lint` | ESLint |
+| `npm run setup` | Crea `.env.local` con un `SESSION_SECRET` aleatorio si no existe (no lo muestra) y prepara la base |
+| `npm run e2e` | Prueba de punta a punta del guion de demostración sobre una base limpia; deja la evidencia en `tests/resultados/prueba-e2e.txt` |
+| `npm run verificar` | `lint` + `test` + `e2e` |
 
 La aplicación también prepara la base sola al primer uso (aplica el esquema y carga los catálogos si están vacíos), pero el flujo anterior deja el entorno listo antes de abrir el navegador. Si cambia `db/02_motor.sql`, el motor se recrea y se recalcula automáticamente en el siguiente arranque (se compara su huella SHA-256).
 
@@ -166,8 +175,8 @@ Hay un selector de perfil sin contraseña (`/perfil`), como permite el reto. Los
 | :--- | :---: | :---: | :---: |
 | Consultar rankings, filtros, gráficos y tablas ordenables | Sí | Sí | Sí |
 | Reporte de calidad (E1–E4), verificación y reconciliaciones, indicadores | Sí | Sí | Sí |
-| Descargar rankings (entregable 2) y desglose por subactividad (entregable 3) | Sí | Sí | Sí |
-| Descargar calidad (entregable 4), exclusiones y movimientos (entregable 5) | No | Sí | Sí |
+| Descargar rankings (entregable 2), desglose por subactividad (entregable 3), calidad (entregable 4) y filas excluidas | Sí | Sí | Sí |
+| Descargar movimientos (entregable 5) y reporte personalizado | No | Sí | Sí |
 | Comparar entidades y períodos (`/comparar`) | No | Sí | Sí |
 | Detalle de préstamos (`/rankings/detalle`) | No | Sí | Sí |
 | Reportes personalizados y versión imprimible | No | Sí | Sí |
@@ -212,8 +221,8 @@ Todas las descargas son CSV UTF-8, coma como separador, fin de línea CRLF, mont
 | :--- | :--- | :---: | :--- |
 | 2. Rankings por período | `/api/exportar/rankings` | Público | `Fecha, Ranking, Posicion, Codigo_Banco, Banco, Saldo_Actividad, Total_Cartera_Local_Valida, Ponderacion_Pct, Operaciones_Validas` |
 | 3. Desglose por subactividad | `/api/exportar/subactividades` | Público | `Fecha, Ranking, Subactividad, Codigo_Banco, Saldo` |
-| 4. Calidad de datos | `/api/exportar/calidad` | Analista | `Fecha, Filas_Leidas, E1_Duplicados, E2_Destino_Extranjero, E3_Saldo_No_Positivo, E4_Actividad_No_Catalogada, Universo_Local_Valido, Saldo_Universo_Local_Valido, Cuadre_Cascada, Indep_Duplicados, Indep_Destino_Extranjero, Indep_Saldo_No_Positivo, Indep_Actividad_No_Catalogada, Alertas_Integridad` |
-| (apoyo del 4) Filas excluidas | `/api/exportar/exclusiones` | Analista | `Fecha, Archivo, Fila_Archivo, Numero_Prestamo, Filtro, Codigo_Banco, Destino, Saldo, Tipo_Actividad` |
+| 4. Calidad de datos | `/api/exportar/calidad` | Público | `Fecha, Filas_Leidas, E1_Duplicados, E2_Destino_Extranjero, E3_Saldo_No_Positivo, E4_Actividad_No_Catalogada, Universo_Local_Valido, Saldo_Universo_Local_Valido, Cuadre_Cascada, Indep_Duplicados, Indep_Destino_Extranjero, Indep_Saldo_No_Positivo, Indep_Actividad_No_Catalogada, Alertas_Integridad` |
+| (apoyo del 4) Filas excluidas | `/api/exportar/exclusiones` | Público | `Fecha, Archivo, Fila_Archivo, Numero_Prestamo, Filtro, Codigo_Banco, Destino, Saldo, Tipo_Actividad` |
 | 5. Movimientos de posición | `/api/exportar/movimientos` (`anterior`, `actual`, `ranking`) | Analista | `Fecha_Anterior, Fecha_Actual, Ranking, Codigo_Banco, Banco, Posicion_Anterior, Posicion_Actual, Cambio_Posicion, Saldo_Anterior, Saldo_Actual, Var_Saldo, Var_Saldo_Pct, Cambio_De_Lider`; con `extendido=1` agrega `Significativo, Motivo` |
 | Reporte personalizado | `/api/exportar/personalizado` (`fechas`, `rankings`, `bancos`, `columnas`) | Analista | Las columnas del entregable 2 que se elijan |
 
@@ -223,7 +232,10 @@ Los conteos `Indep_*` son conteos independientes de cada regla sobre todas las f
 
 ```bash
 npm test      # node --test tests/
+npm run e2e   # guion de demostración de punta a punta (evidencia en tests/resultados/prueba-e2e.txt)
 ```
+
+Además, con la aplicación conectada a Supabase se descargaron las cinco exportaciones completas y se compararon con la clave de control: 216 filas de rankings, 792 de subactividades, 3 de calidad, 3,284 exclusiones y 216 movimientos, todas idénticas.
 
 Las pruebas cargan los 3 cortes en PGlite en memoria y comparan, campo por campo y como texto exacto, contra `tests/clave_de_control/*.csv`:
 
@@ -268,6 +280,6 @@ En cada período se cumple `filas leídas = E1 + E2 + E3 + E4 + universo válido
 - Con Supabase, si no se define `DATABASE_CA_FILE` la conexión se cifra pero no se verifica el certificado del servidor.
 - Un corte se identifica por su columna `Fecha`; para sustituir un período ya cargado hay que pedirlo expresamente (opción "reemplazar" o `--reemplazar`).
 - `recalcular()` vuelve a calcular todos los períodos en cada carga o borrado de un corte; con cortes mucho más grandes que los del reto el tiempo de carga crecería.
-- Las descargas de calidad, exclusiones y movimientos requieren perfil Analista o superior (ver sección 5).
+- Las descargas de movimientos y el reporte personalizado requieren perfil Analista o superior; las demás son públicas (ver sección 5).
 
 **Uso de IA.** La inteligencia artificial no interviene en el cálculo de los rankings, en la clasificación ni en las explicaciones de la aplicación. Todo es SQL determinista y plantillas de texto fijas, reproducible con los mismos datos.
