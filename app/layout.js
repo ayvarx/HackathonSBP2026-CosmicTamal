@@ -4,6 +4,7 @@ import "./globals.css";
 import Cabecera from "@/components/Cabecera";
 import FranjaDatos from "@/components/FranjaDatos";
 import PiePagina from "@/components/PiePagina";
+import AsistenteFlotante from "@/components/AsistenteFlotante";
 import { headers } from "next/headers";
 import { obtenerPerfil } from "@/lib/auth";
 import { fechasDisponibles } from "@/lib/consultas-rankings";
@@ -56,6 +57,8 @@ export default async function RootLayout({ children }) {
           {children}
         </main>
         {!esAcceso && <PiePagina perfil={perfil} />}
+        {/* Asistente de IA: solo si el servidor tiene clave (la clave nunca llega al cliente). */}
+        {!esAcceso && Boolean(process.env.ANTHROPIC_API_KEY) && <AsistenteFlotante perfil={perfil} />}
       </body>
     </html>
   );

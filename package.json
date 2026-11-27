@@ -17,6 +17,7 @@
     "usuario": "node scripts/crear-usuario.mjs"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.14.0",
     "@electric-sql/pglite": "^0.6.0",
     "csv-parse": "^7.0.3",
     "csv-stringify": "^6.9.0",
