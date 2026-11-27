@@ -1,4 +1,4 @@
-Prueba de punta a punta — 2026-11-27T19:30:53.053Z — next build + next start en http://localhost:3120
+Prueba de punta a punta — 2026-11-27T19:39:57.291Z — next build + next start en http://localhost:3120
 Compilando (next build)…
 
 == Fase 0: base vacía (sin cortes cargados) ==
@@ -25,8 +25,8 @@ Compilando (next build)…
 
 == Fase 1: base limpia y siembra de julio y agosto (scripts/seed.mjs) ==
   Base: pglite (.pgdata-e2e)
-  ✓ AT03_sintetico_202607.csv: período 20260731, 25000 filas, universo válido 24004 (E1 20, E2 886, E3 48, E4 42) en 2341 ms
-  ✓ AT03_sintetico_202608.csv: período 20260831, 27500 filas, universo válido 26410 (E1 25, E2 967, E3 52, E4 46) en 3254 ms
+  ✓ AT03_sintetico_202607.csv: período 20260731, 25000 filas, universo válido 24004 (E1 20, E2 886, E3 48, E4 42) en 2309 ms
+  ✓ AT03_sintetico_202608.csv: período 20260831, 27500 filas, universo válido 26410 (E1 25, E2 967, E3 52, E4 46) en 3087 ms
   ✓ [siembra] julio y agosto cargados
 
 == Fase 2: perfil Público ==
@@ -61,12 +61,12 @@ Compilando (next build)…
   ✓ [admin] archivo inválido fecha_invalida.csv se rechaza con mensaje claro — HTTP 422: archivo rechazado (1 error(es)). Fecha inválida en la fila 3: "31/07/2026". Debe tener formato AAAAMMDD (8 dígitos, por ejemplo 20260930) y ser una fecha real. | Fecha inválida en la fila 3: "31/07/2026". Debe tener formato AAAAMMDD (8 dígitos, por ejemplo 20260930) y ser una fecha real.
   ✓ [admin] los archivos inválidos no cambiaron los datos (siguen 2 períodos) — 2 cortes
   ✓ [admin] validar el corte de septiembre sin comprimir (11 MB) no escribe datos — HTTP 200: 30000 filas, período 20260930
-  ✓ [admin] carga AT03_sintetico_202609.csv — HTTP 200 en 4084 ms; períodos 20260930
+  ✓ [admin] carga AT03_sintetico_202609.csv — HTTP 200 en 3997 ms; períodos 20260930
   ✓ [admin] el resumen "Qué cambió" compara contra agosto — anterior=20260831; 72 movimientos, 6 significativos
   ✓ [admin] los movimientos significativos traen explicación automática — Banco Progreso (109) sube 2 posiciones en Agropecuario: pasa del 6.º al 4.º lugar. Su saldo aumenta 4,861,343.59 (+19.19 %): de 25,329,968.20 a 30,191,311.79. Desglose de la variación: 40 préstamos nuevos aportan +7,723,949.55; 23 préstamos que salieron (vencieron o dejaron de ser válidos) restan 2,601,369.11; los 188 préstamos que continúan varían -261,236.85 (amortización). Factor principal: la entrada de préstamos nuevos. Se marca como significativo por: Sube 2 posiciones.
   ✓ [admin] aparece el período 20260930 — 20260930, 20260831, 20260731
   ✓ [admin] administrador abre /admin/resumen?periodo=20260930 — HTTP 200
-  ✓ [admin] volver a subir el mismo período se rechaza (409) con mensaje — HTTP 409: El período ya está cargado: 20260930 (archivo AT03_sintetico_202609.csv, cargado 2026-11-27 19:31). Si quiere sustituirlo, vuelva a cargarlo marcando la opción "reemplazar".
+  ✓ [admin] volver a subir el mismo período se rechaza (409) con mensaje — HTTP 409: El período ya está cargado: 20260930 (archivo AT03_sintetico_202609.csv, cargado 2026-11-27 19:40). Si quiere sustituirlo, vuelva a cargarlo marcando la opción "reemplazar".
   ✓ [admin] la bitácora registra la carga
   ✓ [admin] publico abre / — HTTP 200
 
@@ -88,4 +88,4 @@ Compilando (next build)…
   ✓ [exactitud] exportación exclusiones (perfil publico) = control_exclusiones.csv — 3284 filas idénticas (períodos 20260731, 20260831, 20260930)
   ✓ [exactitud] exportación movimientos (perfil analista) = control_movimientos.csv — 216 filas idénticas (períodos 20260831, 20260930)
 
-Resultado: 72 de 72 comprobaciones correctas en 29 s.
+Resultado: 72 de 72 comprobaciones correctas en 30 s.
