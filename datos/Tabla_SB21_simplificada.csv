@@ -1,0 +1,7 @@
+﻿Codigo,Descripcion,Uso_en_reto
+01,Prestamo a plazo,General
+02,Linea de credito,General
+03,Prestamo de auto,Automovil
+04,Sobregiro contractual,General
+05,Sobregiro ocasional,General
+07,Tarjeta de credito,Separar tarjeta en bonus consumo

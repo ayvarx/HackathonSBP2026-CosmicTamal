@@ -1,0 +1,23 @@
+﻿Codigo_CINU,Descripcion,Macroactividad_Reto,Subactividad_Reto,Codigo_SB08_Referencia
+L.68.681.6810.00000,Compra de vivienda propia,HIPOTECARIO,Vivienda propia,2101
+L.68.682.6821.00000,Compra de local comercial,HIPOTECARIO,Local comercial,1430
+F.41.410.4100.41001,Construccion de vivienda,CONSTRUCCION,Vivienda interino,1601
+F.41.410.4100.41002,Construccion de local comercial,CONSTRUCCION,Local comercial interino,1602
+F.42.421.4210.00000,Obras de infraestructura,CONSTRUCCION,Infraestructura,1603
+F.43.439.4390.00000,Otras construcciones especializadas,CONSTRUCCION,Otras construcciones,1604
+C.10.101.1010.00000,Procesamiento y conservacion de carne,INDUSTRIA,"Alimentos, bebidas y tabaco",1501
+C.14.141.1411.00000,Fabricacion de prendas de vestir,INDUSTRIA,Vestidos y zapatos,1502
+C.24.241.2410.00000,Fabricacion de hierro y acero,INDUSTRIA,Acero y materiales de construccion,1503
+C.19.192.1920.00000,Refinacion de petroleo,INDUSTRIA,Petroleo y derivados,1504
+D.35.351.3510.00000,Generacion y distribucion electrica,INDUSTRIA,Produccion y generacion electrica,1505
+C.32.329.3290.00000,Otras industrias manufactureras,INDUSTRIA,Otras industrias manufactureras,1506
+A.01.011.0112.00000,Cultivo de arroz,AGROPECUARIO,Agricultura,1011
+A.01.014.0141.00000,Cria de ganado vacuno,AGROPECUARIO,Ganaderia,1101
+A.03.031.0311.00000,Pesca maritima,AGROPECUARIO,Pesca,1201
+A.02.022.0220.00000,Extraccion de madera,AGROPECUARIO,Forestal,1901
+G.46.469.4690.46900,Comercio al por mayor no especializado,COMERCIO,Mayorista,1413
+G.47.471.4719.47191,Comercio al por menor,COMERCIO,Minorista,1420
+N.77.771.7710.77101,Alquiler y servicios empresariales,COMERCIO,Servicios,1899
+K.64.649.6492.64921,Credito personal,CONSUMO,Credito personal,2103
+K.64.649.6492.64922,Financiamiento de automovil,CONSUMO,Automovil,2102
+K.64.649.6499.64991,Consumo mediante tarjeta,CONSUMO,Tarjeta,2103

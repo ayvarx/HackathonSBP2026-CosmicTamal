@@ -1,0 +1,62 @@
+﻿Campo,Descripcion_reto,Tipo,Regla_clave
+Fecha,Fecha de corte mensual del reporte regulatorio en formato AAAAMMDD,Fecha (AAAAMMDD),Identifica el periodo evaluado (20260731 / 20260831 / 20260930). Usar este campo (no el nombre del archivo) para identificar el periodo
+Codigo_Banco,Codigo identificador de la entidad bancaria de licencia general (101 a 112),Codigo (Texto),Cruzar con Bancos_ficticios.Codigo_Banco; el nombre a reportar es Bancos_ficticios.Nombre_Ficticio
+Codigo_Subsidiaria,Codigo de subsidiaria bancaria (NA cuando opera directo en casa matriz),Codigo (Texto),Siempre NA en el reto: los datos son individuales por banco (no consolidados). No interviene en el ranking
+Preferencial_No_Preferencial,Indicador de tramo de tasa preferencial (0001 preferencial / 0002 no preferencial),Codigo (Texto),Contexto estructural AT03; no interviene en el ranking
+Aplica_FECI,Indicador de retencion FECI (SI / NO / NA),Codigo (Texto),Contexto estructural AT03; no interviene en el ranking
+Tipo_Credito,Modalidad general del credito (001 corporativo/comercial; 002 consumo/personal),Codigo (Texto),Contexto estructural AT03; no usar para clasificar actividad
+Facilidad_Crediticia,Codigo del instrumento o facilidad crediticia otorgada (dos digitos con cero a la izquierda),Codigo (Texto),Cruzar con Tabla_SB21_simplificada.Codigo. Unico uso en el calculo: CINU de Credito personal con Facilidad 07 se reclasifica a Tarjeta (ver Seccion 6 de las indicaciones)
+Clasificacion_Prestamo,Categoria regulatoria de riesgo (01 Normal; 02 Mencion especial; 03 Subnormal; 04 Dudoso; 05 Irrecuperable),Codigo (Texto),No interviene en calculo de rankings (SB19 no requerida). Es coherente con Dias_Mora
+Destino,Destino geografico de la operacion crediticia (L = Local; E = Extranjero),Codigo (Texto),Regla obligatoria: conservar solo Destino = L (mayuscula exacta); excluir cualquier otro valor
+Codigo_Region,Codigo de provincia/region local (001-010) o pais extranjero ISO numerico (170 / 188 / 724 / 840),Codigo (Texto),Contexto geografico; la exclusion oficial se rige solo por Destino
+ID_Cliente,Identificador unico sintetico del deudor (formato CLIxxxxxxxx),Texto,No usar datos del cliente para clasificar actividad economica
+Tamano_Empresa,Tamano del deudor (01 a 05 persona juridica de menor a mayor tamano; 06 persona natural),Codigo (Texto),Contexto estructural AT03; no interviene en el ranking
+Genero,Genero de la persona natural (01 / 02) o NA para persona juridica,Codigo (Texto),Contexto estructural AT03; NA si y solo si Tamano_Empresa <> 06
+Numero_Prestamo,Identificador unico de la operacion crediticia (formato BBB-CR-NNNNNNNNN),Texto,Llave de deduplicacion por periodo: conservar la primera ocurrencia (orden de filas del archivo). Tambien es la llave para seguir un prestamo entre meses
+Nombre_Cliente,Nombre o razon social sintetica del cliente,Texto,Prohibido usar texto libre o nombres para clasificar actividad
+ID_Grupo_Economico,Identificador de grupo economico vinculado o NA,Texto,Siempre NA en el reto; no interviene en el ranking
+Tipo_Relacion,Codigo de relacion con partes vinculadas o NA,Codigo (Texto),Siempre NA en el reto; no interviene en el ranking
+Tipo_Actividad,Codigo de actividad economica CINU / SB109 a 5 niveles (formato X.99.999.9999.99999),Codigo (Texto),Cruzar por igualdad exacta con Catalogo_CINU_SB109_reto.Codigo_CINU; excluir y reportar si no existe en catalogo
+Tasa_Interes,Tasa de interes nominal anual pactada (%),Numerico (Decimal),Contexto financiero; util para analisis exploratorio
+Valor_Inicial,Monto original desembolsado (o limite aprobado en lineas / sobregiros / tarjetas),Numerico (Decimal),Contexto financiero; no sustituir Saldo por Valor_Inicial. Siempre >= Saldo
+Intereses_por_Cobrar,Intereses devengados pendientes de cobro al corte,Numerico (Decimal),Contexto financiero; no sumar al Saldo de capital
+Fecha_Inicial_Prestamo,Fecha de otorgamiento de la operacion (AAAAMMDD),Fecha (AAAAMMDD),Siempre <= Fecha de corte
+Fecha_Vencimiento,Fecha contractual de vencimiento final (AAAAMMDD),Fecha (AAAAMMDD),Siempre > Fecha de corte. Un prestamo que no aparece en el corte siguiente vencio en ese mes
+Fecha_Refinanciamiento,Fecha de ultimo refinanciamiento (AAAAMMDD) o NA,Fecha/Texto,Siempre NA en el reto; no interviene en el ranking
+Fecha_Restructuracion,Fecha de ultima reestructuracion (AAAAMMDD) o NA,Fecha/Texto,Siempre NA en el reto; no interviene en el ranking
+Numero_Facilidad_Anterior,Numero de operacion previa en caso de refinanciamiento o NA,Texto,Siempre NA en el reto; no interviene en el ranking
+Primera_Garantia,Codigo del tipo de garantia principal (0101 / 0201 / 0301 / 0701) o NA,Codigo (Texto),Contexto estructural AT03; no interviene en el ranking
+Valor_Primera_Garantia,Valor de avaluo o cobertura de la garantia principal,Numerico (Decimal),Contexto financiero AT03; no interviene en el ranking
+Segunda_Garantia,Codigo de garantia secundaria o NA,Codigo (Texto),Siempre NA en el reto; no interviene en el ranking
+Valor_Segunda_Garantia,Valor de la garantia secundaria (0 si no aplica),Numerico (Decimal),Contexto financiero AT03; no interviene en el ranking
+Provision,Provision regulatoria constituida sobre la operacion,Numerico (Decimal),Contexto de riesgo; no descontar del Saldo bruto
+Provision_NIIF,Provision por perdida crediticia esperada bajo NIIF 9,Numerico (Decimal),Contexto de riesgo; no descontar del Saldo bruto
+Provision_Complementaria_no_NIIF,Provision dinamica o regulatoria complementaria,Numerico (Decimal),Contexto de riesgo; no descontar del Saldo bruto
+Saldo,Saldo insoluto de capital a la fecha de corte (unidad monetaria homogenea; 2 decimales),Numerico (Decimal),Metrica oficial de agregacion; excluir registros con Saldo <= 0. Si Saldo > 0: Saldo = suma de los 9 Monto_por_Vencer_* + los 7 Monto_Vencido_*
+Cantidad_Cuotas_por_Vencer,Numero de cuotas de capital pendientes hasta el vencimiento,Numerico (Entero),Contexto de perfil de pago (0 cuando Saldo <= 0)
+Monto_por_Vencer_30_dias,Capital por vencer en los proximos 0 a 30 dias,Numerico (Decimal),Desglose temporal del saldo por vencer (segun dias desde la Fecha de corte)
+Monto_por_Vencer_60_dias,Capital por vencer de 31 a 60 dias,Numerico (Decimal),Desglose temporal del saldo por vencer
+Monto_por_Vencer_90_dias,Capital por vencer de 61 a 90 dias,Numerico (Decimal),Desglose temporal del saldo por vencer
+Monto_por_Vencer_120_dias,Capital por vencer de 91 a 120 dias,Numerico (Decimal),Desglose temporal del saldo por vencer
+Monto_por_Vencer_180_dias,Capital por vencer de 121 a 180 dias,Numerico (Decimal),Desglose temporal del saldo por vencer
+Monto_por_Vencer_1_ano,Capital por vencer de 181 a 365 dias,Numerico (Decimal),Desglose temporal del saldo por vencer
+Monto_por_Vencer_1_a_5_anos,Capital por vencer de 366 dias hasta 5 anos,Numerico (Decimal),Desglose temporal del saldo por vencer
+Monto_por_Vencer_5_a_10_anos,Capital por vencer de mas de 5 anos hasta 10 anos,Numerico (Decimal),Desglose temporal del saldo por vencer
+Monto_por_Vencer_mas_10_anos,Capital por vencer a mas de 10 anos,Numerico (Decimal),Desglose temporal del saldo por vencer. Ningun tramo supera el plazo remanente hasta Fecha_Vencimiento
+Cantidad_Cuotas_Vencidas,Numero de cuotas vencidas e impagas al corte,Numerico (Entero),Contexto de morosidad (0 si Dias_Mora = 0)
+Monto_Vencido_30_dias,Capital vencido con 1 a 30 dias de atraso,Numerico (Decimal),Desglose temporal del saldo vencido (segun antiguedad de cada cuota impaga)
+Monto_Vencido_60_dias,Capital vencido de 31 a 60 dias,Numerico (Decimal),Desglose temporal del saldo vencido
+Monto_Vencido_90_dias,Capital vencido de 61 a 90 dias,Numerico (Decimal),Desglose temporal del saldo vencido
+Monto_Vencido_120_dias,Capital vencido de 91 a 120 dias,Numerico (Decimal),Desglose temporal del saldo vencido
+Monto_Vencido_180_dias,Capital vencido de 121 a 180 dias,Numerico (Decimal),Desglose temporal del saldo vencido
+Monto_Vencido_1_ano,Capital vencido de 181 a 365 dias,Numerico (Decimal),Desglose temporal del saldo vencido
+Monto_Vencido_mas_1_ano,Capital vencido a mas de 1 ano,Numerico (Decimal),Desglose temporal del saldo vencido. Ningun tramo supera Dias_Mora
+Fecha_Proximo_Pago_Capital,Fecha programada del siguiente pago de capital (AAAAMMDD),Fecha (AAAAMMDD),Entre la Fecha de corte (exclusive) y Fecha_Vencimiento (inclusive)
+Periodicidad_Pago_Capital,Frecuencia de pago de capital (01 mensual; 02 trimestral; 03 semestral; 04 anual),Codigo (Texto),Contexto operativo del prestamo (consumo e hipotecario siempre 01)
+Fecha_Proximo_Pago_Interes,Fecha programada del siguiente cobro de intereses (AAAAMMDD),Fecha (AAAAMMDD),Contexto operativo del prestamo
+Periodicidad_Pago_Intereses,Frecuencia de cobro de intereses (01 mensual; 02 trimestral; 03 semestral; 04 anual),Codigo (Texto),Contexto operativo del prestamo
+Dias_Mora,Cantidad de dias de atraso al corte (0 si esta al dia),Numerico (Entero),Contexto de calidad de cartera; evoluciona de forma coherente entre meses para un mismo Numero_Prestamo
+Perfil_Vencimiento,Indicador de estado de vencimiento (01 al dia; 02 con morosidad),Codigo (Texto),02 si y solo si Dias_Mora > 0
+Monto_Cuota_Pagar,Valor estimado de la cuota periodica (capital + interes del periodo),Numerico (Decimal),Contexto operativo del prestamo
+Metodologia_Calculo_Intereses,Base de calculo de intereses (01 360 dias; 02 365 dias),Codigo (Texto),Contexto operativo del prestamo
+Categoria_Cambio,Categoria de riesgo cambiario o NA en moneda local homogenea,Codigo (Texto),Siempre NA en el reto; no interviene en el ranking

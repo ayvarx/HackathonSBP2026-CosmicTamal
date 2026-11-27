@@ -1,0 +1,4 @@
+Fecha,Filas_Leidas,E1_Duplicados,E2_Destino_Extranjero,E3_Saldo_No_Positivo,E4_Actividad_No_Catalogada,Universo_Local_Valido,Saldo_Universo_Local_Valido,Cuadre_Cascada,Indep_Duplicados,Indep_Destino_Extranjero,Indep_Saldo_No_Positivo,Indep_Actividad_No_Catalogada,Alertas_Integridad
+20260731,25000,20,886,48,42,24004,4342391663.85,SI,20,888,52,44,0
+20260831,27500,25,967,52,46,26410,4733510382.80,SI,25,969,57,48,0
+20260930,30000,30,1058,58,52,28802,5152103850.27,SI,30,1060,63,55,0
