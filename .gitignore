@@ -1,3 +1,19 @@
+# Dependencias y builds
+node_modules/
+dist/
+build/
+
+# Datos de la SBP (no subir al repositorio)
+datos/
+
+# Variables de entorno y secretos (R5)
+.env
+.env.*
+*.key
+
+# Python / otros
+__pycache__/
+*.pyc
 # Build and Release Folders
 bin-debug/
 bin-release/

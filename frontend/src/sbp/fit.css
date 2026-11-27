@@ -1,0 +1,44 @@
+/* Escritorio: espaciado cómodo. El panel principal no se comprime para caber en la ventana;
+   si el contenido es más alto, la página se desplaza. Cada gráfico tiene altura mínima legible. */
+@media (min-width: 1101px) {
+  .page-content { padding: 22px 30px 30px; }
+  .topbar { padding: 22px 30px 14px; }
+  .persistent-disclaimer { margin: 0 30px; }
+
+  .dash { gap: 18px; }
+  .dash-head { margin-bottom: 2px; }
+  .kpi-row { gap: 14px; }
+  .kpi-card { padding: 18px 20px; gap: 10px; }
+  .kpi-value { font-size: 26px; }
+  .spark { height: 36px; }
+
+  .dash-grid { gap: 16px; }
+  .dash-panel { padding: 20px 22px; gap: 14px; min-width: 0; }
+  .chart-h { height: 260px; }
+
+  /* Donut: tamaño suficiente para que el total central quepa sin tocar el anillo. */
+  .donut-wrap { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 22px; }
+  .donut { height: 260px; }
+  .donut-center strong { font-size: 13px; }
+  .donut-center small { font-size: 10px; }
+  .legend { gap: 10px; }
+  .legend li { font-size: 13px; grid-template-columns: 11px 1fr auto; gap: 10px; }
+  .sw { width: 11px; height: 11px; }
+
+  .quality-list { gap: 16px; }
+  .quality-list li { gap: 7px; }
+  .q-head { font-size: 13px; }
+  .q-bar { height: 8px; }
+  .q-total { padding-top: 12px; font-size: 13px; }
+
+  .leaders { gap: 12px; }
+  .leader { padding: 16px; gap: 6px; min-height: 120px; }
+  .leader-name { font-size: 11px; }
+  .leader strong { font-size: 15px; }
+  .leader small { font-size: 13px; }
+
+  .recon { gap: 10px; }
+  .recon li { padding: 12px 14px; font-size: 13px; }
+
+  .dash-foot { font-size: 11px; margin: 4px 0 0; }
+}

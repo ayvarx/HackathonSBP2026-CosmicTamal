@@ -1,0 +1,79 @@
+/* Barra lateral: secciones con icono, título de grupo y estado activo claro. */
+.sidebar { background: #ffffff; border-right: 1px solid #D4DEF0; padding: 24px 16px 18px; }
+.brand-lockup { padding: 0 6px 22px; }
+.profile-field { padding: 0 6px 18px; }
+.profile-field > span { color: #4b5563; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+.profile-field select { background: #E6EDF8; border-color: #B9C8E6; font-weight: 600; }
+
+.nav-titulo { margin: 8px 8px 10px; font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: .08em; }
+.main-nav { display: grid; gap: 4px; }
+.nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 12px; font-size: 14px; color: #1f2937; background: transparent; border: 0; cursor: pointer; text-align: left; }
+.nav-item:hover { background: #f0f7f3; }
+.nav-icono {
+  width: 30px; height: 30px; display: inline-grid; place-items: center; flex: 0 0 30px;
+  background: #E6EDF8; color: #0F2D69; font-size: 15px; font-weight: 700;
+}
+.nav-texto { font-weight: 600; }
+.nav-item.is-active { background: #1D3E7F; color: #ffffff; box-shadow: none; }
+.nav-item.is-active .nav-icono { background: #ffffff; color: #0F2D69; }
+.nav-item.is-active .nav-texto { font-weight: 700; }
+
+.sidebar-foot {
+  margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 14px 12px;
+  background: #E6EDF8; border: 1px solid #D4DEF0; font-size: 12px; color: #374151;
+}
+.sidebar-foot strong { display: block; font-size: 13px; color: #111827; }
+.sidebar-foot small { color: #6b7280; }
+.connection-dot { width: 9px; height: 9px; flex: 0 0 9px; background: #d97706; }
+.connection-dot.online { background: #1D3E7F; box-shadow: 0 0 0 3px #E6EDF8; }
+
+/* Selector de período en la parte baja de la barra lateral, encima del estado de la conexión. */
+.sidebar-periodo { margin-top: auto; padding: 0 6px 14px; }
+.sidebar-periodo > label { gap: 6px; }
+.sidebar-periodo > label > span { color: #4b5563; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+.sidebar-periodo select { width: 100%; background: #E6EDF8; border-color: #B9C8E6; font-weight: 600; }
+.sidebar-foot { margin-top: 0; }
+
+/* Selector de período encima del contenido, en la misma línea a la derecha. */
+.periodo-barra { display: flex; justify-content: flex-end; margin-bottom: 16px; }
+.periodo-barra > label { flex-direction: row; align-items: center; gap: 10px; }
+.periodo-barra > label > span { color: #4b5563; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+.periodo-barra select { min-width: 200px; background: #ffffff; border-color: #B9C8E6; font-weight: 600; }
+
+/* Selector de período junto al menú de actividades (Rankings y portada de visitante). */
+.fila-chips { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.fila-chips > .chips-visitante, .fila-chips > .chips.grande { flex: 1 1 auto; min-width: 0; }
+.fila-chips > label.field, .saltos-selector { display: flex; align-items: center; }
+.fila-chips > label.field { flex-direction: row; align-items: center; gap: 10px; flex: 0 0 auto; }
+.fila-chips > label.field > span { color: #4b5563; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+.fila-chips > label.field select { min-width: 190px; background: #ffffff; border-color: #B9C8E6; font-weight: 600; }
+.saltos-selector { margin-left: auto; }
+.saltos-selector > label.field { flex-direction: row; align-items: center; gap: 10px; }
+.saltos-selector > label.field > span { color: #374151; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+.saltos-selector select { min-width: 180px; background: #ffffff; border-color: #B9C8E6; font-weight: 600; }
+
+/* Fila de sección: título a la izquierda y período de corte a la derecha, en cada pantalla sin menú. */
+.periodo-barra { justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.periodo-titulo { font-size: 18px; font-weight: 800; color: #111827; letter-spacing: -0.01em; }
+
+/* Barra lateral plegable: se reduce a una franja de iconos. */
+.barra-toggle {
+  align-self: flex-end; width: 30px; height: 30px; margin: 0 0 12px; display: grid; place-items: center;
+  background: #ffffff; border: 1px solid #B9C8E6; color: #0F2D69; font-size: 20px; font-weight: 700; line-height: 1; cursor: pointer;
+  box-shadow: 0 3px 0 #B9C8E6, 0 5px 10px rgba(15,23,42,0.1); transition: transform .08s, box-shadow .08s;
+}
+.barra-toggle:hover { transform: translateY(-1px); }
+.barra-toggle:active { transform: translateY(3px); box-shadow: 0 0 0 #B9C8E6; }
+.app-frame { transition: grid-template-columns .2s ease; }
+.app-frame.colapsada { grid-template-columns: 84px minmax(0, 1fr); }
+.app-frame.colapsada .sidebar { padding: 20px 12px; }
+.app-frame.colapsada .brand-lockup { justify-content: center; padding: 0 0 16px; }
+.app-frame.colapsada .brand-lockup > div:not(.brand-mark),
+.app-frame.colapsada .profile-field,
+.app-frame.colapsada .nav-titulo,
+.app-frame.colapsada .nav-texto,
+.app-frame.colapsada .sidebar-foot > div { display: none; }
+.app-frame.colapsada .barra-toggle { align-self: center; }
+.app-frame.colapsada .nav-item { justify-content: center; padding: 10px 0; }
+.app-frame.colapsada .sidebar-foot { justify-content: center; padding: 10px 0; }
+@media (max-width: 700px) { .barra-toggle { display: none; } }

@@ -1,0 +1,27 @@
+/* Cajas con esquinas rectas: tarjetas, paneles, botones, campos, chips, tablas y avisos.
+   Solo se conservan redondos los indicadores de estado (puntos), que no son cajas. */
+.app-frame *:not(.connection-dot):not(.kpi-dot):not(.nav-dot):not(.connection-dot.online) {
+  border-radius: 0 !important;
+}
+
+/* Contenedores sin color de fondo: se conservan los bordes para separar cada bloque. */
+.app-frame .metric-card,
+.app-frame .metric-card::after,
+.app-frame .panel,
+.app-frame .kpi-card,
+.app-frame .dash-panel,
+.app-frame .persistent-disclaimer,
+.app-frame .notice,
+.app-frame .admin-capability,
+.app-frame .reconciliation-grid > div,
+.app-frame .recon li,
+.app-frame .leader,
+.app-frame .ranking-shortcut,
+.app-frame .period-option {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+/* Cambios de posición en Comparar: subió (verde) y bajó (rojo), legibles sobre fondo claro. */
+.sube { color: #0F2D69; font-weight: 600; }
+.baja { color: #b91c1c; font-weight: 600; }
