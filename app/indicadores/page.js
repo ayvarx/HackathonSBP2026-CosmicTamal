@@ -28,9 +28,9 @@ function Nota({ children }) {
 
 function Seccion({ id, titulo, nota, children }) {
   return (
-    <section aria-labelledby={id} className="mt-10 space-y-4">
+    <section aria-labelledby={id} className="mt-8 space-y-4">
       <div>
-        <h2 id={id}>{titulo}</h2>
+        <h2 id={id} className="m-0">{titulo}</h2>
         {nota && <Nota>{nota}</Nota>}
       </div>
       {children}
@@ -65,7 +65,7 @@ export default async function PaginaIndicadores({ searchParams }) {
       <>
         {encabezado}
         <EstadoVacio titulo="Aún no hay cortes cargados" accion={{ href: "/admin", texto: "Ir a la carga de cortes" }}>
-          Los indicadores se calculan cuando se carga al menos un corte AT03.
+          Los indicadores aparecerán cuando se cargue un corte.
         </EstadoVacio>
       </>
     );
@@ -91,7 +91,7 @@ export default async function PaginaIndicadores({ searchParams }) {
         ]}
       />
       <p className="mt-3 text-sm text-texto-suave">
-        Cartera analizada: <strong>{alcance}</strong>, corte de {formatearFecha(fecha, "mes")}. Universo local válido.
+        Cartera analizada: <strong>{alcance}</strong>, corte de {formatearFecha(fecha, "mes")}.
       </p>
 
       {!cartera ? (
@@ -101,23 +101,17 @@ export default async function PaginaIndicadores({ searchParams }) {
           </EstadoVacio>
         </div>
       ) : (
-        <>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <TarjetaIndicador titulo="Saldo de la cartera" valor={formatearMonto(cartera.saldo)} detalle={`${formatearEntero(cartera.operaciones)} operaciones válidas`} />
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <TarjetaIndicador titulo="Saldo de la cartera" valor={formatearMonto(cartera.saldo)} detalle={`${formatearEntero(cartera.operaciones)} operaciones válidas`} />
             <TarjetaIndicador titulo="Saldo con mora (> 0 días)" valor={formatearPorcentaje(cartera.mora_pct)} detalle={`Saldo: ${formatearMonto(cartera.saldo_mora)}`} />
             <TarjetaIndicador titulo="Saldo con mora mayor a 90 días" valor={formatearPorcentaje(cartera.mora_90_pct)} detalle={`Saldo: ${formatearMonto(cartera.saldo_mora_90)}`} />
             <TarjetaIndicador titulo="Tasa promedio ponderada" valor={formatearPorcentaje(cartera.tasa_ponderada)} detalle="Anual, ponderada por saldo" />
-          </div>
-          <Nota>
-            Ambos indicadores = saldo de los préstamos con días de mora (más de 0 o más de 90) ÷ saldo de la cartera.
-          </Nota>
-        </>
+        </div>
       )}
 
       <Seccion
         id="morosidad"
         titulo={`Saldo con mora por banco${ranking ? ` en ${nombreRanking(ranking)}` : ""}`}
-        nota="Saldo de los préstamos con días de mora ÷ saldo de la cartera local válida del banco."
       >
         <AlternarVista
           grafico={<BarrasMorosidad filas={porBanco} bancoElegido={banco} />}
@@ -165,7 +159,7 @@ export default async function PaginaIndicadores({ searchParams }) {
       <Seccion
         id="vencimientos"
         titulo="Escalera de vencimientos"
-        nota="Capital por tramo de plazo restante (por vencer) y de días de atraso (vencido)."
+        nota="Capital por plazo restante y por días de atraso."
       >
         {cartera ? (
           <>
@@ -186,10 +180,6 @@ export default async function PaginaIndicadores({ searchParams }) {
                 />
               }
             />
-            <p className="text-sm text-texto-suave">
-              Monto por vencer {formatearMonto(cartera.por_vencer)} + monto vencido {formatearMonto(cartera.vencido)} = saldo {formatearMonto(cartera.saldo)}.{" "}
-              Préstamos con tramos descuadrados: <strong>{formatearEntero(cartera.filas_descuadradas)}</strong>.
-            </p>
           </>
         ) : null}
         <AlternarVista
@@ -212,15 +202,12 @@ export default async function PaginaIndicadores({ searchParams }) {
             />
           }
         />
-        <p className="text-sm text-texto-suave">
-          Bloques: por vencer hasta 1 año (tramos de 30 días a 1 año), de 1 a 5 años, a más de 5 años (5 a 10 y más de 10), vencido hasta 90 días y vencido a más de 90 días.
-        </p>
       </Seccion>
 
       <Seccion
         id="concentracion"
         titulo="Concentración del mercado por ranking"
-        nota="HHI = suma de las participaciones al cuadrado (en %): menos de 1,500 baja, 1,500 a 2,500 moderada, más de 2,500 alta."
+        nota="HHI: menos de 1,500 baja, de 1,500 a 2,500 moderada, más de 2,500 alta."
       >
         <TablaOrdenable
           titulo={`HHI y participación de los 3 mayores · ${formatearFecha(fecha, "mes")}`}
@@ -259,7 +246,6 @@ export default async function PaginaIndicadores({ searchParams }) {
       <Seccion
         id="concentracion-banco"
         titulo="Concentración de la cartera de cada banco"
-        nota="HHI de la cartera = suma de los pesos de sus 6 actividades al cuadrado (en %); 10,000 es todo en una sola actividad."
       >
         <TablaOrdenable
           titulo={`Concentración por actividad de cada banco · ${formatearFecha(fecha, "mes")}`}

@@ -102,15 +102,16 @@ export default function FormularioCarga({ periodosCargados = [] }) {
 
   return (
     <form
-      className="tarjeta flex flex-col gap-4"
+      className="tarjeta flex flex-col gap-3"
       onSubmit={(evento) => {
         evento.preventDefault();
         enviar(evento.nativeEvent.submitter?.value === "validar" ? "validar" : "cargar");
       }}
     >
-      <div>
+      <div className="flex flex-col gap-3 md:flex-row md:items-end">
+      <div className="min-w-0 flex-1">
         <label className="etiqueta-campo" htmlFor="archivo-corte">
-          Archivo AT03 (CSV UTF-8 separado por comas, 61 columnas)
+          Archivo AT03 (CSV)
         </label>
         <input
           id="archivo-corte"
@@ -123,23 +124,25 @@ export default function FormularioCarga({ periodosCargados = [] }) {
             setEstado({ tipo: "inicial" });
           }}
         />
-        <p className="mt-1 text-xs text-texto-tenue">
-          CSV AT03 de 61 columnas; el período se toma de la columna Fecha.
-        </p>
+      </div>
+      <div className="flex flex-wrap gap-2 md:justify-end">
+        <button type="submit" value="cargar" className="boton" disabled={procesando || !archivo}>
+          Validar, cargar y recalcular
+        </button>
+        <button type="submit" value="validar" className="boton boton-secundario" disabled={procesando || !archivo}>
+          Solo validar
+        </button>
+      </div>
       </div>
 
-      <label className="flex items-start gap-2 text-sm">
+      <label className="flex items-center gap-2 text-sm">
         <input
           type="checkbox"
-          className="mt-1"
           checked={reemplazar}
           disabled={procesando}
           onChange={(evento) => setReemplazar(evento.target.checked)}
         />
-        <span>
-          <span className="font-semibold">Reemplazar el período si ya está cargado.</span>{" "}
-          Borra las filas anteriores de ese período, guarda las nuevas y recalcula todo.
-        </span>
+        <span>Reemplazar el período si ya está cargado</span>
       </label>
 
       {posibleRepetido && !reemplazar && (
@@ -149,22 +152,11 @@ export default function FormularioCarga({ periodosCargados = [] }) {
         </p>
       )}
 
-      <div className="flex flex-wrap gap-2">
-        <button type="submit" value="cargar" className="boton" disabled={procesando || !archivo}>
-          Validar, cargar y recalcular
-        </button>
-        <button type="submit" value="validar" className="boton boton-secundario" disabled={procesando || !archivo}>
-          Solo validar (no guarda nada)
-        </button>
-      </div>
-
       <div aria-live="polite">
         {procesando && (
           <p className="rounded-tarjeta border border-borde bg-superficie-alt px-4 py-3 text-sm">
             <span className="font-semibold">Procesando «{archivo?.name}»…</span>{" "}
-            {estado.modo === "validar"
-              ? "Revisando columnas, fechas, saldos y códigos."
-              : "Validando, guardando las filas y recalculando los rankings. Puede tardar unos segundos."}
+            {estado.modo === "validar" ? "Validando el archivo." : "Puede tardar unos segundos."}
           </p>
         )}
 

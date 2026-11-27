@@ -10,13 +10,12 @@
 //   barras     [{ codigo, etiqueta, saldo (texto), posicion, ponderacion (texto) }] en orden de posición.
 //   resaltado  Código del banco seleccionado (o "").
 //   rutaBase   URL de la pantalla con los filtros actuales SIN banco, p. ej. "/rankings?periodo=...&ranking=...".
-//   titulo, descripcion  Textos del gráfico.
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Grafico, { COLORES_GRAFICO, COLOR_RESALTADO } from "@/components/Grafico";
 import { aNumeroParaGrafico, formatearMonto, formatearPorcentaje } from "@/lib/formato";
 
-export default function GraficoRanking({ barras, resaltado, rutaBase, titulo, descripcion }) {
+export default function GraficoRanking({ barras, resaltado, rutaBase }) {
   const router = useRouter();
   const [pendiente, iniciarTransicion] = useTransition();
 
@@ -26,6 +25,7 @@ export default function GraficoRanking({ barras, resaltado, rutaBase, titulo, de
     yAxis: { type: "category", inverse: true, data: barras.map((b) => `${b.posicion}. ${b.etiqueta}`) },
     tooltip: {
       trigger: "item",
+      confine: true,
       // Se arma el texto con la cifra exacta (no con el Number de la barra).
       formatter: (p) =>
         `<strong>${p.data.etiqueta}</strong><br/>Posición ${p.data.posicion}<br/>` +
@@ -66,14 +66,12 @@ export default function GraficoRanking({ barras, resaltado, rutaBase, titulo, de
     <div>
       <Grafico
         opcion={opcion}
-        titulo={titulo}
-        descripcion={descripcion}
         altura={Math.max(320, barras.length * 34)}
         formatoValor="monto"
         eventos={eventos}
       />
       <p className="mt-1 text-xs text-texto-tenue" aria-live="polite">
-        {pendiente ? "Actualizando…" : "Pulse una barra para ver ese banco; púlsela de nuevo para quitar la selección."}
+        {pendiente ? "Actualizando…" : "Pulse una barra para ver ese banco."}
       </p>
     </div>
   );

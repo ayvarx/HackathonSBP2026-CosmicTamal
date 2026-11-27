@@ -1,6 +1,6 @@
 // Qué cambió con este corte (/admin/resumen?periodo=AAAAMMDD) — Se abre sola al terminar una carga.
-// Muestra la cascada E1–E4 del período, los cambios de líder y la explicación automática de los
-// principales movimientos frente al período anterior; la tabla completa vive en /comparar.
+// Indicadores, cambios de líder y movimientos explicados; la cascada vive en /calidad y la
+// tabla completa de movimientos en /comparar.
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import BotonDescarga from "@/components/BotonDescarga";
@@ -9,7 +9,6 @@ import EstadoVacio from "@/components/EstadoVacio";
 import Filtros from "@/components/Filtros";
 import TarjetaIndicador from "@/components/TarjetaIndicador";
 import { exigirPerfil } from "@/lib/auth";
-import { FILTROS } from "@/lib/consultas";
 import { cortesCargados, esPeriodo, periodoMasReciente, restarMontos, resumenCorte } from "@/lib/consultas-admin";
 import { formatearEntero, formatearFecha, formatearMonto, formatearMontoCompacto } from "@/lib/formato";
 
@@ -18,21 +17,6 @@ export const metadata = { title: "Qué cambió con este corte" };
 
 // Parámetros de la URL que solo sirven para el aviso de "recién cargado".
 const PARAMETROS_AVISO = ["cargado", "archivo", "segundos", "reemplazado"];
-
-/** Fila de la tabla de la cascada: valor anterior, actual y diferencia. */
-function FilaCascada({ concepto, anterior, actual, destacada = false }) {
-  const diferencia = anterior === undefined || anterior === null ? null : actual - anterior;
-  return (
-    <tr className={destacada ? "fila-resaltada" : undefined}>
-      <th scope="row" className="text-left font-normal">{concepto}</th>
-      {anterior !== undefined && <td className="num">{anterior === null ? "—" : formatearEntero(anterior)}</td>}
-      <td className="num">{formatearEntero(actual)}</td>
-      {anterior !== undefined && (
-        <td className="num">{diferencia === null ? "—" : `${diferencia > 0 ? "+" : ""}${formatearEntero(diferencia)}`}</td>
-      )}
-    </tr>
-  );
-}
 
 export default async function PaginaResumenCorte({ searchParams }) {
   await exigirPerfil("administrador");
@@ -44,8 +28,7 @@ export default async function PaginaResumenCorte({ searchParams }) {
       <>
         <EncabezadoPagina titulo="Qué cambió con este corte" />
         <EstadoVacio titulo="Aún no hay cortes cargados" accion={{ href: "/admin", texto: "Cargar un corte" }}>
-          Cuando cargue un archivo AT03, aquí verá la cascada de exclusiones, los cambios de líder y los
-          movimientos significativos frente al período anterior.
+          Cargue un corte para ver sus cambios.
         </EstadoVacio>
       </>
     );
@@ -89,9 +72,8 @@ export default async function PaginaResumenCorte({ searchParams }) {
           <BotonDescarga
             href="/api/exportar/movimientos"
             parametros={{ anterior: resumen.anterior, actual: periodo }}
-            texto="Descargar reporte de movimientos"
+            texto="Descargar movimientos"
             variante="primario"
-            descripcion="Posiciones, variación de saldo, cambio de líder y marca de significativo."
           />
         )}
       </EncabezadoPagina>
@@ -102,10 +84,7 @@ export default async function PaginaResumenCorte({ searchParams }) {
             {parametros.reemplazado === "1" ? "Período reemplazado" : "Corte cargado"} correctamente
             {parametros.archivo ? <> desde «{parametros.archivo}»</> : null}.
           </p>
-          <p className="mt-1">
-            Se validó el archivo, se guardaron sus filas y los rankings, movimientos y reconciliaciones se recalcularon
-            automáticamente{parametros.segundos ? ` en ${parametros.segundos} s` : ""}, sin editar código.
-          </p>
+          {parametros.segundos && <p className="mt-1">Recalculado en {parametros.segundos} s.</p>}
         </div>
       )}
 
@@ -115,7 +94,7 @@ export default async function PaginaResumenCorte({ searchParams }) {
             nombre: "periodo",
             etiqueta: "Período a revisar",
             predeterminado: periodo,
-            opciones: cortes.map((x) => ({ valor: x.fecha, texto: `${formatearFecha(x.fecha)} (${x.fecha})` })),
+            opciones: cortes.map((x) => ({ valor: x.fecha, texto: formatearFecha(x.fecha) })),
           },
         ]}
         reiniciar={["anterior", ...PARAMETROS_AVISO]}
@@ -127,13 +106,14 @@ export default async function PaginaResumenCorte({ searchParams }) {
         <TarjetaIndicador
           titulo="Filas leídas"
           valor={formatearEntero(c.filas_leidas)}
-          detalle={`Excluidas en la cascada E1–E4: ${formatearEntero(c.filas_leidas - c.universo_local_valido)}`}
+          detalle={`Excluidas: ${formatearEntero(c.filas_leidas - c.universo_local_valido)}`}
+          enlace={{ href: `/calidad?periodo=${periodo}`, texto: "Ver calidad" }}
         />
         <TarjetaIndicador
           titulo="Universo local válido"
           valor={formatearEntero(c.universo_local_valido)}
           unidad="préstamos"
-          detalle={ca ? `${resumen.etiqueta_anterior}: ${formatearEntero(ca.universo_local_valido)}` : "Préstamos que pasan los cuatro filtros."}
+          detalle={ca ? `${resumen.etiqueta_anterior}: ${formatearEntero(ca.universo_local_valido)}` : undefined}
         />
         <TarjetaIndicador
           titulo="Saldo del universo válido"
@@ -145,49 +125,14 @@ export default async function PaginaResumenCorte({ searchParams }) {
           titulo="Movimientos significativos"
           valor={conAnterior ? formatearEntero(resumen.total_significativos) : "—"}
           unidad={conAnterior ? `de ${formatearEntero(resumen.total_movimientos)}` : undefined}
-          detalle={conAnterior ? `Cambios de líder: ${resumen.cambios_lider.length}` : "Se calculan al cargar el siguiente período."}
+          detalle={conAnterior ? `Cambios de líder: ${resumen.cambios_lider.length}` : undefined}
           enlace={{ href: "/admin/parametros", texto: "Ajustar la regla" }}
         />
       </section>
 
-      {/* Cascada E1–E4 */}
-      <section aria-labelledby="titulo-cascada" className="mb-8">
-        <h2 id="titulo-cascada" className="mb-1">Cascada de exclusiones E1–E4</h2>
-        <p className="mb-3 text-sm text-texto-suave">
-          Cada fila excluida se cuenta una vez, en el primer filtro que incumple:{" "}
-          filas leídas = E1 + E2 + E3 + E4 + universo local válido →{" "}
-          <span className="font-semibold">{c.cuadre_cascada === "SI" ? "cuadra" : "NO cuadra"}</span>.
-        </p>
-        <div className="marco-tabla max-w-3xl">
-          <table className="tabla-datos">
-            <caption>Conteos de {resumen.etiqueta}{ca ? ` frente a ${resumen.etiqueta_anterior}` : ""}</caption>
-            <thead>
-              <tr>
-                <th scope="col">Concepto</th>
-                {ca && <th scope="col" className="num">{formatearFecha(resumen.anterior, "corta")}</th>}
-                <th scope="col" className="num">{formatearFecha(periodo, "corta")}</th>
-                {ca && <th scope="col" className="num">Diferencia</th>}
-              </tr>
-            </thead>
-            <tbody>
-              <FilaCascada concepto="Filas leídas" anterior={ca ? ca.filas_leidas : undefined} actual={c.filas_leidas} />
-              {FILTROS.map((f, i) => {
-                const campo = ["e1_duplicados", "e2_destino_extranjero", "e3_saldo_no_positivo", "e4_actividad_no_catalogada"][i];
-                return <FilaCascada key={f.clave} concepto={`${f.clave} — ${f.nombre}`} anterior={ca ? ca[campo] : undefined} actual={c[campo]} />;
-              })}
-              <FilaCascada concepto="Universo local válido" anterior={ca ? ca.universo_local_valido : undefined} actual={c.universo_local_valido} destacada />
-            </tbody>
-          </table>
-        </div>
-        <p className="mt-2 text-sm">
-          <Link href={`/calidad?periodo=${periodo}`}>Ver el reporte de calidad completo y las filas excluidas</Link>
-        </p>
-      </section>
-
       {!conAnterior ? (
         <EstadoVacio titulo="Sin período anterior para comparar">
-          Cuando cargue el siguiente corte mensual, aquí aparecerán los movimientos de posición, los cambios de líder y
-          su explicación.
+          Los movimientos aparecerán al cargar el siguiente corte.
         </EstadoVacio>
       ) : (
         <>
@@ -221,10 +166,7 @@ export default async function PaginaResumenCorte({ searchParams }) {
 
           {/* Explicación automática de los principales movimientos */}
           <section aria-labelledby="titulo-principales" className="mb-8">
-            <h2 id="titulo-principales" className="mb-1">Principales movimientos explicados</h2>
-            <p className="mb-3 text-sm text-texto-suave">
-              {resumen.regla.texto}
-            </p>
+            <h2 id="titulo-principales" className="mb-3">Movimientos explicados</h2>
             {resumen.principales.length === 0 ? (
               <p className="tarjeta text-sm">Con la regla vigente no hay movimientos significativos entre estos dos períodos.</p>
             ) : (

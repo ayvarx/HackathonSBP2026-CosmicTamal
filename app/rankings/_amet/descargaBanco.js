@@ -1,7 +1,7 @@
 // Portado del frontend de Amet: descargaBanco.js
 // En Amet el CSV de un banco se armaba en el navegador con datos de su API Express.
 // Aquí se usan las rutas oficiales /api/exportar/* (mismas columnas que los entregables
-// 2 y 3), filtradas por ranking y banco, para que el archivo salga del motor SQL.
+// 2 y 3), filtradas por ranking y banco.
 
 /**
  * Enlaces de descarga de un banco en un ranking.

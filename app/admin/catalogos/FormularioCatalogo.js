@@ -1,13 +1,11 @@
 "use client";
-// Reemplaza un catálogo completo desde un CSV (con el mismo encabezado que el archivo original
-// de datos/). La ruta /api/admin/catalogos exige el perfil Administrador y valida el archivo;
-// si es válido, recalcula los rankings con el catálogo nuevo.
+// Reemplaza un catálogo completo desde un CSV (POST /api/admin/catalogos) y recalcula.
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import MensajeError from "@/components/MensajeError";
 
 const OPCIONES = [
-  { valor: "bancos", texto: "Bancos ficticios", encabezado: "Codigo_Banco,Nombre_Ficticio,Tipo_Licencia" },
+  { valor: "bancos", texto: "Bancos", encabezado: "Codigo_Banco,Nombre_Ficticio,Tipo_Licencia" },
   { valor: "cinu", texto: "Catálogo CINU / SB109", encabezado: "Codigo_CINU,Descripcion,Macroactividad_Reto,Subactividad_Reto,Codigo_SB08_Referencia" },
   { valor: "sb21", texto: "Tabla SB21 simplificada", encabezado: "Codigo,Descripcion,Uso_en_reto" },
 ];
@@ -42,26 +40,24 @@ export default function FormularioCatalogo() {
 
   return (
     <form className="tarjeta flex flex-col gap-3" onSubmit={enviar}>
-      <div className="grid gap-3 md:grid-cols-2">
-        <div>
+      <div className="flex flex-col gap-3 md:flex-row md:items-end">
+        <div className="md:w-64">
           <label className="etiqueta-campo" htmlFor="tipo-catalogo">Catálogo</label>
           <select id="tipo-catalogo" className="control" value={tipo} onChange={(e) => setTipo(e.target.value)}>
             {OPCIONES.map((o) => <option key={o.valor} value={o.valor}>{o.texto}</option>)}
           </select>
         </div>
-        <div>
+        <div className="min-w-0 flex-1">
           <label className="etiqueta-campo" htmlFor="archivo-catalogo">Archivo CSV</label>
           <input id="archivo-catalogo" type="file" accept=".csv,text/csv" className="control" onChange={(e) => setArchivo(e.target.files?.[0] ?? null)} />
         </div>
-      </div>
-      <p className="text-xs text-texto-tenue">
-        Encabezado: <code>{opcion.encabezado}</code>. Reemplaza el catálogo completo.
-      </p>
-      <div>
-        <button type="submit" className="boton boton-secundario" disabled={!archivo || estado.tipo === "procesando"}>
-          {estado.tipo === "procesando" ? "Reemplazando…" : "Reemplazar catálogo y recalcular"}
+        <button type="submit" className="boton boton-secundario md:ml-auto" disabled={!archivo || estado.tipo === "procesando"}>
+          {estado.tipo === "procesando" ? "Reemplazando…" : "Reemplazar y recalcular"}
         </button>
       </div>
+      <p className="text-xs text-texto-tenue">
+        Columnas: <code>{opcion.encabezado}</code>
+      </p>
       <div aria-live="polite">
         {estado.tipo === "ok" && (
           <p className="rounded-tarjeta border border-exito-borde bg-exito-fondo px-4 py-3 text-sm font-semibold">{estado.mensaje}</p>

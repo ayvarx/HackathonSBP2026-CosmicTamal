@@ -12,11 +12,11 @@ import { aNumeroParaGrafico, formatearFecha, formatearMonto, nombreRanking } fro
 
 // Misma paleta que components/Grafico.js (COLORES_GRAFICO). Se copia porque un componente
 // de servidor no puede leer constantes exportadas por un módulo "use client".
-export const COLORES = ["#30b01f", "#d9622b", "#1a9a72", "#d99a00", "#d0679a", "#16801f", "#60d650", "#c93f3e"];
+export const COLORES = ["#094000", "#419A33", "#7EAC39", "#297D5F", "#106003", "#608D1A", "#136749", "#267F18"];
 const GRIS = "#9db29a";
-const AZUL_TOTAL = "#17660d";
-const VERDE_SUBE = "#1d6b3a";
-const ROJO_BAJA = "#a12a2a";
+const TOTAL = "#094000";
+const VERDE_SUBE = "#419A33";
+const ROJO_BAJA = "#b42318";
 
 /** Color del banco según su lugar en la lista de bancos comparados (mismo color en todos los gráficos). */
 export function colorBanco(codigo, resaltados, indiceGeneral) {
@@ -77,7 +77,7 @@ export function opcionPosiciones({ fechas, filas, resaltados = [], anterior, act
   }
 
   return {
-    tooltip: { trigger: "item", formatter: "{a}<br/>{b}: posición {c}" },
+    tooltip: { trigger: "item", confine: true, formatter: "{a}<br/>{b}: posición {c}" },
     grid: { left: 56, right: 200, top: 28, bottom: 36 },
     xAxis: { type: "category", data: etiquetas, boundaryGap: false },
     yAxis: {
@@ -110,7 +110,7 @@ export function opcionCascada({ m, d }) {
   const trasSalidos = trasNuevos + salidos;
 
   const pasos = [
-    { nombre: "Saldo anterior", base: 0, alto: anterior, color: AZUL_TOTAL, texto: formatearMonto(m.saldo_anterior), detalle: formatearFecha(m.fecha_anterior) },
+    { nombre: "Saldo anterior", base: 0, alto: anterior, color: TOTAL, texto: formatearMonto(m.saldo_anterior), detalle: formatearFecha(m.fecha_anterior) },
     { nombre: "Préstamos nuevos", base: anterior, alto: nuevos, color: VERDE_SUBE, texto: formatearMonto(d.saldo_nuevos, { signo: true }), detalle: `${d.prestamos_nuevos} préstamos` },
     { nombre: "Préstamos que salieron", base: trasSalidos, alto: -salidos, color: ROJO_BAJA, texto: formatearMonto(d.saldo_salidos), detalle: `${d.prestamos_salidos} préstamos` },
     {
@@ -121,7 +121,7 @@ export function opcionCascada({ m, d }) {
       texto: formatearMonto(d.variacion_continuan, { signo: true }),
       detalle: `${d.prestamos_continuan} préstamos`,
     },
-    { nombre: "Saldo actual", base: 0, alto: actual, color: AZUL_TOTAL, texto: formatearMonto(m.saldo_actual), detalle: formatearFecha(m.fecha_actual) },
+    { nombre: "Saldo actual", base: 0, alto: actual, color: TOTAL, texto: formatearMonto(m.saldo_actual), detalle: formatearFecha(m.fecha_actual) },
   ];
 
   // El eje no empieza en cero: si no, las variaciones (≈10 % del saldo) casi no se verían.
@@ -132,7 +132,7 @@ export function opcionCascada({ m, d }) {
   const ejeMinimo = nivelMinimo > 1e6 ? Math.floor(bajo / paso) * paso : 0;
 
   return {
-    tooltip: { trigger: "item" },
+    tooltip: { trigger: "item", confine: true },
     grid: { left: 72, right: 24, top: 36, bottom: 48 },
     xAxis: { type: "category", data: pasos.map((p) => p.nombre), axisLabel: { interval: 0, width: 110, overflow: "break" } },
     yAxis: { type: "value", min: ejeMinimo },
@@ -172,13 +172,15 @@ export function opcionEntidades({ bancos, ordenRankings, movimientos }) {
   const saldo = new Map(movimientos.map((m) => [`${m.ranking}|${m.codigo_banco}`, m.saldo_actual]));
   return {
     legend: { top: 0 },
-    grid: { left: 72, right: 16, top: 44, bottom: 32 },
+    tooltip: { trigger: "axis", confine: true, axisPointer: { type: "shadow" } },
+    grid: { left: 64, right: 16, top: 40, bottom: 32 },
     xAxis: { type: "category", data: ordenRankings.map(nombreRanking) },
     yAxis: { type: "value" },
     series: bancos.map((b, i) => ({
       name: `${b.nombre} (${b.codigo})`,
       type: "bar",
       color: COLORES[i % COLORES.length],
+      barMaxWidth: 28,
       itemStyle: { borderRadius: [3, 3, 0, 0] },
       data: ordenRankings.map((r) => aNumeroParaGrafico(saldo.get(`${r}|${b.codigo}`) ?? "0")),
     })),

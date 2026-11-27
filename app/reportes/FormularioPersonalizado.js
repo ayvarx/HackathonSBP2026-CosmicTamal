@@ -7,10 +7,10 @@ function Grupo({ titulo, nombre, opciones, seleccionados }) {
   return (
     <fieldset className="min-w-0">
       <legend className="etiqueta-campo mb-2">{titulo}</legend>
-      <div className="flex max-h-56 flex-col gap-1 overflow-y-auto pr-2">
+      <div className="flex max-h-48 flex-col gap-1 overflow-y-auto pr-2">
         {opciones.map((o) => (
           <label key={o.valor} className="flex items-center gap-2 text-sm">
-            <input type="checkbox" name={nombre} value={o.valor} defaultChecked={todos || seleccionados.includes(o.valor)} />
+            <input type="checkbox" className="accent-[#106003]" name={nombre} value={o.valor} defaultChecked={todos || seleccionados.includes(o.valor)} />
             {o.texto}
           </label>
         ))}
@@ -23,7 +23,7 @@ export default function FormularioPersonalizado({ periodos, rankings, bancos, co
   return (
     <form method="get" action="/reportes" className="tarjeta">
       <input type="hidden" name="vista" value="1" />
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Grupo titulo="Períodos" nombre="fechas" opciones={periodos} seleccionados={seleccion.fechas} />
         <Grupo titulo="Rankings" nombre="rankings" opciones={rankings} seleccionados={seleccion.rankings} />
         <Grupo titulo="Bancos" nombre="bancos" opciones={bancos} seleccionados={seleccion.bancos} />
@@ -34,7 +34,7 @@ export default function FormularioPersonalizado({ periodos, rankings, bancos, co
           seleccionados={seleccion.columnas.map((c) => columnas.find((k) => k.campo === c || k.valor === c)?.valor ?? c)}
         />
       </div>
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-4 flex flex-wrap justify-end gap-2">
         <button type="submit" className="boton">Ver vista previa</button>
         <a href="/reportes" className="boton boton-secundario">Restablecer</a>
       </div>

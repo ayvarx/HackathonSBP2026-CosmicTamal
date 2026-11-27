@@ -33,13 +33,13 @@ export function MapaCalor({ celdas, rankings, bancos }) {
     yAxis: { type: "category", data: bancos, inverse: true, splitArea: { show: true } },
     visualMap: {
       min: 0, max: maximo, calculable: false, orient: "horizontal", left: "center", bottom: 4,
-      text: ["Mayor ponderación", "Menor"], inRange: { color: ["#eef8ec", "#a0d898", "#17660d"] },
+      text: ["Mayor ponderación", "Menor"], inRange: { color: ["#eef6ea", "#7EAC39", "#106003", "#052200"] },
     },
     series: [{
       type: "heatmap",
       data: datos.map((d) => ({
         ...d,
-        label: { show: true, formatter: () => d.value[2].toFixed(1), color: d.value[2] > maximo * 0.55 ? "#ffffff" : "#192b17" },
+        label: { show: true, formatter: () => d.value[2].toFixed(1), color: d.value[2] > maximo * 0.45 ? "#ffffff" : "#052200" },
       })),
       itemStyle: { borderColor: "#ffffff", borderWidth: 2 },
     }],
@@ -47,7 +47,6 @@ export function MapaCalor({ celdas, rankings, bancos }) {
   return (
     <Grafico
       titulo="Mapa de calor: ponderación de cada banco por actividad"
-      descripcion="Cada celda es el % de la cartera local válida del banco que está en esa actividad (el número es el %, redondeado a 1 decimal). Más oscuro = mayor peso."
       altura={Math.max(360, bancos.length * 34 + 110)}
       opcion={opcion}
     />
@@ -85,7 +84,7 @@ export function MapaArbol({ filas, bancoElegido }) {
       type: "treemap", data: datos, roam: false, nodeClick: false, breadcrumb: { show: false },
       width: "100%", height: "100%", top: 0, bottom: 0, left: 0, right: 0,
       label: { show: true, color: "#ffffff", fontSize: 12, overflow: "truncate" },
-      upperLabel: { show: !bancoElegido, height: 20, color: "#192b17", fontWeight: 600 },
+      upperLabel: { show: !bancoElegido, height: 20, color: "#052200", fontWeight: 600 },
       itemStyle: { borderColor: "#ffffff", borderWidth: 2, gapWidth: 2 },
       levels: bancoElegido
         ? [{ itemStyle: { borderWidth: 0, gapWidth: 2 } }]
@@ -95,7 +94,6 @@ export function MapaArbol({ filas, bancoElegido }) {
   return (
     <Grafico
       titulo={bancoElegido ? "Treemap de la cartera del banco por actividad" : "Treemap de la cartera por banco y actividad"}
-      descripcion="El área de cada rectángulo es proporcional al saldo. El color identifica la actividad económica."
       altura={460}
       opcion={opcion}
     />
@@ -120,7 +118,6 @@ export function BarrasMorosidad({ filas, bancoElegido }) {
   return (
     <Grafico
       titulo="Saldo con mora (> 0 días) por banco, % del saldo"
-      descripcion="Ordenado de mayor a menor."
       altura={Math.max(300, ordenadas.length * 28 + 50)}
       formatoValor="porcentaje"
       opcion={opcion}
@@ -133,19 +130,18 @@ export function LineaMorosidad({ puntos }) {
   // puntos: [{etiqueta, mora_pct, mora_90_pct}]
   const etiqueta = { show: true, formatter: (p) => `${p.value.toFixed(2)} %`, position: "top" };
   const opcion = {
-    legend: { bottom: 0 },
-    grid: { left: 56, right: 24, top: 24, bottom: 48 },
+    legend: { top: 0 },
+    grid: { left: 56, right: 24, top: 48, bottom: 28 },
     xAxis: { type: "category", data: puntos.map((p) => p.etiqueta) },
     yAxis: { type: "value" },
     series: [
-      { name: "Saldo con mora (> 0 días)", type: "line", data: puntos.map((p) => n(p.mora_pct)), label: etiqueta },
-      { name: "Saldo con mora mayor a 90 días", type: "line", data: puntos.map((p) => n(p.mora_90_pct)), label: etiqueta },
+      { name: "Saldo con mora (> 0 días)", type: "line", itemStyle: { color: "#106003" }, lineStyle: { color: "#106003" }, data: puntos.map((p) => n(p.mora_pct)), label: etiqueta },
+      { name: "Saldo con mora mayor a 90 días", type: "line", itemStyle: { color: "#7EAC39" }, lineStyle: { color: "#7EAC39" }, data: puntos.map((p) => n(p.mora_90_pct)), label: etiqueta },
     ],
   };
   return (
     <Grafico
       titulo="Evolución del saldo con mora"
-      descripcion="Saldo de los préstamos con mora sobre el saldo total en cada corte cargado."
       altura={280}
       formatoValor="porcentaje"
       opcion={opcion}
@@ -153,7 +149,7 @@ export function LineaMorosidad({ puntos }) {
   );
 }
 
-/** Escalera de vencimientos: 16 tramos de plazo (por vencer en azul, vencido en naranja). */
+/** Escalera de vencimientos: 16 tramos de plazo (por vencer en verde, vencido en ámbar). */
 export function EscaleraTramos({ tramos }) {
   const opcion = {
     grid: { left: 64, right: 16, top: 16, bottom: 100 },
@@ -170,7 +166,7 @@ export function EscaleraTramos({ tramos }) {
   return (
     <Grafico
       titulo="Escalera de vencimientos del saldo"
-      descripcion="Azul: capital por vencer según el plazo restante. Naranja: capital vencido según los días de atraso."
+      descripcion="Verde: por vencer. Ámbar: vencido."
       altura={380}
       formatoValor="monto"
       opcion={opcion}
@@ -181,15 +177,15 @@ export function EscaleraTramos({ tramos }) {
 /** Barras apiladas al 100 %: cómo se reparte el saldo de cada banco por plazo y mora. */
 export function BarrasApiladasVencimientos({ filas }) {
   const bloques = [
-    { clave: "hasta_1a", nombre: "Por vencer hasta 1 año", color: "#30b01f" },
-    { clave: "de_1_a_5a", nombre: "Por vencer de 1 a 5 años", color: "#94d38c" },
-    { clave: "mas_5a", nombre: "Por vencer a más de 5 años", color: "#17660d" },
-    { clave: "vencido_hasta_90", nombre: "Vencido hasta 90 días", color: "#d99a00" },
-    { clave: "vencido_mas_90", nombre: "Vencido a más de 90 días", color: "#c93f3e" },
+    { clave: "hasta_1a", nombre: "Por vencer hasta 1 año", color: "#106003" },
+    { clave: "de_1_a_5a", nombre: "Por vencer de 1 a 5 años", color: "#7EAC39" },
+    { clave: "mas_5a", nombre: "Por vencer a más de 5 años", color: "#052200" },
+    { clave: "vencido_hasta_90", nombre: "Vencido hasta 90 días", color: "#f5a524" },
+    { clave: "vencido_mas_90", nombre: "Vencido a más de 90 días", color: "#b42318" },
   ];
   const opcion = {
-    legend: { bottom: 0 },
-    grid: { left: 130, right: 24, top: 8, bottom: 56 },
+    legend: { top: 0 },
+    grid: { left: 130, right: 24, top: 40, bottom: 28 },
     xAxis: { type: "value", max: 100 },
     yAxis: { type: "category", data: filas.map((f) => f.banco), inverse: true },
     series: bloques.map((b) => ({
@@ -200,7 +196,6 @@ export function BarrasApiladasVencimientos({ filas }) {
   return (
     <Grafico
       titulo="Perfil de vencimiento de cada banco (% de su saldo)"
-      descripcion="Cada barra suma 100 % del saldo del banco, dividido por plazo restante y por mora."
       altura={Math.max(340, filas.length * 30 + 90)}
       formatoValor="porcentaje"
       opcion={opcion}

@@ -29,14 +29,6 @@ export default function TarjetasBancos({ tarjetas, detalle }) {
           <BancoCard key={codigo} {...props} />
         ))}
       </div>
-      <details className="definiciones">
-        <summary>¿Cómo leer las tarjetas?</summary>
-        <p>
-          La cifra grande es el saldo total del banco en esta actividad (exacto, al centavo). Las columnas muestran cómo cambió
-          en los cortes cargados hasta el período elegido. La barra y la lista reparten ese saldo entre las subactividades, con
-          su monto y su porcentaje. Los botones descargan el histórico del banco y su desglose en CSV.
-        </p>
-      </details>
     </div>
   );
 }

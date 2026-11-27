@@ -87,7 +87,7 @@ export default function BancoCard({ posicion, banco, saldo, serie, partes, selec
       </button>
 
       <div className="bc-cifra cifra">{formatearMonto(total)}</div>
-      <p className="bc-sub">{pendiente ? "Abriendo el detalle…" : "Saldo total del banco en esta actividad"}</p>
+      {pendiente && <p className="bc-sub">Abriendo el detalle…</p>}
 
       {abierta && (
         <>
@@ -165,7 +165,7 @@ export default function BancoCard({ posicion, banco, saldo, serie, partes, selec
       )}
       {descargas.length > 0 && (
         <div
-          className="bc-acciones flex flex-row flex-wrap items-start gap-2"
+          className="bc-acciones flex flex-row flex-wrap items-start justify-end gap-2"
           onClick={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
         >

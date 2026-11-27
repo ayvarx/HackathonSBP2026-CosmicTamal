@@ -16,30 +16,19 @@ import EncabezadoPagina from "@/components/EncabezadoPagina";
 import EstadoVacio from "@/components/EstadoVacio";
 import Filtros from "@/components/Filtros";
 import Grafico from "@/components/Grafico";
-import IndicadorMovimiento from "@/components/IndicadorMovimiento";
 import MensajeError from "@/components/MensajeError";
 import TablaOrdenable from "@/components/TablaOrdenable";
-import TarjetaIndicador from "@/components/TarjetaIndicador";
 import { exigirPerfil } from "@/lib/auth";
 import {
   descomposicion,
-  FUENTE,
   movimientos,
   parametros,
   periodos,
   RANKINGS,
   rankings,
 } from "@/lib/consultas";
-import { compararDecimales, formatearFecha, formatearMonto, nombreRanking } from "@/lib/formato";
-import {
-  descomposicionCuadra,
-  explicarMovimiento,
-  introduccionRanking,
-  ordinal,
-  principalesMovimientos,
-  quitarSigno,
-  unirLista,
-} from "./explicacion";
+import { compararDecimales, formatearFecha, formatearMonto, formatearPorcentaje, nombreRanking } from "@/lib/formato";
+import { montoCompacto, principalesMovimientos, quitarSigno, resumenRanking, unirLista } from "./explicacion";
 import { opcionCascada, opcionPosiciones } from "./graficos";
 import ReglaAplicada from "./ReglaAplicada";
 import SeccionEntidades, { MAX_BANCOS, MIN_BANCOS } from "./SeccionEntidades";
@@ -221,11 +210,11 @@ export default async function PaginaComparar({ searchParams }) {
   // --- Ranking elegido -----------------------------------------------------------------
   const movsRanking = movs.filter((m) => m.ranking === ranking);
   const descPorBanco = new Map(desc.map((d) => [d.codigo_banco, d]));
-  const principales = principalesMovimientos(movsRanking);
-  const explicaciones = principales.map((m) => ({ m, ...explicarMovimiento(m, descPorBanco.get(m.codigo_banco), movsRanking) }));
+  const grupos = principalesMovimientos(movsRanking);
   const seleccionado =
     movsRanking.find((m) => m.codigo_banco === bancoPedido) ??
-    principales[0] ??
+    grupos.significativos[0] ??
+    grupos.otros[0] ??
     [...movsRanking].sort((a, b) => compararDecimales(quitarSigno(b.var_saldo), quitarSigno(a.var_saldo)))[0];
   const descSeleccionado = seleccionado ? descPorBanco.get(seleccionado.codigo_banco) : undefined;
 
@@ -235,12 +224,12 @@ export default async function PaginaComparar({ searchParams }) {
   let avisoBancos = null;
   if (bancosElegidos === null) {
     bancosElegidos = [...movsRanking].sort((a, b) => a.posicion_actual - b.posicion_actual).slice(0, 3).map((m) => m.codigo_banco);
-    avisoBancos = `Selección inicial: los 3 primeros de ${nombreRanking(ranking)}. Marque otros bancos y pulse "Comparar bancos".`;
+    avisoBancos = null;
   } else if (bancosElegidos.length > MAX_BANCOS) {
     avisoBancos = `Eligió ${bancosElegidos.length} bancos; se muestran solo los primeros ${MAX_BANCOS}.`;
     bancosElegidos = bancosElegidos.slice(0, MAX_BANCOS);
   } else if (bancosElegidos.length < MIN_BANCOS) {
-    avisoBancos = `Elija al menos ${MIN_BANCOS} bancos para compararlos lado a lado.`;
+    avisoBancos = `Elija al menos ${MIN_BANCOS} bancos.`;
   }
 
   // Enlaces que eligen un movimiento para la cascada (conservan la selección explícita de bancos).
@@ -252,7 +241,6 @@ export default async function PaginaComparar({ searchParams }) {
   const significativos = movs.filter((m) => m.significativo);
   const rankingsConCambioLider = ORDEN_RANKINGS.filter((r) => movs.some((m) => m.ranking === r && m.cambio_de_lider === "SI"));
   const cambiosPosicion = movs.filter((m) => m.cambio_posicion !== 0).length;
-  const consecutivos = movs[0]?.consecutivos;
 
   const filasSignificativas = significativos.map((m) => ({
     ...m,
@@ -267,82 +255,56 @@ export default async function PaginaComparar({ searchParams }) {
     es_significativo: m.significativo ? "Sí" : "No",
   }));
 
-  // Datos del gráfico de posiciones también en tabla (alternativa accesible y cifras exactas).
-  const filasPosiciones = todosBancos.map((b) => {
-    const fila = { codigo_banco: b.codigo, banco_texto: `${b.nombre} (${b.codigo})` };
-    for (const p of posiciones.filter((x) => x.codigo_banco === b.codigo)) fila[`p_${p.fecha}`] = p.posicion;
-    return fila;
-  });
-
   const textoPar = `${formatearFecha(anterior)} → ${formatearFecha(actual)}`;
+
+  const conteos = [
+    { titulo: "Movimientos significativos", valor: significativos.length, unidad: `de ${movs.length}` },
+    {
+      titulo: "Cambios de líder",
+      valor: rankingsConCambioLider.length,
+      unidad: rankingsConCambioLider.length ? `en ${unirLista(rankingsConCambioLider.map(nombreRanking))}` : "rankings",
+    },
+    { titulo: "Cambios de posición", valor: cambiosPosicion, unidad: `de ${movs.length}` },
+  ];
 
   return (
     <>
-      <EncabezadoPagina {...ENCABEZADO}>
-        <BotonDescarga
-          href="/api/exportar/movimientos"
-          parametros={{ anterior, actual }}
-          texto="Descargar reporte de movimientos"
-          variante="primario"
-          descripcion="Los 6 rankings del par de períodos elegido."
-        />
-      </EncabezadoPagina>
+      <EncabezadoPagina {...ENCABEZADO} />
 
       <Filtros campos={camposFiltro} />
 
-      <p className="mb-2 text-sm text-texto-suave">
-        Comparando <strong className="text-texto">{textoPar}</strong>{" "}
-        ({consecutivos ? "períodos consecutivos" : "períodos no consecutivos: se compara el primero con el último"}).
-      </p>
-      <nav aria-label="Secciones de la comparación" className="mb-6 flex flex-wrap gap-x-4 gap-y-1 text-sm">
-        <a href="#resumen">Resumen</a>
-        <a href="#ranking">Ranking {nombreRanking(ranking)}</a>
-        <a href="#cascada">Cascada del movimiento</a>
-        <a href="#entidades">Bancos lado a lado</a>
-      </nav>
-
       {/* 1. Resumen de los 6 rankings ------------------------------------------------ */}
-      <section id="resumen" aria-labelledby="titulo-resumen" className="mb-10 scroll-mt-24">
-        <h2 id="titulo-resumen" className="mb-3">
-          Resumen de los 6 rankings
-        </h2>
-        <div className="grid gap-4 lg:grid-cols-[2fr_3fr]">
-          <ReglaAplicada parametros={params} esAdministrador={perfil === "administrador"} />
-          <div className="grid gap-4 sm:grid-cols-3">
-            <TarjetaIndicador
-              titulo="Movimientos significativos"
-              valor={String(significativos.length)}
-              unidad={`de ${movs.length}`}
-              detalle="Banco × ranking que cumplen la regla vigente."
-            />
-            <TarjetaIndicador
-              titulo="Cambios de líder"
-              valor={String(rankingsConCambioLider.length)}
-              unidad={rankingsConCambioLider.length === 1 ? "ranking" : "rankings"}
-              detalle={
-                rankingsConCambioLider.length
-                  ? `En ${unirLista(rankingsConCambioLider.map(nombreRanking))}.`
-                  : "El líder se mantiene en los 6 rankings."
-              }
-            />
-            <TarjetaIndicador
-              titulo="Cambios de posición"
-              valor={String(cambiosPosicion)}
-              unidad={`de ${movs.length}`}
-              detalle="Banco × ranking que suben o bajan al menos un puesto."
-            />
-          </div>
+      <section id="resumen" aria-labelledby="titulo-resumen" className="mb-8 scroll-mt-24">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 id="titulo-resumen">Resumen de los 6 rankings · {textoPar}</h2>
+          <BotonDescarga
+            href="/api/exportar/movimientos"
+            parametros={{ anterior, actual }}
+            texto="Descargar movimientos"
+          />
+        </div>
+        <ReglaAplicada parametros={params} />
+        <div className="mt-3 grid gap-3 sm:grid-cols-3">
+          {conteos.map((c) => (
+            <article key={c.titulo} className="tarjeta">
+              <h3 className="text-sm font-semibold text-texto-suave">{c.titulo}</h3>
+              <p className="cifra text-2xl font-extrabold text-texto">
+                {c.valor}
+                <span className="ml-1 text-sm font-normal text-texto-suave">{c.unidad}</span>
+              </p>
+            </article>
+          ))}
         </div>
 
         <div className="mt-4">
           <TablaOrdenable
-            titulo={`Movimientos significativos · ${textoPar}. Haga clic en un banco para ver su explicación y su cascada.`}
+            titulo="Movimientos significativos"
             columnas={[
               { clave: "ranking", titulo: "Ranking", tipo: "ranking" },
               { clave: "banco_texto", titulo: "Banco", enlace: enlaceMovimiento("{ranking}") },
               { clave: "posicion_anterior", titulo: "Posición anterior", tipo: "entero" },
               { clave: "posicion_actual", titulo: "Posición actual", tipo: "entero" },
-              { clave: "cambio_posicion", titulo: "Cambio", tipo: "movimiento", ayuda: "Cambio_Posicion = Posición anterior − Posición actual" },
+              { clave: "cambio_posicion", titulo: "Cambio", tipo: "movimiento" },
               { clave: "var_saldo", titulo: "Var. saldo", tipo: "monto_signo" },
               { clave: "var_saldo_pct", titulo: "Var. saldo %", tipo: "porcentaje", decimales: 4 },
               { clave: "motivo", titulo: "Motivo", ordenable: false },
@@ -350,50 +312,52 @@ export default async function PaginaComparar({ searchParams }) {
             filas={filasSignificativas}
             claveFila="clave"
             compacta
-            altoMaximo="28rem"
-            mensajeVacio="Ningún movimiento cumple la regla vigente en este par de períodos."
+            mensajeVacio="Ningún movimiento significativo en este par de períodos."
           />
         </div>
       </section>
 
       {/* 2. Ranking elegido ---------------------------------------------------------- */}
-      <section id="ranking" aria-labelledby="titulo-ranking" className="mb-10 scroll-mt-24">
-        <h2 id="titulo-ranking" className="mb-3">
-          Ranking {nombreRanking(ranking)} · {textoPar}
+      <section id="ranking" aria-labelledby="titulo-ranking" className="mb-8 scroll-mt-24">
+        <h2 id="titulo-ranking" className="mb-1">
+          Ranking {nombreRanking(ranking)}
         </h2>
+        <p className="mb-3 text-sm text-texto-suave">{resumenRanking(ranking, movsRanking)}</p>
 
-        <article className="tarjeta mb-4" aria-labelledby="titulo-explicacion">
-          <h3 id="titulo-explicacion">Principales movimientos</h3>
-          <p className="mt-2">{introduccionRanking(ranking, movsRanking, anterior, actual)}</p>
-          <ul className="mt-3 space-y-3">
-            {explicaciones.map((e) => (
-              <li key={e.codigo_banco} className="border-l-2 border-borde pl-3">
-                <p className="flex flex-wrap items-center gap-x-2 gap-y-1 font-semibold">
-                  <span>{e.banco}</span>
-                  <IndicadorMovimiento valor={e.m.cambio_posicion} significativo={e.m.significativo} />
-                  <span className="etiqueta">{e.m.significativo ? "Significativo" : "Cambio de posición"}</span>
-                  {e.m.cambio_de_lider === "SI" && <span className="etiqueta">Cambio de líder</span>}
-                </p>
-                <p className="mt-1 text-sm">{e.frases.join(" ")}</p>
-              </li>
-            ))}
-          </ul>
-        </article>
+        {[
+          { titulo: "Significativos", lista: grupos.significativos },
+          { titulo: "Cambios de posición", lista: grupos.otros },
+        ]
+          .filter((g) => g.lista.length)
+          .map((g) => (
+            <div key={g.titulo} className="mb-4">
+              <h3 className="mb-2 text-sm font-semibold text-texto-suave">{g.titulo}</h3>
+              <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                {g.lista.map((m) => (
+                  <TarjetaMovimiento
+                    key={m.codigo_banco}
+                    m={m}
+                    d={descPorBanco.get(m.codigo_banco)}
+                    href={enlaceMovimiento(ranking).replace("{codigo_banco}", m.codigo_banco)}
+                  />
+                ))}
+              </ul>
+            </div>
+          ))}
 
         <TablaOrdenable
-          titulo={`Movimientos de ${nombreRanking(ranking)} · ${textoPar}. Filas resaltadas: movimiento significativo.`}
+          titulo={`Movimientos de ${nombreRanking(ranking)}`}
           columnas={[
             { clave: "posicion_actual", titulo: "Posición actual", tipo: "entero" },
             { clave: "banco_texto", titulo: "Banco", enlace: enlaceMovimiento(ranking) },
             { clave: "posicion_anterior", titulo: "Posición anterior", tipo: "entero" },
-            { clave: "cambio_posicion", titulo: "Cambio", tipo: "movimiento", ayuda: "Cambio_Posicion = Posición anterior − Posición actual" },
+            { clave: "cambio_posicion", titulo: "Cambio", tipo: "movimiento" },
             { clave: "saldo_anterior", titulo: `Saldo ${formatearFecha(anterior, "corta")}`, tipo: "monto" },
             { clave: "saldo_actual", titulo: `Saldo ${formatearFecha(actual, "corta")}`, tipo: "monto" },
-            { clave: "var_saldo", titulo: "Var_Saldo", tipo: "monto_signo", ayuda: "Saldo actual − Saldo anterior" },
-            { clave: "var_saldo_pct", titulo: "Var_Saldo_Pct", tipo: "porcentaje", decimales: 4, ayuda: "Var_Saldo / Saldo anterior × 100" },
+            { clave: "var_saldo", titulo: "Var. saldo", tipo: "monto_signo" },
+            { clave: "var_saldo_pct", titulo: "Var. saldo %", tipo: "porcentaje", decimales: 4 },
             { clave: "lider", titulo: "Cambio de líder", alinear: "centro" },
             { clave: "es_significativo", titulo: "Significativo", alinear: "centro" },
-            { clave: "motivo", titulo: "Motivo", ordenable: false },
           ]}
           filas={filasRanking}
           claveFila="codigo_banco"
@@ -405,107 +369,19 @@ export default async function PaginaComparar({ searchParams }) {
         <div className="mt-4">
           <Grafico
             titulo={`Posición por mes en ${nombreRanking(ranking)}`}
-            descripcion={`Una línea por banco; la 1.ª posición está arriba. Zona sombreada: ${textoPar}. Bancos destacados: los elegidos en "Bancos lado a lado".`}
             altura={440}
             opcion={opcionPosiciones({ fechas, filas: posiciones, resaltados: bancosElegidos, anterior, actual })}
           />
-          <details className="mt-2 text-sm">
-            <summary className="cursor-pointer">Ver los datos del gráfico de posiciones</summary>
-            <div className="mt-2">
-              <TablaOrdenable
-                titulo={`Posición de cada banco en ${nombreRanking(ranking)} por período`}
-                columnas={[
-                  { clave: "banco_texto", titulo: "Banco" },
-                  ...fechas.map((f) => ({ clave: `p_${f}`, titulo: formatearFecha(f, "corta"), tipo: "entero" })),
-                ]}
-                filas={filasPosiciones}
-                claveFila="codigo_banco"
-                ordenInicial={{ clave: `p_${fechas.at(-1)}`, direccion: "asc" }}
-                compacta
-              />
-            </div>
-          </details>
         </div>
       </section>
 
       {/* 3. Cascada del movimiento elegido ------------------------------------------ */}
-      <section id="cascada" aria-labelledby="titulo-cascada" className="mb-10 scroll-mt-24">
-        <h2 id="titulo-cascada" className="mb-1">
+      <section id="cascada" aria-labelledby="titulo-cascada" className="mb-8 scroll-mt-24">
+        <h2 id="titulo-cascada" className="mb-3">
           Cascada del movimiento{seleccionado ? `: ${seleccionado.banco} en ${nombreRanking(ranking)}` : ""}
         </h2>
-        <p className="mb-3 text-sm text-texto-suave">
-          Cómo se pasa del saldo anterior al actual siguiendo cada préstamo por su número: los que se originaron, los que
-          salieron y lo que amortizaron los que continúan. Elija otro banco en el filtro &quot;Movimiento a explicar&quot; o
-          haciendo clic en su nombre en las tablas.
-        </p>
         {seleccionado && descSeleccionado ? (
-          <div className="grid items-start gap-4 lg:grid-cols-[3fr_2fr]">
-            <Grafico
-              titulo={`Variación de saldo de ${seleccionado.banco} (${seleccionado.codigo_banco}) · ${nombreRanking(ranking)}`}
-              descripcion="Verde suma, rojo resta. El eje vertical no empieza en cero para que se vean las variaciones."
-              altura={400}
-              formatoValor="monto"
-              opcion={opcionCascada({ m: seleccionado, d: descSeleccionado })}
-            />
-            <div className="flex flex-col gap-3">
-              <div className="marco-tabla" role="region" aria-label="Cifras exactas de la cascada" tabIndex={0}>
-                <table className="tabla-datos tabla-compacta">
-                  <caption>Cifras exactas de la cascada</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Concepto</th>
-                      <th scope="col" className="num">Préstamos</th>
-                      <th scope="col" className="num">Monto</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row" className="text-left font-normal">Saldo {formatearFecha(anterior)}</th>
-                      <td className="num">—</td>
-                      <td className="num">{formatearMonto(seleccionado.saldo_anterior)}</td>
-                    </tr>
-                    <tr>
-                      <th scope="row" className="text-left font-normal">Préstamos nuevos</th>
-                      <td className="num">{descSeleccionado.prestamos_nuevos}</td>
-                      <td className="num">{formatearMonto(descSeleccionado.saldo_nuevos, { signo: true })}</td>
-                    </tr>
-                    <tr>
-                      <th scope="row" className="text-left font-normal">Préstamos que salieron</th>
-                      <td className="num">{descSeleccionado.prestamos_salidos}</td>
-                      <td className="num">{formatearMonto(descSeleccionado.saldo_salidos, { signo: true })}</td>
-                    </tr>
-                    <tr>
-                      <th scope="row" className="text-left font-normal">Préstamos que continúan (amortización)</th>
-                      <td className="num">{descSeleccionado.prestamos_continuan}</td>
-                      <td className="num">{formatearMonto(descSeleccionado.variacion_continuan, { signo: true })}</td>
-                    </tr>
-                    <tr>
-                      <th scope="row" className="text-left">Variación total (Var_Saldo)</th>
-                      <td className="num" />
-                      <td className="num font-semibold">{formatearMonto(seleccionado.var_saldo, { signo: true })}</td>
-                    </tr>
-                  </tbody>
-                  <tfoot>
-                    <tr>
-                      <td>Saldo {formatearFecha(actual)}</td>
-                      <td className="num" />
-                      <td className="num">{formatearMonto(seleccionado.saldo_actual)}</td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-              <p className="text-xs text-texto-tenue">
-                {descomposicionCuadra(descSeleccionado)
-                  ? "✓ Comprobado al centavo: nuevos + salidos + continúan = Var_Saldo."
-                  : "Atención: la descomposición no cuadra con Var_Saldo; revise la carga del corte."}{" "}
-                Posición: {ordinal(seleccionado.posicion_anterior)} → {ordinal(seleccionado.posicion_actual)}.
-              </p>
-              <div className="tarjeta text-sm">
-                <h3 className="mb-1">En palabras</h3>
-                <p>{explicarMovimiento(seleccionado, descSeleccionado, movsRanking).frases.join(" ")}</p>
-              </div>
-            </div>
-          </div>
+          <Grafico altura={400} formatoValor="monto" opcion={opcionCascada({ m: seleccionado, d: descSeleccionado })} />
         ) : (
           <EstadoVacio titulo="No hay descomposición para este movimiento">
             No hay detalle por préstamo para este banco y ranking.
@@ -526,11 +402,55 @@ export default async function PaginaComparar({ searchParams }) {
         movimientos={movs}
         rankingsActual={rankingsActual}
       />
-
-      <p className="mt-10 border-t border-borde pt-3 text-xs text-texto-tenue">
-        {FUENTE} Períodos comparados: {textoPar}.
-      </p>
     </>
+  );
+}
+
+/** Tarjeta compacta de un movimiento: posición, variación de saldo y su descomposición. */
+function TarjetaMovimiento({ m, d, href }) {
+  const sube = m.cambio_posicion > 0;
+  const baja = m.cambio_posicion < 0;
+  const color = sube ? "text-[#106003]" : baja ? "text-[#b42318]" : "text-texto";
+  const flecha = sube ? "▲" : baja ? "▼" : "■";
+  const cambio = m.cambio_posicion > 0 ? `+${m.cambio_posicion}` : String(m.cambio_posicion);
+  const tieneSaldoPct = m.var_saldo_pct !== null && m.var_saldo_pct !== undefined;
+  const cifras = d
+    ? [
+        { rotulo: "Nuevos", valor: montoCompacto(d.saldo_nuevos) },
+        { rotulo: "Salieron", valor: montoCompacto(d.saldo_salidos) },
+        { rotulo: "Amortización", valor: montoCompacto(d.variacion_continuan) },
+      ]
+    : [];
+  return (
+    <li className="tarjeta flex flex-col gap-1">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <a href={href} className="whitespace-nowrap font-semibold">
+          {m.banco}
+        </a>
+        <span className="flex gap-1">
+          <span className="etiqueta">{m.significativo ? "Significativo" : "Cambio de posición"}</span>
+          {m.cambio_de_lider === "SI" && <span className="etiqueta">Cambio de líder</span>}
+        </span>
+      </div>
+      <p className={`cifra text-2xl font-extrabold ${color}`}>
+        <span aria-hidden="true" className="mr-1 text-base">{flecha}</span>
+        {m.posicion_anterior} → {m.posicion_actual} <span className="text-base font-semibold">({cambio})</span>
+      </p>
+      <p className="cifra text-sm text-texto-suave">
+        {formatearMonto(m.var_saldo, { signo: true })}
+        {tieneSaldoPct ? ` · ${formatearPorcentaje(m.var_saldo_pct, 2, { signo: true })}` : ""}
+      </p>
+      {cifras.length > 0 && (
+        <dl className="mt-1 grid grid-cols-3 gap-2 border-t border-borde pt-2 text-xs">
+          {cifras.map((c) => (
+            <div key={c.rotulo}>
+              <dt className="text-texto-tenue">{c.rotulo}</dt>
+              <dd className="cifra font-semibold text-texto">{c.valor}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+    </li>
   );
 }
 
@@ -541,7 +461,7 @@ function ErrorDatos({ detalle }) {
       <EncabezadoPagina {...ENCABEZADO} />
       <MensajeError
         titulo="No se pudieron leer los datos de la comparación"
-        mensaje="La base de datos no respondió. Verifique que se ejecutó npm run db:setup y npm run db:seed, y vuelva a intentarlo."
+        mensaje="La base de datos no respondió. Vuelva a intentarlo."
         detalle={detalle}
         accion={{ href: "/comparar", texto: "Volver a intentar" }}
       />

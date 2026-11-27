@@ -6,12 +6,11 @@ import MensajeError from "@/components/MensajeError";
 import Filtros from "@/components/Filtros";
 import TablaOrdenable from "@/components/TablaOrdenable";
 import BotonDescarga from "@/components/BotonDescarga";
-import EmbudoCascada from "../calidad/EmbudoCascada";
 import { exigirPerfil } from "@/lib/auth";
 import { calidad, periodos, RANKINGS, rankings, reconciliaciones } from "@/lib/consultas";
 import { elegirPeriodo, reclasificacionSb21, totalesPorSubactividad } from "@/lib/consultas-calidad";
 import Link from "next/link";
-import { formatearEntero, formatearFecha, formatearMonto, nombreRanking, nombreSubactividad } from "@/lib/formato";
+import { formatearEntero, formatearFecha, formatearMonto, nombreRanking } from "@/lib/formato";
 
 export const dynamic = "force-dynamic"; // los datos cambian al cargar cortes
 export const metadata = { title: "Verificación" };
@@ -21,15 +20,14 @@ const PUNTOS = [
   ["p2", "2. Hipotecario a Agropecuario"],
   ["p3", "3. Comercio y Consumo"],
   ["p4", "4. Cartera y ponderación"],
-  ["p5", "5. Subactividades y SB21"],
+  ["p5", "5. Subactividades"],
   ["p6", "6. Períodos y reconciliaciones"],
 ];
 
 // Tabla de un ranking: posición, banco, saldo, ponderación y operaciones.
 function TablaRanking({ clave, filas }) {
   return (
-    <div>
-      <h3 className="mb-1">Ranking {nombreRanking(clave)}</h3>
+    <div className="w-full [&_td]:whitespace-nowrap [&_th]:whitespace-nowrap">
       <TablaOrdenable
         titulo={`Ranking ${nombreRanking(clave)}`}
         claveFila="codigo_banco"
@@ -52,7 +50,7 @@ function TablaRanking({ clave, filas }) {
 // Selector de ranking (?ranking=): un enlace por ranking; el elegido queda marcado.
 function SelectorRanking({ claves, elegido, fecha, ancla }) {
   return (
-    <nav aria-label="Elegir ranking" className="mb-3 flex flex-wrap gap-2">
+    <nav aria-label="Elegir ranking" className="flex flex-wrap gap-2">
       {claves.map((clave) => {
         const activo = clave === elegido;
         return (
@@ -136,7 +134,8 @@ export default async function PaginaVerificacion({ searchParams }) {
     return fila;
   });
   const recActual = recs[lista.findIndex((p) => p.fecha === fecha)];
-  const detalleRec = recActual.detalle.map((x, i) => ({ ...x, clave: `${x.reconciliacion}-${x.ranking}-${x.codigo_banco}-${i}` }));
+  const NOMBRE_REC = { 1: "Subactividades = actividad", 2: "Actividades = cartera", 3: "Bancos = universo" };
+  const detalleRec = recActual.detalle.map((x, i) => ({ ...x, comprobacion: NOMBRE_REC[x.reconciliacion] ?? String(x.reconciliacion), clave: `${x.reconciliacion}-${x.ranking}-${x.codigo_banco}-${i}` }));
   const resumenSub = subs.map((s) => ({ ...s, clave: `${s.ranking}-${s.subactividad}` }));
 
   return (
@@ -161,35 +160,38 @@ export default async function PaginaVerificacion({ searchParams }) {
 
       <section id="p1" className="mt-8 scroll-mt-24" aria-labelledby="h-p1">
         <h2 id="h-p1">1. Reporte de calidad</h2>
-        <p className="mb-3 text-texto-suave">Detalle y filas excluidas en <a href={`/calidad?periodo=${fecha}`}>Calidad de datos</a>.</p>
-        <EmbudoCascada q={q} />
+        <p className="mt-2">
+          <strong>{formatearEntero(q.filas_leidas)}</strong> filas leídas · <strong>{formatearEntero(q.universo_local_valido)}</strong> operaciones válidas · saldo válido <strong>{formatearMonto(q.saldo_universo_local_valido)}</strong> · <a href={`/calidad?periodo=${fecha}`}>ver detalle en Calidad</a>
+        </p>
       </section>
 
       <section id="p2" className="mt-8 scroll-mt-24" aria-labelledby="h-p2">
-        <h2 id="h-p2">2. Rankings Hipotecario, Construcción, Industria y Agropecuario</h2>
-        <SelectorRanking claves={principales} elegido={rankingElegido} fecha={fecha} ancla="p2" />
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <h2 id="h-p2" className="mb-0">2. Rankings Hipotecario, Construcción, Industria y Agropecuario</h2>
+          <SelectorRanking claves={principales} elegido={rankingElegido} fecha={fecha} ancla="p2" />
+        </div>
         {principales.includes(rankingElegido) ? (
           <TablaRanking clave={rankingElegido} filas={porRanking(rankingElegido)} />
         ) : (
-          <p className="text-sm text-texto-suave">Elija un ranking para ver su tabla aquí.</p>
+          <p className="text-sm text-texto-suave">Elija un ranking.</p>
         )}
       </section>
 
       <section id="p3" className="mt-8 scroll-mt-24" aria-labelledby="h-p3">
-        <h2 id="h-p3">3. Rankings Comercio y Consumo</h2>
-        <SelectorRanking claves={otros} elegido={rankingElegido} fecha={fecha} ancla="p3" />
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <h2 id="h-p3" className="mb-0">3. Rankings Comercio y Consumo</h2>
+          <SelectorRanking claves={otros} elegido={rankingElegido} fecha={fecha} ancla="p3" />
+        </div>
         {otros.includes(rankingElegido) ? (
           <TablaRanking clave={rankingElegido} filas={porRanking(rankingElegido)} />
         ) : (
-          <p className="text-sm text-texto-suave">Elija un ranking para ver su tabla aquí.</p>
+          <p className="text-sm text-texto-suave">Elija un ranking.</p>
         )}
       </section>
 
       <section id="p4" className="mt-8 scroll-mt-24" aria-labelledby="h-p4">
         <h2 id="h-p4">4. Total de cartera local válida y ponderación</h2>
-        <p className="mb-3 text-texto-suave">
-          Ponderación = saldo de la actividad ÷ total de cartera local válida del banco × 100, a 4 decimales.
-        </p>
+        <div className="w-full [&_td]:whitespace-nowrap [&_th]:whitespace-nowrap">
         <TablaOrdenable
           titulo="Total de cartera local válida y ponderación por ranking"
           claveFila="codigo_banco"
@@ -202,29 +204,21 @@ export default async function PaginaVerificacion({ searchParams }) {
             ...RANKINGS.map((r) => ({ clave: `pond_${r.clave}`, titulo: `% ${r.nombre}`, tipo: "porcentaje", decimales: 4 })),
           ]}
         />
-        <p className="mt-2 text-sm text-texto-suave">
-          Saldo del universo local válido: {formatearMonto(q.saldo_universo_local_valido)}.
-        </p>
+        </div>
       </section>
 
       <section id="p5" className="mt-8 scroll-mt-24" aria-labelledby="h-p5">
-        <h2 id="h-p5">5. Desglose por subactividad y reclasificación SB21</h2>
-        <div className="tarjeta mb-4">
-          <p>
-            <strong>Regla SB21:</strong> un préstamo cuyo CINU es de &laquo;Crédito personal&raquo; pero con Facilidad Crediticia 07 (tarjeta de crédito) se reclasifica a &laquo;Tarjeta&raquo;, siempre dentro de Consumo.
-          </p>
-          <p className="mt-2">
-            En {formatearFecha(fecha)} la regla movió <strong>{formatearMonto(sb21.saldo_movido)}</strong> de saldo y <strong>{formatearEntero(sb21.operaciones_movidas)}</strong> operaciones de Crédito personal a Tarjeta.
-          </p>
-          <p className="mt-1 text-sm text-texto-suave">
-            Resultado: Tarjeta = {formatearMonto(sb21.tarjeta_saldo)} ({formatearEntero(sb21.tarjeta_operaciones)} operaciones); Crédito personal = {formatearMonto(sb21.credito_personal_saldo)} ({formatearEntero(sb21.credito_personal_operaciones)} operaciones).
-          </p>
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
+          <h2 id="h-p5" className="mb-0">5. Desglose por subactividad</h2>
+          <BotonDescarga href="/api/exportar/subactividades" parametros={{ periodo: fecha }} texto="Desglose por banco" />
         </div>
+        <p className="mb-3 text-sm text-texto-suave">
+          {formatearEntero(sb21.operaciones_movidas)} operaciones · {formatearMonto(sb21.saldo_movido)} pasan de Crédito personal a Tarjeta.
+        </p>
         <TablaOrdenable
           titulo="Saldo y operaciones por subactividad (suma de los 12 bancos)"
           claveFila="clave"
           compacta
-          altoMaximo="32rem"
           filas={resumenSub}
           columnas={[
             { clave: "ranking", titulo: "Ranking", tipo: "ranking", alinear: "izquierda" },
@@ -233,19 +227,10 @@ export default async function PaginaVerificacion({ searchParams }) {
             { clave: "operaciones", titulo: "Operaciones", tipo: "entero" },
           ]}
         />
-        <div className="mt-2 flex flex-row flex-wrap items-center gap-2 text-sm text-texto-suave">
-          <span>Por banco: el desglose completo ({nombreSubactividad("Tarjeta")} incluida).</span>
-          <BotonDescarga href="/api/exportar/subactividades" parametros={{ periodo: fecha }} texto="Desglose completo" />
-        </div>
       </section>
 
       <section id="p6" className="mt-8 scroll-mt-24" aria-labelledby="h-p6">
         <h2 id="h-p6">6. Períodos procesados y reconciliaciones</h2>
-        <ul className="mb-3 list-disc space-y-1 pl-5 text-texto-suave">
-          {recActual.resumen.map((r) => (
-            <li key={r.reconciliacion}><strong>Reconciliación {r.reconciliacion}:</strong> {r.descripcion}</li>
-          ))}
-        </ul>
         <TablaOrdenable
           titulo={`${lista.length} períodos procesados y estado de las reconciliaciones`}
           claveFila="fecha"
@@ -255,12 +240,11 @@ export default async function PaginaVerificacion({ searchParams }) {
             { clave: "fecha", titulo: "Período", tipo: "fecha", alinear: "izquierda" },
             { clave: "filas_leidas", titulo: "Filas leídas", tipo: "entero" },
             { clave: "universo_local_valido", titulo: "Universo válido", tipo: "entero" },
-            { clave: "rec1", titulo: "Reconciliación 1", tipo: "texto", alinear: "centro" },
-            { clave: "rec2", titulo: "Reconciliación 2", tipo: "texto", alinear: "centro" },
-            { clave: "rec3", titulo: "Reconciliación 3", tipo: "texto", alinear: "centro" },
+            { clave: "rec1", titulo: "Subactividades = actividad", tipo: "texto", alinear: "centro" },
+            { clave: "rec2", titulo: "Actividades = cartera", tipo: "texto", alinear: "centro" },
+            { clave: "rec3", titulo: "Bancos = universo", tipo: "texto", alinear: "centro" },
           ]}
         />
-        <p className="mt-2 text-sm text-texto-suave">&laquo;Cuadra&raquo;: diferencia de 0.00. Entre paréntesis: comprobaciones que cuadran / total.</p>
         <details className="mt-4">
           <summary className="cursor-pointer font-medium">Ver las comprobaciones de {formatearFecha(fecha)} una por una ({detalleRec.length})</summary>
           <div className="mt-3">
@@ -268,10 +252,9 @@ export default async function PaginaVerificacion({ searchParams }) {
               titulo={`Detalle de reconciliaciones de ${formatearFecha(fecha)}`}
               claveFila="clave"
               compacta
-              altoMaximo="28rem"
               filas={detalleRec}
               columnas={[
-                { clave: "reconciliacion", titulo: "Rec.", tipo: "entero" },
+                { clave: "comprobacion", titulo: "Comprobación", tipo: "texto", alinear: "izquierda" },
                 { clave: "ranking", titulo: "Ranking", tipo: "ranking", alinear: "izquierda" },
                 { clave: "codigo_banco", titulo: "Banco", tipo: "codigo" },
                 { clave: "esperado", titulo: "Esperado", tipo: "monto" },

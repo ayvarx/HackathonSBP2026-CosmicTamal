@@ -30,10 +30,9 @@
 //   eventos      opcional  { click: (params) => ... } — SOLO desde otro componente cliente.
 import dynamic from "next/dynamic";
 
-// Paleta categórica validada (orden fijo, segura para daltonismo en pares adyacentes).
-// El color 1 (azul) es el predeterminado de una sola serie; el 2 (naranja) sirve para resaltar.
-// Tema Radar: el color 1 es el azul marino de la marca (--blue) y el 4 el azul claro (--purple).
-export const COLORES_GRAFICO = ["#106003", "#297D5F", "#7EAC39", "#136749", "#608D1A", "#419A33", "#034E33", "#426B04"];
+// Paleta de series: solo verdes de la marca (orden fijo). El ámbar COLOR_RESALTADO se reserva
+// para resaltar el líder o un banco elegido.
+export const COLORES_GRAFICO = ["#106003", "#7EAC39", "#297D5F", "#419A33", "#136749", "#608D1A", "#034E33", "#426B04"];
 export const COLOR_RESALTADO = "#f5a524";
 
 // Tema sobrio: ejes y rejilla discretos, texto con los colores de la interfaz.
@@ -42,8 +41,9 @@ const TEMA_SBP = {
   backgroundColor: "transparent",
   textStyle: { fontFamily: 'Inter, "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Roboto, Arial, sans-serif', color: "#122a0f" },
   title: { textStyle: { color: "#122a0f", fontWeight: 700, fontSize: 14 }, subtextStyle: { color: "#375533" } },
-  legend: { textStyle: { color: "#375533" }, icon: "roundRect", itemWidth: 12, itemHeight: 12 },
+  legend: { top: 0, textStyle: { color: "#375533" }, icon: "roundRect", itemWidth: 12, itemHeight: 12 },
   tooltip: {
+    confine: true,
     backgroundColor: "#ffffff",
     borderColor: "#d9e9d7",
     borderWidth: 1,
@@ -62,7 +62,7 @@ const TEMA_SBP = {
     axisLabel: { color: "#375533" },
     splitLine: { lineStyle: { color: "#e7f3e5" } },
   },
-  bar: { itemStyle: { borderRadius: [0, 4, 4, 0] }, barMaxWidth: 28 },
+  bar: { itemStyle: { borderRadius: 4 }, barMaxWidth: 28 },
   line: { symbolSize: 8, lineStyle: { width: 2 } },
 };
 
@@ -131,16 +131,61 @@ function aplicarFormato(opcion, tipo) {
   };
 }
 
+/** Barras con el mismo radio en todo el gráfico; en series apiladas, sin esquinas redondeadas. */
+function ajustarSeries(opcion) {
+  if (!opcion || !Array.isArray(opcion.series)) return opcion;
+  const ejeY = Array.isArray(opcion.yAxis) ? opcion.yAxis[0] : opcion.yAxis;
+  const horizontal = ejeY?.type === "category";
+  return {
+    ...opcion,
+    series: opcion.series.map((serie) => {
+      if (serie?.type !== "bar") return serie;
+      const radio = serie.stack ? 0 : horizontal ? [0, 4, 4, 0] : [4, 4, 0, 0];
+      return { ...serie, itemStyle: { ...serie.itemStyle, borderRadius: radio } };
+    }),
+  };
+}
+
+/** Ejes de valor con cifras compactas ("50 M") cuando la página no indica un formato. */
+function ejesCompactos(opcion) {
+  if (!opcion) return opcion;
+  const compacto = (v) => {
+    if (typeof v !== "number") return v;
+    const absoluto = Math.abs(v);
+    if (absoluto >= 1e6) return formatearValorEje("monto", v);
+    if (absoluto >= 1e3) return formatoEntero.format(v);
+    return String(v);
+  };
+  const conEje = (eje) => {
+    if (!eje) return eje;
+    if (Array.isArray(eje)) return eje.map(conEje);
+    if (eje.type !== "value" || eje.axisLabel?.formatter) return eje;
+    return { ...eje, axisLabel: { ...eje.axisLabel, formatter: compacto } };
+  };
+  return { ...opcion, xAxis: conEje(opcion.xAxis), yAxis: conEje(opcion.yAxis) };
+}
+
 export default function Grafico({ opcion, titulo, descripcion, altura = 360, formatoValor, eventos }) {
   const alto = typeof altura === "number" ? `${altura}px` : altura;
   // Valores por defecto: tooltip al pasar sobre cada categoría y márgenes ajustados.
   // Lo que traiga `opcion` siempre tiene prioridad.
-  const base = {
+  const base = ajustarSeries({
     tooltip: { trigger: "axis", axisPointer: { type: "shadow", shadowStyle: { color: "rgba(40, 127, 29, 0.07)" } } },
     ...opcion,
-  };
-  if (!Array.isArray(base.grid)) base.grid = { top: 24, right: 24, bottom: 32, ...base.grid };
-  const opcionFinal = aplicarFormato(base, formatoValor);
+  });
+  // Tooltip siempre dentro del gráfico y con fondo opaco; leyenda arriba.
+  if (base.tooltip && !Array.isArray(base.tooltip)) base.tooltip = { confine: true, backgroundColor: "#ffffff", ...base.tooltip };
+  if (base.legend && !Array.isArray(base.legend)) {
+    base.legend = { ...base.legend };
+    delete base.legend.bottom;
+    if (typeof base.legend.top !== "number" && base.legend.top !== "top") base.legend.top = 0;
+  }
+  if (!Array.isArray(base.grid)) {
+    base.grid = { top: base.legend ? 40 : 24, right: 24, bottom: 32, ...base.grid };
+    // Con la leyenda arriba, deja sitio para que no tape el área del gráfico.
+    if (base.legend && typeof base.grid.top === "number" && base.grid.top < 36) base.grid.top = 40;
+  }
+  const opcionFinal = formatoValor ? aplicarFormato(base, formatoValor) : ejesCompactos(base);
 
   return (
     <figure className="tarjeta">

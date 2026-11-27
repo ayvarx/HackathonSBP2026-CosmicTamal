@@ -1,11 +1,9 @@
 "use client";
-// Edita un parámetro. Envía { clave, valor } a /api/admin/parametros, que exige el perfil
-// Administrador, valida el valor y anota el cambio en la bitácora. Luego refresca la página
-// para que se vea de inmediato cuántos movimientos marca la nueva regla.
+// Edita un parámetro (POST /api/admin/parametros) y refresca la página.
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function FormularioParametro({ clave, valor, descripcion, control, actualizado }) {
+export default function FormularioParametro({ clave, valor, control }) {
   const router = useRouter();
   const [texto, setTexto] = useState(valor);
   const [estado, setEstado] = useState({ tipo: "inicial" });
@@ -36,7 +34,6 @@ export default function FormularioParametro({ clave, valor, descripcion, control
   return (
     <form className="tarjeta flex flex-col gap-2" onSubmit={guardar}>
       <label htmlFor={id} className="font-semibold">{control.titulo}</label>
-      <p className="text-sm text-texto-suave">{descripcion}</p>
       <div className="flex items-center gap-2">
         {control.tipo === "si_no" ? (
           <select id={id} className="control" value={texto} onChange={(e) => setTexto(e.target.value)}>
@@ -51,21 +48,19 @@ export default function FormularioParametro({ clave, valor, descripcion, control
             inputMode={control.tipo === "entero" ? "numeric" : "decimal"}
             value={texto}
             onChange={(e) => setTexto(e.target.value)}
-            aria-describedby={`${id}-ayuda`}
+            aria-describedby={control.tipo === "entero" || control.tipo === "decimal" ? `${id}-ayuda` : undefined}
           />
         )}
         {control.unidad && <span className="text-sm text-texto-suave">{control.unidad}</span>}
-      </div>
-      <p id={`${id}-ayuda`} className="text-xs text-texto-tenue">
-        {control.tipo === "entero" && `Entero entre ${control.min} y ${control.max}. `}
-        {control.tipo === "decimal" && "Número mayor o igual a 0, con punto decimal (por ejemplo 10 o 7.5). "}
-        Último cambio: {actualizado}
-      </p>
-      <div>
-        <button type="submit" className="boton" disabled={estado.tipo === "guardando" || texto === valor}>
+        <button type="submit" className="boton ml-auto" disabled={estado.tipo === "guardando" || texto === valor}>
           {estado.tipo === "guardando" ? "Guardando…" : "Guardar"}
         </button>
       </div>
+      {(control.tipo === "entero" || control.tipo === "decimal") && (
+        <p id={`${id}-ayuda`} className="text-xs text-texto-tenue">
+          {control.tipo === "entero" ? `Entre ${control.min} y ${control.max}.` : "Por ejemplo 10 o 7.5."}
+        </p>
+      )}
       <p aria-live="polite" className="text-sm">
         {estado.tipo === "ok" && <span className="font-semibold text-sube">{estado.mensaje}</span>}
         {estado.tipo === "error" && <span role="alert" className="font-semibold text-error-texto">{estado.mensaje}</span>}

@@ -15,7 +15,7 @@
 //   parametros  (objeto)  opcional  Se agregan como ?clave=valor (se omiten los vacíos).
 //   texto       (string)  Predeterminado "Descargar".
 //   formato     (string)  Predeterminado "CSV"; formato que se lista primero en el menú.
-//   descripcion (string)  opcional  Qué contiene el archivo (se muestra al abrir el menú y como ayuda).
+//   descripcion (string)  opcional  Qué contiene el archivo (solo como ayuda al pasar el mouse).
 //   variante    ("primario" | "secundario")  Predeterminado "secundario".
 const OPCIONES = [
   { clave: "csv", texto: "CSV" },
@@ -51,7 +51,7 @@ export default function BotonDescarga({
         {texto}
         <span aria-hidden="true" className="text-xs">▾</span>
       </summary>
-      <div className="absolute left-0 top-full z-40 mt-1 flex min-w-full w-max max-w-xs flex-col rounded-md border border-borde bg-superficie p-1 shadow-lg">
+      <div className="absolute right-0 top-full z-40 mt-1 flex min-w-full w-max max-w-xs flex-col rounded-md border border-borde bg-superficie p-1 shadow-lg">
         {opciones.map((o) => (
           <a
             key={o.clave}
@@ -63,7 +63,6 @@ export default function BotonDescarga({
             {o.texto}
           </a>
         ))}
-        {descripcion && <span className="border-t border-borde-suave px-3 pt-2 pb-1 text-xs text-texto-tenue">{descripcion}</span>}
       </div>
     </details>
   );

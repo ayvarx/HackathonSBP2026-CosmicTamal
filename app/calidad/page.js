@@ -7,10 +7,9 @@ import Filtros from "@/components/Filtros";
 import Paginacion from "@/components/Paginacion";
 import TablaOrdenable from "@/components/TablaOrdenable";
 import BotonDescarga from "@/components/BotonDescarga";
-import EmbudoCascada from "./EmbudoCascada";
 import CalidadPage from "./_amet/CalidadPage";
 import { exigirPerfil } from "@/lib/auth";
-import { alertas, calidad, catalogos, exclusiones, FILTROS, periodos, reconciliaciones } from "@/lib/consultas";
+import { alertas, calidad, catalogos, exclusiones, FILTROS, periodos } from "@/lib/consultas";
 import { elegirPeriodo } from "@/lib/consultas-calidad";
 import { formatearEntero, formatearFecha, nombreBanco } from "@/lib/formato";
 
@@ -19,12 +18,15 @@ export const metadata = { title: "Calidad de datos" };
 
 const POR_PAGINA = 50;
 
-const TIPOS_ALERTA = [
-  { tipo: "BANCO_NO_CATALOGADO", texto: "Banco no catalogado", ayuda: "El Codigo_Banco no existe en Bancos_ficticios.csv (integridad referencial)." },
-  { tipo: "FACILIDAD_NO_CATALOGADA", texto: "Facilidad no catalogada", ayuda: "La Facilidad_Crediticia no existe en la tabla SB21 (integridad referencial)." },
-  { tipo: "TARJETA_SIN_FACILIDAD_07", texto: "Tarjeta sin facilidad 07", ayuda: "Coherencia SB21: un CINU de Tarjeta debería venir con facilidad 07." },
-  { tipo: "AUTOMOVIL_SIN_FACILIDAD_03", texto: "Automóvil sin facilidad 03", ayuda: "Coherencia SB21: un CINU de Automóvil debería venir con facilidad 03." },
-];
+const TIPOS_ALERTA = {
+  BANCO_NO_CATALOGADO: "Banco no catalogado",
+  FACILIDAD_NO_CATALOGADA: "Facilidad no catalogada",
+  TARJETA_SIN_FACILIDAD_07: "Tarjeta sin facilidad 07",
+  AUTOMOVIL_SIN_FACILIDAD_03: "Automóvil sin facilidad 03",
+};
+
+// Quita la tarjeta envolvente de Filtros para que los selectores queden en la fila del título.
+const SIN_TARJETA = "[&_.tarjeta]:m-0 [&_.tarjeta]:border-0 [&_.tarjeta]:bg-transparent [&_.tarjeta]:p-0 [&_.tarjeta]:shadow-none";
 
 export default async function PaginaCalidad({ searchParams }) {
   await exigirPerfil("publico");
@@ -41,14 +43,13 @@ export default async function PaginaCalidad({ searchParams }) {
       const banco = un(sp.banco);
       const busqueda = un(sp.busqueda).trim().slice(0, 40);
       const pagina = Math.max(1, Number.parseInt(un(sp.pagina), 10) || 1);
-      const [todas, al, ex, cat, rec] = await Promise.all([
+      const [todas, al, ex, cat] = await Promise.all([
         calidad(),
         alertas(fecha),
         exclusiones({ fecha, filtro: filtro || undefined, banco: banco || undefined, busqueda: busqueda || undefined, pagina, tamano: POR_PAGINA }),
         catalogos(),
-        reconciliaciones(fecha),
       ]);
-      datos = { lista, fecha, filtro, banco, busqueda, pagina, todas, al, ex, bancos: cat.bancos, verificaciones: rec.resumen };
+      datos = { lista, fecha, filtro, banco, busqueda, pagina, todas, al, ex, bancos: cat.bancos };
     }
   } catch (e) {
     return (
@@ -64,60 +65,45 @@ export default async function PaginaCalidad({ searchParams }) {
       <>
         <EncabezadoPagina titulo="Calidad de datos" />
         <EstadoVacio titulo="Todavía no hay cortes cargados" accion={{ href: "/admin", texto: "Cargar un corte (administrador)" }}>
-          El reporte de calidad aparece cuando se carga al menos un archivo AT03.
+          Carga un corte para ver su calidad de datos.
         </EstadoVacio>
       </>
     );
   }
 
-  const { lista, fecha, filtro, banco, busqueda, pagina, todas, al, ex, bancos, verificaciones } = datos;
+  const { lista, fecha, filtro, banco, busqueda, pagina, todas, al, ex, bancos } = datos;
   const q = todas.find((x) => x.fecha === fecha);
-  // Clave única por fila (una misma fila del archivo puede tener varias alertas).
-  const conClave = (filas) => filas.map((f, i) => ({ ...f, clave: `${f.archivo}-${f.fila_archivo}-${f.tipo ?? f.filtro}-${i}` }));
+  // Clave única por fila (una misma fila del archivo puede aparecer con varios motivos).
+  const conClave = (filas) => filas.map((f, i) => ({ ...f, clave: `${f.archivo}-${f.fila_archivo}-${f.filtro}-${i}` }));
   const totalPaginas = Math.max(1, Math.ceil(ex.total / POR_PAGINA));
-  const cuentaAlertas = Object.fromEntries(al.resumen.map((r) => [r.tipo, r.cantidad]));
-  const hayAlertas = al.resumen.some((r) => r.cantidad > 0);
+  const resumenAlertas = al.resumen
+    .filter((r) => Number(r.cantidad) > 0)
+    .map((r) => ({ tipo: r.tipo, texto: TIPOS_ALERTA[r.tipo] ?? r.tipo, cantidad: Number(r.cantidad) }));
+  const totalAlertas = resumenAlertas.reduce((s, r) => s + r.cantidad, 0);
 
-  const campos = [
+  const campoPeriodo = [
     { nombre: "periodo", etiqueta: "Período", predeterminado: fecha, opciones: lista.map((p) => ({ valor: p.fecha, texto: formatearFecha(p.fecha) })) },
-    { nombre: "filtro", etiqueta: "Motivo de exclusión", textoTodos: "Todos (E1 a E4)", opciones: FILTROS.map((f) => ({ valor: f.clave, texto: `${f.clave} · ${f.nombre}` })) },
+  ];
+  const camposExcluidas = [
+    { nombre: "filtro", etiqueta: "Motivo", textoTodos: "Todos (E1 a E4)", opciones: FILTROS.map((f) => ({ valor: f.clave, texto: `${f.clave} · ${f.nombre}` })) },
     { nombre: "banco", etiqueta: "Banco", textoTodos: "Todos los bancos", opciones: bancos.map((b) => ({ valor: b.codigo_banco, texto: nombreBanco(b.codigo_banco, b.nombre_ficticio) })) },
   ];
 
   return (
     <>
-      <EncabezadoPagina
-        titulo="Calidad de datos"
-        descripcion={`Período: ${formatearFecha(fecha)}.`}
-      >
-        <div className="flex flex-row flex-wrap items-start gap-2">
-        <BotonDescarga href="/api/exportar/calidad" texto="Reporte de calidad" descripcion="Todos los períodos cargados." />
-        <BotonDescarga href="/api/exportar/exclusiones" parametros={{ fecha }} texto="Filas excluidas" descripcion={`Todas las excluidas de ${formatearFecha(fecha)}.`} />
+      <EncabezadoPagina titulo="Calidad de datos" descripcion={`Período: ${formatearFecha(fecha)}.`}>
+        <div className={SIN_TARJETA}>
+          <Filtros campos={campoPeriodo} reiniciar={["pagina"]} conLimpiar={false} />
         </div>
+        <BotonDescarga href="/api/exportar/calidad" texto="Reporte de calidad" />
       </EncabezadoPagina>
 
-      <Filtros campos={campos} reiniciar={["pagina"]} />
-
-      <section className="mt-6" aria-label="Resumen de calidad">
-        <CalidadPage
-          q={q}
-          todas={todas}
-          fecha={fecha}
-          verificaciones={verificaciones}
-          totalAlertas={al.resumen.reduce((s, r) => s + Number(r.cantidad || 0), 0)}
-        />
-      </section>
-
-      <section className="mt-6" aria-labelledby="t-cascada">
-        <h2 id="t-cascada">Cascada de exclusión E1 → E4</h2>
-        <p className="mb-3 text-texto-suave">
-          Cada fila se evalúa en orden y recibe solo el primer filtro que incumple, así ninguna se cuenta dos veces.
-        </p>
-        <EmbudoCascada q={q} />
+      <section aria-label="Resumen de calidad">
+        <CalidadPage q={q} totalAlertas={totalAlertas} />
       </section>
 
       <section className="mt-8" aria-labelledby="t-periodos">
-        <h2 id="t-periodos">Todos los períodos</h2>
+        <h2 id="t-periodos" className="mb-3">Todos los períodos</h2>
         <TablaOrdenable
           titulo="Reporte de calidad por período"
           claveFila="fecha"
@@ -140,10 +126,7 @@ export default async function PaginaCalidad({ searchParams }) {
 
       <section className="mt-8" aria-labelledby="t-indep">
         <h2 id="t-indep">Conteos independientes</h2>
-        <p className="mb-3 text-texto-suave">
-          Cada filtro contado por separado sobre todas las filas leídas. Una misma fila puede
-          incumplir varios filtros, por eso estas cifras no suman al total.
-        </p>
+        <p className="mb-3 text-texto-suave">Cada filtro contado por separado; una fila puede incumplir varios, así que no suman al total.</p>
         <TablaOrdenable
           titulo="Conteos independientes por filtro"
           claveFila="fecha"
@@ -151,73 +134,59 @@ export default async function PaginaCalidad({ searchParams }) {
           filas={todas}
           columnas={[
             { clave: "fecha", titulo: "Período", tipo: "fecha", alinear: "izquierda" },
-            { clave: "indep_duplicados", titulo: "Indep. duplicados", tipo: "entero" },
-            { clave: "indep_destino_extranjero", titulo: "Indep. extranjero", tipo: "entero" },
-            { clave: "indep_saldo_no_positivo", titulo: "Indep. saldo ≤ 0", tipo: "entero" },
-            { clave: "indep_actividad_no_catalogada", titulo: "Indep. no catalogada", tipo: "entero" },
+            { clave: "indep_duplicados", titulo: "Duplicados", tipo: "entero" },
+            { clave: "indep_destino_extranjero", titulo: "Extranjero", tipo: "entero" },
+            { clave: "indep_saldo_no_positivo", titulo: "Saldo ≤ 0", tipo: "entero" },
+            { clave: "indep_actividad_no_catalogada", titulo: "No catalogada", tipo: "entero" },
           ]}
         />
       </section>
 
       <section className="mt-8" aria-labelledby="t-alertas">
-        <h2 id="t-alertas">Alertas de integridad y coherencia</h2>
-        <p className="mb-3 text-texto-suave">
-          Las alertas no excluyen filas. {hayAlertas ? "Hay alertas en este período." : "Este período no tiene alertas."}
-        </p>
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {TIPOS_ALERTA.map((t) => (
-            <li key={t.tipo} className="tarjeta" title={t.ayuda}>
-              <p className="text-sm text-texto-suave">{t.texto}</p>
-              <p className="text-2xl font-semibold tabular-nums">{formatearEntero(cuentaAlertas[t.tipo] ?? 0)}</p>
-              <p className="text-xs text-texto-suave">{(cuentaAlertas[t.tipo] ?? 0) === 0 ? "Sin alertas" : "Con alertas"} · {t.ayuda}</p>
-            </li>
-          ))}
-        </ul>
-        {hayAlertas && (
-          <div className="mt-4">
-            <TablaOrdenable
-              titulo="Detalle de alertas (máximo 500 filas)"
-              claveFila="clave"
-              compacta
-              altoMaximo="20rem"
-              filas={conClave(al.filas)}
-              columnas={[
-                { clave: "tipo", titulo: "Tipo", tipo: "texto" },
-                { clave: "archivo", titulo: "Archivo", tipo: "texto" },
-                { clave: "fila_archivo", titulo: "Fila", tipo: "entero" },
-                { clave: "numero_prestamo", titulo: "Préstamo", tipo: "codigo" },
-                { clave: "codigo_banco", titulo: "Banco", tipo: "codigo" },
-                { clave: "valor", titulo: "Valor", tipo: "codigo" },
-                { clave: "detalle", titulo: "Detalle", tipo: "texto", alinear: "izquierda" },
-              ]}
-            />
-          </div>
+        <h2 id="t-alertas" className="mb-3">Alertas de integridad y coherencia</h2>
+        {totalAlertas === 0 ? (
+          <p className="text-texto-suave">Sin alertas de integridad ni de coherencia en este período.</p>
+        ) : (
+          <TablaOrdenable
+            titulo="Alertas por tipo"
+            claveFila="tipo"
+            compacta
+            filas={resumenAlertas}
+            columnas={[
+              { clave: "texto", titulo: "Tipo", tipo: "texto", alinear: "izquierda" },
+              { clave: "cantidad", titulo: "Cantidad", tipo: "entero" },
+            ]}
+          />
         )}
       </section>
 
       <section className="mt-8" aria-labelledby="t-excluidas">
-        <h2 id="t-excluidas">Filas excluidas</h2>
-        <p className="mb-3 text-texto-suave">
-          {formatearEntero(ex.total)} {ex.total === 1 ? "fila" : "filas"} con los filtros elegidos. La columna Fila es la línea física del archivo (la 1 es el encabezado).
-        </p>
-        <form method="get" className="mb-4 flex flex-wrap items-end gap-2">
-          {periodoOculto(fecha, filtro, banco)}
-          <div>
-            <label htmlFor="busqueda" className="etiqueta-campo">Buscar número de préstamo</label>
-            <input id="busqueda" name="busqueda" defaultValue={busqueda} maxLength={40} className="control" placeholder="Parte del número" />
+        <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
+          <div className="flex flex-wrap items-end gap-3">
+            <h2 id="t-excluidas" className="m-0">Filas excluidas</h2>
+            <div className={SIN_TARJETA}>
+              <Filtros campos={camposExcluidas} reiniciar={["pagina"]} conLimpiar={false} />
+            </div>
+            <form method="get" className="flex flex-wrap items-end gap-2">
+              {periodoOculto(fecha, filtro, banco)}
+              <div>
+                <label htmlFor="busqueda" className="etiqueta-campo">Número de préstamo</label>
+                <input id="busqueda" name="busqueda" defaultValue={busqueda} maxLength={40} className="control" placeholder="Parte del número" />
+              </div>
+              <button type="submit" className="boton boton-secundario">Buscar</button>
+            </form>
           </div>
-          <button type="submit" className="boton boton-secundario">Buscar</button>
-        </form>
+          <BotonDescarga href="/api/exportar/exclusiones" parametros={{ fecha }} texto="Filas excluidas" />
+        </div>
         <TablaOrdenable
-          titulo={`Filas excluidas de ${formatearFecha(fecha)}`}
+          titulo={`${formatearEntero(ex.total)} ${ex.total === 1 ? "fila excluida" : "filas excluidas"} · ${formatearFecha(fecha)}`}
           claveFila="clave"
           compacta
-          altoMaximo="32rem"
           filas={conClave(ex.filas)}
           mensajeVacio="Ninguna fila excluida coincide con los filtros."
           columnas={[
             { clave: "archivo", titulo: "Archivo", tipo: "texto", alinear: "izquierda" },
-            { clave: "fila_archivo", titulo: "Fila", tipo: "entero", ayuda: "Línea física del archivo (encabezado = 1)" },
+            { clave: "fila_archivo", titulo: "Fila", tipo: "entero" },
             { clave: "numero_prestamo", titulo: "Préstamo", tipo: "codigo" },
             { clave: "filtro", titulo: "Filtro", tipo: "codigo", alinear: "centro" },
             { clave: "motivo", titulo: "Motivo", tipo: "texto", alinear: "izquierda" },

@@ -19,7 +19,7 @@
 }
 @media (max-width: 900px) { .visitante { margin: 0 0 22px; } }
 .hero h1 { color: #fff; }
-.hero-acciones { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.hero-acciones { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-top: 16px; }
 .hero-acciones a {
   display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; font-weight: 700; font-size: 14px;
   background: #ffffff; color: #1a690f; text-decoration: none; border-radius: 10px;
@@ -35,7 +35,7 @@
 /* Los gráficos ECharts (components/Grafico) van dentro de un panel: sin doble tarjeta. */
 .dash-panel figure.tarjeta { border: 0; padding: 0; margin: 0; box-shadow: none; background: transparent; }
 .dash { margin-bottom: 28px; }
-.dash-actions a.ghost { text-decoration: none; display: inline-flex; align-items: center; }
+a.ghost, .dash-actions a.ghost { text-decoration: none; display: inline-flex; align-items: center; }
 .kpi-enlace { font-size: 12px; font-weight: 600; }
 .recon-pie { margin: 0; font-size: 12px; }
 
@@ -45,31 +45,25 @@ a.lider-ver { text-decoration: none; display: inline-block; }
 .lider-card header .lider-etiqueta { margin-left: auto; }
 .kpi-card figure.tarjeta { border: 0; padding: 0; margin: 0; box-shadow: none; background: transparent; }
 .lider-card header .lider-toggle { flex: none; }
-/* Portado del frontend de Amet: styles.css (.eyebrow). */
-.eyebrow { font-size: 10px; letter-spacing: 1.4px; color: var(--muted); font-weight: 700; text-transform: uppercase; }
 
 /* Movimientos significativos: tres tarjetas destacadas (nuevo líder, mayor subida, mayor bajada). */
 .destacados { list-style: none; margin: 0 0 16px; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 .destacado {
-  background: #ffffff; border: 1px solid #d8efd5; border-top: 4px solid #106003; border-radius: 12px;
-  padding: 16px 18px; display: flex; flex-direction: column; gap: 4px; min-width: 0;
-  box-shadow: 0 2px 10px rgba(5, 34, 0, 0.08);
+  background: #ffffff; border: 1px solid #d8efd5; border-radius: 12px;
+  padding: 16px 18px; display: flex; flex-direction: column; gap: 4px; min-width: 0; box-shadow: none;
 }
 .destacado-tipo { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
 .destacado-banco { font-size: 20px; font-weight: 800; color: #052200; line-height: 1.2; overflow-wrap: anywhere; }
 .destacado-ranking { font-size: 13px; color: #034E33; }
 .destacado-cifra { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; margin-top: 4px; }
 .destacado small { font-size: 12px; color: #4e634b; }
-.destacado--lider { border-top-color: #d97706; background: #fffbeb; }
-.destacado--lider .destacado-tipo, .destacado--lider .destacado-cifra { color: #b45309; }
-.destacado--subida { border-top-color: #267F18; background: #f3f9f1; }
+.destacado--lider .destacado-tipo, .destacado--lider .destacado-cifra { color: #9a6100; }
 .destacado--subida .destacado-tipo, .destacado--subida .destacado-cifra { color: #267F18; }
-.destacado--bajada { border-top-color: #b91c1c; background: #fef2f2; }
-.destacado--bajada .destacado-tipo, .destacado--bajada .destacado-cifra { color: #b91c1c; }
+.destacado--bajada .destacado-tipo, .destacado--bajada .destacado-cifra { color: #b42318; }
 @media (max-width: 900px) { .destacados { grid-template-columns: 1fr; } }
 
 /* Descargas de la portada: botones lado a lado en la esquina inferior derecha de "Rankings por actividad". */
-.descargas-botones { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: flex-start; gap: 10px; margin-top: 16px; }
+.descargas-botones { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 10px; margin-left: auto; }
 .descargas-botones details > div { left: auto; right: 0; }
 
 /* Resumen del corte compacto: título a la izquierda y selector de período a la derecha, sin tarjeta. */
@@ -83,3 +77,9 @@ a.lider-ver { text-decoration: none; display: inline-block; }
 /* Líder de cada ranking: la actividad se ve más grande que el banco. */
 .lideres .lider-card header strong { font-size: 19px; font-weight: 800; }
 .lideres .lider-banco { font-size: 14px; }
+
+/* Título de sección y sus acciones en una sola fila. */
+.fila-titulo { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; margin-bottom: 12px; }
+.fila-titulo h2 { margin: 0; }
+.detalle-barra { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; margin-bottom: 16px; }
+.detalle-barra h2 { margin: 0; font-size: 22px; font-weight: 800; color: #22371f; }

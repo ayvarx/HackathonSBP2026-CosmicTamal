@@ -1,108 +1,67 @@
-// Portado del frontend de Amet: components/CalidadPage.jsx (datos por props desde lib/consultas.js).
-import { formatearEntero, formatearFecha } from "@/lib/formato";
+// Resumen de calidad de un período: cuatro cifras, la cascada E1–E4 y su reparto.
+import { formatearEntero, formatearMonto } from "@/lib/formato";
 import "./calidad.css";
 
 const num = (v) => Number(String(v ?? 0).replaceAll(",", "")) || 0;
 const pct = (n, base) => (base ? `${((n / base) * 100).toFixed(1)} %` : "—");
 
 const MOTIVOS = [
-  { k: "E1", campo: "e1_duplicados", t: "Préstamo repetido", color: "#E8A33D", ayuda: "Mismo número de préstamo más de una vez en el corte." },
-  { k: "E2", campo: "e2_destino_extranjero", t: "Destino extranjero", color: "#D98C1F", ayuda: "El destino del préstamo no es local." },
-  { k: "E3", campo: "e3_saldo_no_positivo", t: "Saldo cero o negativo", color: "#F2C46D", ayuda: "El saldo no es positivo." },
-  { k: "E4", campo: "e4_actividad_no_catalogada", t: "Actividad no catalogada", color: "#B45309", ayuda: "La actividad no existe en el catálogo CINU." },
+  { k: "E1", campo: "e1_duplicados", t: "Préstamo repetido", color: "#f5a524" },
+  { k: "E2", campo: "e2_destino_extranjero", t: "Destino extranjero", color: "#7EAC39" },
+  { k: "E3", campo: "e3_saldo_no_positivo", t: "Saldo cero o negativo", color: "#419A33" },
+  { k: "E4", campo: "e4_actividad_no_catalogada", t: "Actividad no catalogada", color: "#608D1A" },
 ];
 
-/**
- * @param {{q: object, todas: object[], fecha: string, verificaciones: {reconciliacion:number, descripcion:string, todas_cuadran:boolean}[], totalAlertas: number}} props
- */
-export default function CalidadPage({ q, todas, fecha, verificaciones, totalAlertas }) {
+/** @param {{q: object, totalAlertas: number}} props */
+export default function CalidadPage({ q, totalAlertas }) {
   const leidas = num(q?.filas_leidas);
   const validas = num(q?.universo_local_valido);
-  const descartados = leidas - validas;
-  const reparto = [
-    { nombre: "Préstamos válidos", valor: validas, color: "#094000", ayuda: "Entran al ranking." },
-    ...MOTIVOS.map((m) => ({ nombre: `${m.k} · ${m.t}`, valor: num(q?.[m.campo]), color: m.color, ayuda: m.ayuda })),
-  ];
-  const verifOk = verificaciones.filter((v) => v.todas_cuadran).length;
+  const motivos = MOTIVOS.map((m) => ({ ...m, valor: num(q?.[m.campo]) }));
+  const descartados = motivos.reduce((s, m) => s + m.valor, 0);
+  const suma = descartados + validas;
+  const cuadra = suma === leidas;
 
   return (
     <div className="calidad">
-      <section className="cal-resumen" aria-label="Resumen del corte">
-        <div><span>Registros leídos</span><strong>{formatearEntero(leidas)}</strong></div>
-        <div className="destacado"><span>Préstamos válidos</span><strong>{formatearEntero(validas)}</strong><small>{pct(validas, leidas)} del archivo</small></div>
-        <div><span>Descartados</span><strong>{formatearEntero(descartados)}</strong><small>{pct(descartados, leidas)} del archivo</small></div>
-        <div className={totalAlertas ? "alerta" : ""}><span>Alertas de coherencia</span><strong>{formatearEntero(totalAlertas)}</strong></div>
-      </section>
+      <ul className="cal-resumen" aria-label="Resumen del corte">
+        <li><span>Registros leídos</span><strong>{formatearEntero(leidas)}</strong><small>Filas del archivo</small></li>
+        <li><span>Préstamos válidos</span><strong>{formatearEntero(validas)}</strong><small>{pct(validas, leidas)} del archivo</small></li>
+        <li><span>Descartados</span><strong>{formatearEntero(descartados)}</strong><small>{pct(descartados, leidas)} del archivo</small></li>
+        <li><span>Alertas de coherencia</span><strong>{formatearEntero(totalAlertas)}</strong><small>{totalAlertas ? "Revise el detalle abajo" : "Sin alertas"}</small></li>
+      </ul>
 
-      <section className="cal-bloque">
-        <header>
-          <span className="cal-etiqueta">Reparto del archivo</span>
-          <h3>Qué se conserva y qué se descarta, y por qué</h3>
-          <p>La barra reparte los registros descartados por motivo.</p>
-        </header>
+      <section className="cal-bloque" aria-labelledby="t-cascada">
+        <h2 id="t-cascada">Cascada de exclusión E1 → E4</h2>
         <div className="cal-franja" role="img" aria-label="Reparto de registros descartados por motivo">
-          {reparto.slice(1).map((r) => (
+          {motivos.map((m) => (
             <div
-              key={r.nombre}
+              key={m.k}
               className="cal-franja-seg"
-              style={{ width: `${descartados ? (r.valor / descartados) * 100 : 0}%`, background: r.color }}
-              title={`${r.nombre}: ${formatearEntero(r.valor)} (${pct(r.valor, leidas)})`}
+              style={{ width: `${descartados ? (m.valor / descartados) * 100 : 0}%`, background: m.color }}
+              title={`${m.k} · ${m.t}: ${formatearEntero(m.valor)}`}
             />
           ))}
         </div>
         <ul className="cal-leyenda">
-          {reparto.map((r) => (
-            <li key={r.nombre} title={r.ayuda}>
-              <i style={{ background: r.color }} />
-              <span>{r.nombre}</span>
-              <b>{formatearEntero(r.valor)}</b>
-              <em>{pct(r.valor, leidas)}</em>
+          {motivos.map((m) => (
+            <li key={m.k}>
+              <i style={{ background: m.color }} />
+              <span>{m.k} · {m.t}</span>
+              <b>{formatearEntero(m.valor)}</b>
+              <em>{pct(m.valor, leidas)}</em>
             </li>
           ))}
+          <li>
+            <i style={{ background: "#094000" }} />
+            <span>Universo local válido · {formatearMonto(q?.saldo_universo_local_valido)}</span>
+            <b>{formatearEntero(validas)}</b>
+            <em>{pct(validas, leidas)}</em>
+          </li>
         </ul>
-      </section>
-
-      {todas.length > 1 && (
-        <section className="cal-bloque">
-          <header>
-            <span className="cal-etiqueta">Comparación entre cortes</span>
-            <h3>Cómo cambió la calidad de un corte a otro</h3>
-          </header>
-          <div className="cal-cortes">
-            {todas.map((c) => {
-              const l = num(c.filas_leidas);
-              const v = num(c.universo_local_valido);
-              return (
-                <article key={c.fecha} className={`cal-corte ${c.fecha === fecha ? "activo" : ""}`}>
-                  <span className="cal-corte-titulo">{formatearFecha(c.fecha)}</span>
-                  <strong className="cal-corte-valido">{formatearEntero(v)}</strong>
-                  <small>préstamos válidos · {pct(v, l)} de {formatearEntero(l)}</small>
-                  <ul>
-                    {MOTIVOS.map((m) => (
-                      <li key={m.k}><span>{m.k} · {m.t}</span><b>{formatearEntero(num(c[m.campo]))}</b></li>
-                    ))}
-                  </ul>
-                </article>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
-      <section className="cal-bloque">
-        <header>
-          <span className="cal-etiqueta">Verificaciones</span>
-          <h3>Los totales cuadran entre sí</h3>
-          <p>{verifOk} de {verificaciones.length} verificaciones cuadran al centavo en este corte.</p>
-        </header>
-        <ul className="cal-verif">
-          {verificaciones.map((v) => (
-            <li key={v.reconciliacion} className={v.todas_cuadran ? "ok" : "fallo"} aria-label={v.todas_cuadran ? "Cuadra" : "No cuadra"}>
-              <span>{v.descripcion}</span>
-              <b>{v.todas_cuadran ? "✔" : "✖"}</b>
-            </li>
-          ))}
-        </ul>
+        <p className={`cal-identidad ${cuadra ? "" : "fallo"}`} role="status">
+          Leídas {formatearEntero(leidas)} = E1 + E2 + E3 + E4 + universo = {formatearEntero(suma)}
+          {cuadra ? " ✓" : ` (diferencia ${formatearEntero(leidas - suma)})`}
+        </p>
       </section>
     </div>
   );

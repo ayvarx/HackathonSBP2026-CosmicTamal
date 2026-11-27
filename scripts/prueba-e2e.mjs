@@ -272,7 +272,9 @@ async function fasePublico() {
   const fase = 'público';
   anotar('\n== Fase 2: perfil Público ==');
   for (const ruta of PANTALLAS_PUBLICAS) {
-    await revisarPantalla(fase, 'publico', ruta, { debeContener: ['Banco'], periodoFranja: 'agosto de 2026' });
+    // Reportes solo lista descargas (sin nombres de banco): se comprueba que ofrece las de rankings y calidad.
+    const debeContener = ruta === '/reportes' ? ['Rankings', 'Calidad de datos'] : ['Banco'];
+    await revisarPantalla(fase, 'publico', ruta, { debeContener, periodoFranja: 'agosto de 2026' });
   }
   // Ranking con filtros: período, ranking y banco.
   const filtrado = await revisarPantalla(fase, 'publico', '/rankings?periodo=20260731&ranking=CONSTRUCCION&banco=112',

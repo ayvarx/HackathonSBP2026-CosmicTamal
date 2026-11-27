@@ -89,50 +89,6 @@ function prepararLideres(resumen, hasta, gruposPorCorte, fecha) {
   });
 }
 
-/**
- * Lo más destacado del corte en tarjetas: nuevo líder, mayor subida y mayor bajada.
- * Solo compara posiciones (enteros), nunca montos.
- */
-function destacados(resumen, movs) {
-  const tarjetas = [];
-  const cambio = resumen.rankings.find((r) => r.cambio_de_lider);
-  if (cambio) {
-    tarjetas.push({
-      tipo: "lider",
-      titulo: "Nuevo líder",
-      icono: "★",
-      banco: cambio.lider.banco,
-      ranking: cambio.nombre,
-      cifra: "Puesto 1",
-      frase: `Antes: ${cambio.lider_anterior.banco}`,
-    });
-  }
-  const subida = movs.reduce((mejor, m) => (m.cambio_posicion > (mejor?.cambio_posicion ?? 0) ? m : mejor), null);
-  const bajada = movs.reduce((peor, m) => (m.cambio_posicion < (peor?.cambio_posicion ?? 0) ? m : peor), null);
-  // Si varios casos comparten el cambio máximo, no hay un único destacado: la tarjeta no se muestra.
-  const unico = (m) => m && movs.filter((x) => x.cambio_posicion === m.cambio_posicion).length === 1;
-  if (unico(subida)) {
-    tarjetas.push({
-      tipo: "subida",
-      titulo: "Mayor aumento",
-      icono: "▲",
-      banco: subida.banco,
-      ranking: nombreRanking(subida.ranking),
-      cifra: `${subida.posicion_anterior} → ${subida.posicion_actual} (+${subida.cambio_posicion})`,
-    });
-  }
-  if (unico(bajada)) {
-    tarjetas.push({
-      tipo: "bajada",
-      titulo: "Mayor bajada",
-      icono: "▼",
-      banco: bajada.banco,
-      ranking: nombreRanking(bajada.ranking),
-      cifra: `${bajada.posicion_anterior} → ${bajada.posicion_actual} (${bajada.cambio_posicion})`,
-    });
-  }
-  return tarjetas;
-}
 
 /** Encabezado del resumen: h1 para Analista/Administrador; h2 en la portada pública (que ya tiene su h1). */
 function Encabezado({ nivel, titulo, descripcion, children }) {
@@ -167,7 +123,7 @@ export default async function PaginaPanel({ searchParams }) {
         {encabezadoBase}
         <MensajeError
           titulo="No se pudo leer el resumen"
-          mensaje="La base de datos no respondió. Verifique que esté configurada (npm run db:setup) y vuelva a intentarlo."
+          mensaje="La base de datos no respondió. Vuelva a intentarlo."
           detalle={error?.message}
           accion={{ href: "/", texto: "Reintentar" }}
         />
@@ -184,7 +140,7 @@ export default async function PaginaPanel({ searchParams }) {
           titulo="Aún no hay cortes cargados"
           accion={alcanzaPerfil(perfil, "administrador") ? { href: "/admin", texto: "Cargar un corte AT03" } : undefined}
         >
-          Cuando se cargue el primer corte, aquí verá el resumen del período.
+          Aquí verá el resumen del período cuando se cargue el primer corte.
         </EstadoVacio>
       </>
     );
@@ -197,21 +153,21 @@ export default async function PaginaPanel({ searchParams }) {
   const esAnalista = !esPublico;
   const significativos = movs.filter((m) => m.significativo);
   const urlComparar = `/comparar?periodo=${fecha}&anterior=${anterior}`;
-  const tarjetasDestacadas = anterior ? destacados(resumen, movs) : [];
 
   // Composición por macroactividad, de mayor a menor saldo (orden exacto sobre texto decimal).
   const composicionOrdenada = [...composicion].sort((a, b) => compararDecimales(b.saldo, a.saldo));
   // Gráfico: cartera local válida de cada banco (ya viene ordenada por el motor).
   const opcionBancos = {
-    grid: { left: 158, right: 24, top: 8, bottom: 24, containLabel: false },
+    grid: { left: 188, right: 24, top: 8, bottom: 24, containLabel: false },
+    tooltip: { trigger: "axis", confine: true },
     xAxis: { type: "value" },
     yAxis: {
       type: "category",
       inverse: true,
       data: bancos.map((b) => `${b.posicion}. ${b.banco}`),
-      axisLabel: { align: "left", margin: 150, width: 140, overflow: "truncate" },
+      axisLabel: { align: "left", margin: 180, width: 172, overflow: "truncate" },
     },
-    series: [{ type: "bar", name: "Cartera local válida", data: bancos.map((b) => aNumeroParaGrafico(b.total_cartera_local_valida)) }],
+    series: [{ type: "bar", name: "Cartera local válida", itemStyle: { color: "#106003", borderRadius: [0, 4, 4, 0] }, data: bancos.map((b) => aNumeroParaGrafico(b.total_cartera_local_valida)) }],
   };
 
   // Datos para los componentes portados de Amet (app/_inicio/).
@@ -240,14 +196,13 @@ export default async function PaginaPanel({ searchParams }) {
         <VisitorHome
           fecha={fecha}
           cortes={datos.fechas.length}
-          obligatorios={resumen.rankings.filter((r) => r.tipo === "obligatorio").length}
           actividades={actividades}
           urlRankings={urlRankings({ periodo: fecha })}
           urlsDescarga={{
             rankings: "/api/exportar/rankings",
             desglose: "/api/exportar/subactividades",
           }}
-          lideres={<LideresRanking lideres={lideres} fecha={fecha} />}
+          lideres={<LideresRanking lideres={lideres} />}
         />
       )}
 
@@ -257,6 +212,12 @@ export default async function PaginaPanel({ searchParams }) {
           titulo={esPublico ? "Resumen del corte" : "Panel principal"}
           descripcion={anterior ? <small>frente a {textoAnterior}</small> : undefined}
         >
+          <Link className="ghost" href={urlRankings({ periodo: fecha })}>
+            Ver rankings →
+          </Link>
+          <Link className="ghost" href="/reportes">
+            Exportar →
+          </Link>
           <Filtros
             conLimpiar={false}
             campos={[
@@ -272,7 +233,7 @@ export default async function PaginaPanel({ searchParams }) {
       </div>
 
       {/* Líder de cada ranking: para Analista/Administrador, primera sección tras el encabezado */}
-      {esAnalista && <LideresRanking lideres={lideres} fecha={fecha} />}
+      {esAnalista && <LideresRanking lideres={lideres} />}
 
       {periodo.invalido && (
         <StatusNotice type="warning">
@@ -299,7 +260,6 @@ export default async function PaginaPanel({ searchParams }) {
         rankings={actividades}
         enlaces={{
           rankings: urlRankings({ periodo: fecha }),
-          exportar: "/reportes",
           movimientos: esAnalista ? { href: urlComparar, texto: "Ver todos los movimientos" } : undefined,
         }}
       />
@@ -308,14 +268,14 @@ export default async function PaginaPanel({ searchParams }) {
       <section aria-labelledby="titulo-composicion" className="mb-10">
         <h2 id="titulo-composicion" className="mb-3">Composición de la cartera local válida</h2>
         <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-2">
-          <div className="flex min-w-0 flex-col gap-3 overflow-x-auto [&_table]:text-[13px] [&_td]:px-2 [&_th]:px-2">
+          <div className="flex min-w-0 flex-col gap-3 overflow-x-auto [&_table]:w-full [&_table]:text-[13px] [&_td]:whitespace-nowrap [&_td]:px-2 [&_th]:whitespace-nowrap [&_th]:px-2">
             <TablaOrdenable
-              titulo="Saldo por macroactividad"
+              titulo="Composición por macroactividad"
               columnas={[
                 { clave: "Ranking", titulo: "Ranking", tipo: "ranking", enlace: urlRankings({ periodo: fecha }) + "&ranking={Ranking}" },
                 { clave: "Saldo", titulo: "Saldo", tipo: "monto" },
                 { clave: "Operaciones", titulo: "Operaciones", tipo: "entero" },
-                { clave: "Participacion", titulo: "Participación", tipo: "porcentaje", decimales: 2, ayuda: "Saldo del ranking ÷ saldo del universo local válido × 100" },
+                { clave: "Participacion", titulo: "Participación", tipo: "porcentaje", decimales: 2 },
               ]}
               filas={composicion.map((c) => ({ Ranking: c.ranking, Saldo: c.saldo, Operaciones: c.operaciones, Participacion: c.participacion_pct }))}
               claveFila="Ranking"
@@ -330,7 +290,6 @@ export default async function PaginaPanel({ searchParams }) {
           <div id="cartera-bancos" className="grafico-izquierda flex min-w-0 scroll-mt-24 flex-col gap-3">
             <Grafico
               titulo={`Cartera local válida por banco · ${formatearFecha(fecha)}`}
-              descripcion="Denominador de la ponderación: todo el universo local válido del banco."
               opcion={opcionBancos}
               altura={360}
               formatoValor="monto"
@@ -339,47 +298,6 @@ export default async function PaginaPanel({ searchParams }) {
         </div>
       </section>
 
-      {/* Movimientos significativos frente al corte anterior */}
-      <section id="movimientos" aria-labelledby="titulo-movimientos" className="mb-10 scroll-mt-24">
-        <h2 id="titulo-movimientos" className="mb-3">Movimientos destacados</h2>
-        {!anterior ? (
-          <EstadoVacio titulo="Sin período anterior">
-            {formatearFecha(fecha)} es el primer corte cargado. Al cargar el siguiente, aquí se señalarán los cambios de
-            posición automáticamente.
-          </EstadoVacio>
-        ) : (
-          <>
-            {tarjetasDestacadas.length > 0 ? (
-              <ul className="destacados" aria-label="Lo más destacado">
-                {tarjetasDestacadas.map((t) => (
-                  <li key={t.tipo} className={`destacado destacado--${t.tipo}`}>
-                    <span className="destacado-tipo">
-                      <span aria-hidden="true">{t.icono}</span> {t.titulo}
-                    </span>
-                    <strong className="destacado-banco">{t.banco}</strong>
-                    <span className="destacado-ranking">{t.ranking}</span>
-                    <span className="destacado-cifra cifra">{t.cifra}</span>
-                    {t.frase && <small>{t.frase}</small>}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="mb-3 text-sm text-texto-suave">
-                {movs.some((m) => m.cambio_posicion !== 0)
-                  ? `Sin un caso único destacado frente a ${textoAnterior}.`
-                  : `Sin cambios de posición frente a ${textoAnterior}.`}
-              </p>
-            )}
-            {esAnalista && (
-              <p className="mt-3 text-sm">
-                <Link href={urlComparar} className="font-semibold">
-                  Ver todos los movimientos →
-                </Link>
-              </p>
-            )}
-          </>
-        )}
-      </section>
 
     </>
   );

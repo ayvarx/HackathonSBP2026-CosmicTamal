@@ -38,7 +38,8 @@
 //   titulo       Texto del <caption> (describe la tabla para lectores de pantalla).
 //   mensajeVacio Texto si no hay filas. Predeterminado: "No hay datos para los filtros seleccionados."
 //   compacta     (bool) Menos relleno por celda.
-//   altoMaximo   (string CSS) opcional, p. ej. "28rem": la tabla se desplaza con encabezado fijo.
+//   altoMaximo   (string CSS) opcional, p. ej. "28rem": SOLO si se pasa, la tabla se desplaza con
+//                encabezado fijo; sin él se ven todas las filas.
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import IndicadorMovimiento from "./IndicadorMovimiento";
@@ -98,6 +99,8 @@ function claseAlineacion(columna, esEncabezado = false) {
   if (alinear === "derecha") clases.push("num");
   if (alinear === "centro") clases.push("centro");
   if (columna.tipo === "codigo" && !esEncabezado) clases.push("codigo");
+  // Nombres de banco y similares en una sola línea (no se parten en dos o tres renglones).
+  if (!TIPOS_NUMERICOS.has(columna.tipo) && /banco|nombre|entidad/i.test(`${columna.clave} ${columna.titulo ?? ""}`)) clases.push("sin-corte");
   return clases.join(" ");
 }
 

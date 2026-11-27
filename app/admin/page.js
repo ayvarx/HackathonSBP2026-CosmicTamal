@@ -1,6 +1,4 @@
-// Administración (/admin) — Cargar un corte AT03 y ver el estado de los cortes cargados.
-// Solo Administrador: se exige en el servidor antes de leer cualquier dato.
-// La carga real la hace la ruta /api/admin/cortes (que vuelve a comprobar el perfil).
+// Administración (/admin) — Cargar un corte y ver los cortes cargados (solo Administrador).
 import Link from "next/link";
 import EncabezadoPagina from "@/components/EncabezadoPagina";
 import EstadoVacio from "@/components/EstadoVacio";
@@ -20,10 +18,7 @@ export default async function PaginaAdmin() {
 
   return (
     <>
-      <EncabezadoPagina
-        titulo="Administración de cortes AT03"
-        descripcion="Cargue, valide o reemplace cortes mensuales AT03."
-      />
+      <EncabezadoPagina titulo="Administración de cortes" />
 
       <section aria-labelledby="titulo-carga" className="mb-8">
         <h2 id="titulo-carga" className="mb-3">Cargar o actualizar un corte</h2>
@@ -31,46 +26,40 @@ export default async function PaginaAdmin() {
       </section>
 
       <section aria-labelledby="titulo-cortes">
-        <h2 id="titulo-cortes" className="mb-3">Cortes cargados</h2>
+        <h2 id="titulo-cortes" className="mb-3">Cortes cargados ({cortes.length})</h2>
         {cortes.length === 0 ? (
           <EstadoVacio titulo="Aún no hay cortes cargados">
-            Use el formulario de arriba para cargar el primer archivo AT03.
+            Cargue el primer archivo con el formulario de arriba.
           </EstadoVacio>
         ) : (
           <div className="marco-tabla" role="region" aria-label="Cortes cargados" tabIndex={0}>
             <table className="tabla-datos">
-              <caption>
-                {cortes.length} período(s) cargado(s).
-              </caption>
               <thead>
                 <tr>
                   <th scope="col">Período</th>
                   <th scope="col">Archivo</th>
                   <th scope="col" className="num">Filas leídas</th>
-                  <th scope="col" className="num">Universo local válido</th>
-                  <th scope="col" className="num">Saldo del universo válido</th>
-                  <th scope="col">Cargado (hora de Panamá)</th>
+                  <th scope="col" className="num">Préstamos válidos</th>
+                  <th scope="col" className="num">Saldo válido</th>
+                  <th scope="col" className="whitespace-nowrap">Cargado</th>
                   <th scope="col">Perfil</th>
-                  <th scope="col" title="Primeros 12 caracteres del SHA-256 del archivo, para trazabilidad">Huella</th>
+                  <th scope="col">Huella</th>
                   <th scope="col">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {cortes.map((c) => (
                   <tr key={c.fecha}>
-                    <td>
-                      <span className="font-semibold">{formatearFecha(c.fecha)}</span>
-                      <span className="codigo block text-xs text-texto-tenue">{c.fecha}</span>
-                    </td>
-                    <td className="codigo">{c.archivo ?? "—"}</td>
+                    <td className="whitespace-nowrap font-semibold">{formatearFecha(c.fecha)}</td>
+                    <td className="codigo whitespace-nowrap">{c.archivo ?? "—"}</td>
                     <td className="num">{formatearEntero(c.filas_leidas)}</td>
                     <td className="num">{formatearEntero(c.universo_local_valido)}</td>
                     <td className="num">{formatearMonto(c.saldo_universo_local_valido)}</td>
-                    <td>{formatearFechaHora(c.cargado_en)}</td>
-                    <td>{c.perfil ?? "—"}</td>
-                    <td className="codigo">{c.huella ?? "—"}</td>
+                    <td className="whitespace-nowrap">{formatearFechaHora(c.cargado_en)}</td>
+                    <td className="whitespace-nowrap">{c.perfil ?? "—"}</td>
+                    <td className="codigo whitespace-nowrap">{c.huella ?? "—"}</td>
                     <td>
-                      <div className="flex flex-wrap items-start gap-2">
+                      <div className="flex flex-nowrap items-start justify-end gap-2">
                         <Link href={`/admin/resumen?periodo=${c.fecha}`} className="boton boton-secundario">
                           Qué cambió
                         </Link>

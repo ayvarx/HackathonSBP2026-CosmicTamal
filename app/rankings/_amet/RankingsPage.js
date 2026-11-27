@@ -1,22 +1,20 @@
 // Portado del frontend de Amet: components/RankingsPage.jsx (cabecera y pestañas)
 // Cabecera "Actividad económica" con los chips de cada ranking y el selector de período al lado,
 // la línea "Incluye: subactividades" y las pestañas que cambian de vista.
-// Cambios frente a Amet: los chips son enlaces (?ranking= en la URL) agrupados en Obligatorios,
-// Recomendado y Bonus como pide la Sección 5, y las pestañas son "Tabla" y "Tarjetas" (?vista=).
+// Cambios frente a Amet: los chips son enlaces (?ranking= en la URL) y las pestañas son
+// "Tabla" y "Tarjetas" (?vista=).
 // Componente de servidor. La pestaña de tarjetas está en TarjetasBancos.js.
 //
 // Props de RankingsPage:
 //   grupos    [{ titulo, chips: [{ clave, texto, href, activo }] }]
 //   selector  Elemento a la derecha de los chips (PeriodSelect).
-//   incluye   [texto] subactividades del ranking elegido.
 //   children  Filtros adicionales (banco, subactividad) dentro del mismo recuadro.
 import Link from "next/link";
 import "./rankings.css";
 
-export default function RankingsPage({ grupos, selector, incluye = [], children }) {
+export default function RankingsPage({ grupos, selector, children }) {
   return (
     <section className="rk-amet panel rk-actividad" aria-label="Filtros del ranking">
-      <span className="eyebrow">Actividad económica</span>
       <div className="fila-chips">
         <nav aria-label="Elegir ranking" className="rk-grupos">
           {grupos.map((g) => (
@@ -39,7 +37,6 @@ export default function RankingsPage({ grupos, selector, incluye = [], children 
         </nav>
         {selector}
       </div>
-      {incluye.length > 0 && <p className="incluye">Incluye: {incluye.join(" · ")}</p>}
       {children && <div className="rk-filtros">{children}</div>}
     </section>
   );

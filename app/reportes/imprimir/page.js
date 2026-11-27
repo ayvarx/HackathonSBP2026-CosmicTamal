@@ -74,8 +74,7 @@ export default async function PaginaImprimir({ searchParams }) {
         <header className="mb-4 border-b border-borde pb-3">
           <h1>Reporte personalizado de rankings de crédito</h1>
           <p className="text-sm">Período: {fechas.map((f) => formatearFecha(f)).join(", ")}</p>
-          <p className="text-sm">{FUENTE}</p>
-          <p className="text-sm font-semibold">{AVISO_DATOS_FICTICIOS}</p>
+          <p className="hidden text-sm print:block">{FUENTE} · {AVISO_DATOS_FICTICIOS}</p>
           <p className="text-sm text-texto-suave">Generado: {formatearFechaHora(new Date().toISOString())} · {formatearEntero(filas.length)} filas</p>
         </header>
 

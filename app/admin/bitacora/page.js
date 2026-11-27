@@ -34,17 +34,15 @@ export default async function PaginaBitacora({ searchParams }) {
   // La hora se muestra en hora de Panamá; el número (N.º) permite ordenar cronológicamente.
   const filas = registros.map((r) => ({
     ...r,
-    momento_texto: formatearFechaHora(r.momento),
+    // Espacios no separables: la fecha y la hora no se parten en varias líneas.
+    momento_texto: formatearFechaHora(r.momento).replace(/ /g, "\u00a0"),
     operacion_texto: NOMBRE_OPERACION[r.operacion] ?? r.operacion,
     resultado_texto: r.resultado === "ok" ? "Correcto" : "Error",
   }));
 
   return (
     <>
-      <EncabezadoPagina
-        titulo="Bitácora de operaciones"
-        descripcion={`Últimas ${LIMITE} operaciones, la más reciente primero.`}
-      />
+      <EncabezadoPagina titulo="Bitácora de operaciones" />
       <Filtros
         campos={[
           {
@@ -68,11 +66,11 @@ export default async function PaginaBitacora({ searchParams }) {
         titulo={`${filas.length} registro(s)`}
         columnas={[
           { clave: "id", titulo: "N.º", tipo: "entero" },
-          { clave: "momento_texto", titulo: "Fecha y hora (Panamá)", ordenable: false },
+          { clave: "momento_texto", titulo: "Fecha y hora", ordenable: false },
           { clave: "perfil", titulo: "Perfil" },
           { clave: "operacion_texto", titulo: "Operación" },
           { clave: "resultado_texto", titulo: "Resultado" },
-          { clave: "detalle", titulo: "Detalle (archivo, período, mensaje)", ordenable: false },
+          { clave: "detalle", titulo: "Detalle", ordenable: false },
           { clave: "duracion_ms", titulo: "Duración (ms)", tipo: "entero" },
         ]}
         filas={filas}

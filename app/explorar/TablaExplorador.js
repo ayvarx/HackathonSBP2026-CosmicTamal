@@ -21,7 +21,19 @@ import {
   TIPOS_NUMERICOS,
   valorTexto,
 } from "@/lib/explorador";
-import { formatearEntero, formatearFecha, formatearMonto } from "@/lib/formato";
+import { formatearEntero, formatearFecha, formatearMonto, nombreRanking } from "@/lib/formato";
+
+// Encabezados legibles en pantalla; el archivo exportado conserva los nombres originales.
+const ETIQUETAS = {
+  Posicion: "Posición", Codigo_Banco: "Código de banco", Saldo_Actividad: "Saldo de la actividad",
+  Total_Cartera_Local_Valida: "Cartera local válida", Ponderacion_Pct: "Ponderación %", Operaciones_Validas: "Operaciones válidas",
+  Fecha_Anterior: "Período anterior", Fecha_Actual: "Período actual", Posicion_Anterior: "Posición anterior",
+  Posicion_Actual: "Posición actual", Cambio_Posicion: "Cambio de posición", Saldo_Anterior: "Saldo anterior",
+  Saldo_Actual: "Saldo actual", Var_Saldo: "Variación de saldo", Var_Saldo_Pct: "Variación %",
+  Cambio_De_Lider: "Cambio de líder", Fila_Archivo: "Fila del archivo", Numero_Prestamo: "Número de préstamo",
+  Tipo_Actividad: "Tipo de actividad",
+};
+const etiqueta = (c) => ETIQUETAS[c.encabezado] ?? c.encabezado;
 
 const LOTE = 300; // filas que se pintan de una vez
 const MAX_DISTINTOS = 200; // con más valores distintos no se ofrece la lista de casillas
@@ -38,7 +50,7 @@ function describirFiltro(c, f) {
   if (f.t) partes.push(`${OPERADORES_TEXTO[f.op]} «${f.t}»`);
   if (f.n === "entre") partes.push(`entre ${f.a ?? "…"} y ${f.b ?? "…"}`);
   else if (f.n) partes.push(`${OPERADORES_NUMERO[f.n]} ${f.a}`);
-  return `${c.encabezado}: ${partes.join(" · ")}`;
+  return `${etiqueta(c)}: ${partes.join(" · ")}`;
 }
 
 export default function TablaExplorador({ conjunto, filas, estadoInicial }) {
@@ -165,7 +177,7 @@ export default function TablaExplorador({ conjunto, filas, estadoInicial }) {
           <span className="text-texto-tenue">
             Orden:{" "}
             {estado.o
-              .map(([campo, dir]) => `${definicion.columnas.find((c) => c.campo === campo).encabezado} ${dir === "a" ? "↑" : "↓"}`)
+              .map(([campo, dir]) => `${etiqueta(definicion.columnas.find((c) => c.campo === campo))} ${dir === "a" ? "↑" : "↓"}`)
               .join(", ")}
           </span>
         )}
@@ -196,7 +208,7 @@ export default function TablaExplorador({ conjunto, filas, estadoInicial }) {
                         title="Ordenar (Mayús + clic: orden secundario)"
                         onClick={(e) => ordenar(c.campo, undefined, e.shiftKey)}
                       >
-                        {c.encabezado}
+                        {etiqueta(c)}
                         {orden && (
                           <span className="ml-1 text-primario" aria-hidden="true">
                             {orden.dir === "a" ? "▲" : "▼"}
@@ -206,7 +218,7 @@ export default function TablaExplorador({ conjunto, filas, estadoInicial }) {
                       </button>
                       <button
                         type="button"
-                        aria-label={`Filtrar ${c.encabezado}`}
+                        aria-label={`Filtrar ${etiqueta(c)}`}
                         aria-haspopup="dialog"
                         aria-expanded={menu?.campo === c.campo}
                         className={`grid h-6 w-6 shrink-0 place-items-center rounded border ${filtrada ? "border-primario bg-primario text-white" : "border-borde-fuerte bg-white text-texto-suave hover:border-primario hover:text-primario"}`}
@@ -237,7 +249,7 @@ export default function TablaExplorador({ conjunto, filas, estadoInicial }) {
                       title={c.tipo === "periodo" ? v : undefined}
                       className={`border-r border-b border-borde px-2 py-1 whitespace-nowrap ${numerica ? "text-right tabular-nums" : ""} ${c.campo === "motivo" ? "max-w-md truncate" : ""}`}
                     >
-                      {mostrarValor(v, c.tipo)}
+                      {c.campo === "ranking" ? nombreRanking(v) : mostrarValor(v, c.tipo)}
                     </td>
                   );
                 })}
@@ -381,7 +393,7 @@ function MenuColumnas({ columnas, ocultas, onCambiar }) {
             disabled={!set.has(c.campo) && columnas.length - set.size <= 1}
             onChange={(e) => onCambiar(e.target.checked ? ocultas.filter((h) => h !== c.campo) : [...ocultas, c.campo])}
           />
-          {c.encabezado}
+          {etiqueta(c)}
         </label>
       ))}
       <button type="button" className="mt-1 self-start text-xs font-semibold text-primario underline" onClick={() => onCambiar([])}>
@@ -415,7 +427,7 @@ function MenuFiltro({ columna, filas, filtro, orden, onFiltro, onOrden }) {
   return (
     <>
       <div className="flex items-center justify-between gap-2">
-        <span className="font-semibold">{columna.encabezado}</span>
+        <span className="font-semibold">{etiqueta(columna)}</span>
         <div className="flex gap-1">
           <button type="button" aria-pressed={orden === "a"} className={`rounded border px-2 py-0.5 text-xs ${orden === "a" ? "border-primario bg-primario text-white" : "border-borde-fuerte"}`} onClick={() => onOrden(orden === "a" ? null : "a")}>
             {numerica ? "0→9" : "A→Z"}

@@ -6,7 +6,6 @@ import EncabezadoPagina from "@/components/EncabezadoPagina";
 import EstadoVacio from "@/components/EstadoVacio";
 import MensajeError from "@/components/MensajeError";
 import { exigirPerfil } from "@/lib/auth";
-import { FUENTE } from "@/lib/consultas";
 import { CLAVES_CONJUNTO, CONJUNTOS_EXPLORADOR, conjuntoValido, leerEstado } from "@/lib/explorador";
 import { cargarConjunto } from "./datos";
 import TablaExplorador from "./TablaExplorador";
@@ -16,7 +15,6 @@ export const metadata = { title: "Explorador de datos" };
 
 const ENCABEZADO = {
   titulo: "Explorador de datos",
-  descripcion: "Filtre, ordene y descargue cualquier conjunto de datos como en una hoja de cálculo.",
 };
 
 export default async function PaginaExplorar({ searchParams }) {
@@ -47,7 +45,7 @@ export default async function PaginaExplorar({ searchParams }) {
           titulo="Aún no hay cortes cargados"
           accion={perfil === "administrador" ? { href: "/admin", texto: "Ir a Administración para cargar un corte" } : undefined}
         >
-          Cuando se cargue un corte AT03 podrá explorar aquí los rankings, subactividades, movimientos y filas excluidas.
+          Cuando se cargue un corte podrá explorar aquí los datos.
         </EstadoVacio>
       </>
     );
@@ -76,7 +74,6 @@ export default async function PaginaExplorar({ searchParams }) {
         })}
       </nav>
       <TablaExplorador key={conjunto} conjunto={conjunto} filas={datos.filas} estadoInicial={estado} />
-      <p className="mt-4 text-xs text-texto-tenue">{FUENTE}</p>
     </>
   );
 }

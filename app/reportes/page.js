@@ -48,7 +48,7 @@ export default async function PaginaReportes({ searchParams }) {
       <>
         <EncabezadoPagina titulo="Reportes y descargas" />
         <EstadoVacio titulo="Aún no hay cortes cargados" accion={puede(perfil, "cargar_cortes") ? { href: "/admin", texto: "Cargar un corte" } : undefined}>
-          Las descargas estarán disponibles cuando el administrador cargue al menos un corte AT03.
+          Las descargas estarán disponibles cuando se cargue un corte.
         </EstadoVacio>
       </>
     );
@@ -89,73 +89,31 @@ export default async function PaginaReportes({ searchParams }) {
 
   return (
     <>
-      <EncabezadoPagina
-        titulo="Reportes y descargas"
-        descripcion="Descargas en CSV, Excel o PDF."
-      />
+      <EncabezadoPagina titulo="Reportes y descargas" />
 
       <section aria-labelledby="t-alcance" className="tarjeta mb-6">
-        <h2 id="t-alcance" className="mb-3">Alcance</h2>
-        <Filtros
-          campos={[
-            { nombre: "periodo", etiqueta: "Período", textoTodos: "Todos los períodos", opciones: lista.map((p) => ({ valor: p.fecha, texto: formatearFecha(p.fecha) })) },
-            { nombre: "ranking", etiqueta: "Ranking", textoTodos: "Todos los rankings", opciones: RANKINGS.map((r) => ({ valor: r.clave, texto: r.nombre })) },
-          ]}
-        />
-        <p className="mt-3 text-sm text-texto-suave">Todas las descargas de esta pantalla incluirán: {textoAlcance}. Sin filtros se descarga todo.</p>
-        <div className="mt-3 flex flex-row flex-wrap items-start gap-2" role="group" aria-label="Acceso rápido">
-          <BotonDescarga href="/api/exportar/rankings" parametros={{ ...unPeriodo, ...unRanking }} texto="Rankings consolidados" variante="primario" />
-          <BotonDescarga href="/api/exportar/subactividades" parametros={{ ...unPeriodo, ...unRanking }} texto="Desglose por subactividad" />
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <h2 id="t-alcance" className="m-0">Alcance</h2>
+          <Filtros
+            campos={[
+              { nombre: "periodo", etiqueta: "Período", textoTodos: "Todos los períodos", opciones: lista.map((p) => ({ valor: p.fecha, texto: formatearFecha(p.fecha) })) },
+              { nombre: "ranking", etiqueta: "Ranking", textoTodos: "Todos los rankings", opciones: RANKINGS.map((r) => ({ valor: r.clave, texto: r.nombre })) },
+            ]}
+          />
         </div>
-      </section>
-
-      <section aria-labelledby="t-descargas" className="mb-8">
-        <h2 id="t-descargas" className="mb-3">Descargas</h2>
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="tarjeta">
-            <h3>Rankings por período</h3>
-            <p className="mb-3 text-sm text-texto-suave">Posición, saldo de la actividad, cartera local válida, ponderación y número de préstamos de cada banco.</p>
-            <BotonDescarga href="/api/exportar/rankings" parametros={{ ...unPeriodo, ...unRanking }} texto="Descargar rankings" variante="primario" descripcion="Fecha, Ranking, Posicion, Codigo_Banco, Banco, Saldo_Actividad, Total_Cartera_Local_Valida, Ponderacion_Pct, Operaciones_Validas" />
-          </div>
-          <div className="tarjeta">
-            <h3>Desglose por subactividad</h3>
-            <p className="mb-3 text-sm text-texto-suave">Saldo de cada banco en cada subactividad de cada ranking.</p>
-            <BotonDescarga href="/api/exportar/subactividades" parametros={{ ...unPeriodo, ...unRanking }} texto="Descargar subactividades" variante="primario" descripcion="Fecha, Ranking, Subactividad, Codigo_Banco, Saldo" />
-          </div>
-          <div className="tarjeta">
-            <h3>Calidad de datos</h3>
-            <p className="mb-3 text-sm text-texto-suave">Conteos en cascada E1 a E4, universo local válido y cuadre.</p>
-            <BotonDescarga href="/api/exportar/calidad" parametros={unPeriodo} texto="Descargar calidad" descripcion="Un renglón por período (el filtro de ranking no aplica)." />
-          </div>
-          <div className="tarjeta">
-            <h3>Filas excluidas</h3>
-            <p className="mb-3 text-sm text-texto-suave">Cada préstamo descartado con el filtro (E1 a E4) que lo excluyó y su fila en el archivo.</p>
-            <BotonDescarga href="/api/exportar/exclusiones" parametros={unPeriodo} texto="Descargar exclusiones" descripcion="Archivo grande: varios miles de filas." />
-          </div>
-          {analista ? (
-            <>
-              <div className="tarjeta">
-                <h3>Movimientos de posición</h3>
-                <p className="mb-3 text-sm text-texto-suave">Cambio de posición y de saldo entre períodos; sin período, todos los pares.</p>
-                <DescargaMovimientos parametros={{ actual: periodo, ...unRanking }} descripcion={periodo ? "Con período elegido: movimientos hacia ese período." : undefined} />
-              </div>
-            </>
-          ) : (
-            <div className="tarjeta md:col-span-2">
-              <h3>Más reportes con el perfil Analista</h3>
-              <p className="text-sm text-texto-suave">
-                Los movimientos de posición entre períodos y los reportes personalizados requieren el perfil Analista.{" "}
-                <Link href="/perfil" className="underline">Cambiar de perfil</Link>
-              </p>
-            </div>
-          )}
+        <p className="mt-2 text-sm text-texto-suave">Se descargará: {textoAlcance}.</p>
+        <div className="mt-3 flex flex-row flex-wrap items-start justify-end gap-2" role="group" aria-label="Descargar">
+          <BotonDescarga href="/api/exportar/rankings" parametros={{ ...unPeriodo, ...unRanking }} texto="Rankings" variante="primario" />
+          <BotonDescarga href="/api/exportar/subactividades" parametros={{ ...unPeriodo, ...unRanking }} texto="Subactividades" />
+          <BotonDescarga href="/api/exportar/calidad" parametros={unPeriodo} texto="Calidad de datos" />
+          <BotonDescarga href="/api/exportar/exclusiones" parametros={unPeriodo} texto="Filas excluidas" />
+          {analista && <DescargaMovimientos parametros={{ actual: periodo, ...unRanking }} />}
         </div>
       </section>
 
       {analista && (
         <section aria-labelledby="t-personalizado" className="mb-8">
-          <h2 id="t-personalizado" className="mb-1">Reporte personalizado</h2>
-          <p className="mb-4 text-texto-suave">Elija períodos, rankings, bancos y columnas. Si no marca nada en un grupo, se incluyen todos.</p>
+          <h2 id="t-personalizado" className="mb-3">Reporte personalizado</h2>
           <FormularioPersonalizado
             periodos={lista.map((p) => ({ valor: p.fecha, texto: formatearFecha(p.fecha) }))}
             rankings={RANKINGS.map((r) => ({ valor: r.clave, texto: r.nombre }))}
@@ -171,10 +129,10 @@ export default async function PaginaReportes({ searchParams }) {
               <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                 <p className="text-sm text-texto-suave">
                   Vista previa: {formatearEntero(vista.filas.length)} filas
-                  {vista.filas.length > MAXIMO_VISTA_PREVIA ? ` (se muestran las primeras ${MAXIMO_VISTA_PREVIA}; el CSV las incluye todas)` : ""}.
+                  {vista.filas.length > MAXIMO_VISTA_PREVIA ? ` (primeras ${MAXIMO_VISTA_PREVIA})` : ""}
                 </p>
                 <div className="flex flex-wrap items-start gap-2">
-                  <BotonDescarga href={hrefPersonalizado("/api/exportar/personalizado")} texto="Descargar reporte" variante="primario" />
+                  <BotonDescarga href={hrefPersonalizado("/api/exportar/personalizado")} texto="Descargar" variante="primario" />
                   <Link href={hrefPersonalizado("/reportes/imprimir")} className="boton boton-secundario">Versión imprimible</Link>
                 </div>
               </div>

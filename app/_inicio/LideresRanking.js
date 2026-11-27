@@ -3,11 +3,11 @@
 // Los datos llegan ya calculados desde app/page.js; los montos son texto exacto formateado
 // con lib/formato.js.
 import Link from "next/link";
-import { formatearFecha, formatearMonto, formatearPorcentaje, nombreBanco } from "@/lib/formato";
+import { formatearMonto, formatearPorcentaje, nombreBanco } from "@/lib/formato";
 import "./dashboard.css";
 import "./inicio.css";
 
-export default function LideresRanking({ lideres, fecha }) {
+export default function LideresRanking({ lideres }) {
   return (
     <section className="lideres" aria-labelledby="titulo-lideres">
       <h2 id="titulo-lideres">Líder de cada ranking</h2>
@@ -36,7 +36,6 @@ export default function LideresRanking({ lideres, fecha }) {
             <Link className="lider-ver" href={r.href}>
               Ver ranking →
             </Link>
-            <small className="lider-corte">Corte {formatearFecha(fecha, "completa")}</small>
           </article>
         ))}
       </div>

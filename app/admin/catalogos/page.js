@@ -1,6 +1,4 @@
-// Catálogos (/admin/catalogos) — Consulta de los catálogos de referencia que usa el motor:
-// bancos ficticios, CINU/SB109 (actividad → ranking y subactividad) y SB21 (facilidades).
-// Toda clasificación sale de aquí (requisito R3): nunca de datos del cliente.
+// Catálogos (/admin/catalogos) — Bancos, actividades CINU/SB109 y facilidades SB21.
 import EncabezadoPagina from "@/components/EncabezadoPagina";
 import TablaOrdenable from "@/components/TablaOrdenable";
 import { exigirPerfil } from "@/lib/auth";
@@ -16,22 +14,15 @@ export default async function PaginaCatalogos() {
 
   return (
     <>
-      <EncabezadoPagina
-        titulo="Catálogos de referencia"
-        descripcion="Bancos, actividades CINU/SB109 y facilidades SB21 usados para clasificar cada préstamo."
-      />
+      <EncabezadoPagina titulo="Catálogos de referencia" />
 
       <section aria-labelledby="titulo-bancos" className="mb-8">
-        <h2 id="titulo-bancos" className="mb-1">Bancos ficticios ({bancos.length})</h2>
-        <p className="mb-3 text-sm text-texto-suave">
-          Un Codigo_Banco que no esté aquí se reporta como alerta de calidad, pero no excluye la fila.
-        </p>
+        <h2 id="titulo-bancos" className="mb-3">Bancos ({bancos.length})</h2>
         <TablaOrdenable
-          titulo="Bancos_ficticios.csv"
           columnas={[
-            { clave: "codigo_banco", titulo: "Codigo_Banco", tipo: "codigo" },
-            { clave: "nombre_ficticio", titulo: "Nombre_Ficticio" },
-            { clave: "tipo_licencia", titulo: "Tipo_Licencia" },
+            { clave: "codigo_banco", titulo: "Código", tipo: "codigo" },
+            { clave: "nombre_ficticio", titulo: "Banco" },
+            { clave: "tipo_licencia", titulo: "Licencia" },
           ]}
           filas={bancos}
           claveFila="codigo_banco"
@@ -40,18 +31,14 @@ export default async function PaginaCatalogos() {
       </section>
 
       <section aria-labelledby="titulo-cinu" className="mb-8">
-        <h2 id="titulo-cinu" className="mb-1">Catálogo CINU / SB109 ({cinu.length} actividades)</h2>
-        <p className="mb-3 text-sm text-texto-suave">
-          Se cruza con AT03.Tipo_Actividad; un código que no esté aquí se excluye en el filtro E4.
-        </p>
+        <h2 id="titulo-cinu" className="mb-3">Actividades CINU / SB109 ({cinu.length})</h2>
         <TablaOrdenable
-          titulo="Catalogo_CINU_SB109_reto.csv"
           columnas={[
-            { clave: "codigo_cinu", titulo: "Codigo_CINU", tipo: "codigo" },
-            { clave: "descripcion", titulo: "Descripcion" },
-            { clave: "macroactividad_reto", titulo: "Macroactividad_Reto (ranking)", tipo: "ranking" },
-            { clave: "subactividad_reto", titulo: "Subactividad_Reto", tipo: "subactividad" },
-            { clave: "codigo_sb08_referencia", titulo: "Codigo_SB08_Referencia", tipo: "codigo" },
+            { clave: "codigo_cinu", titulo: "Código CINU", tipo: "codigo" },
+            { clave: "descripcion", titulo: "Descripción" },
+            { clave: "macroactividad_reto", titulo: "Ranking", tipo: "ranking" },
+            { clave: "subactividad_reto", titulo: "Subactividad", tipo: "subactividad" },
+            { clave: "codigo_sb08_referencia", titulo: "Código SB08", tipo: "codigo" },
           ]}
           filas={cinu}
           claveFila="codigo_cinu"
@@ -60,16 +47,12 @@ export default async function PaginaCatalogos() {
       </section>
 
       <section aria-labelledby="titulo-sb21">
-        <h2 id="titulo-sb21" className="mb-1">Tabla SB21 simplificada ({sb21.length} facilidades)</h2>
-        <p className="mb-3 text-sm text-texto-suave">
-          Crédito personal con facilidad 07 (tarjeta de crédito) se reclasifica a la subactividad Tarjeta.
-        </p>
+        <h2 id="titulo-sb21" className="mb-3">Facilidades SB21 ({sb21.length})</h2>
         <TablaOrdenable
-          titulo="Tabla_SB21_simplificada.csv"
           columnas={[
-            { clave: "codigo", titulo: "Codigo", tipo: "codigo" },
-            { clave: "descripcion", titulo: "Descripcion" },
-            { clave: "uso_en_reto", titulo: "Uso_en_reto" },
+            { clave: "codigo", titulo: "Código", tipo: "codigo" },
+            { clave: "descripcion", titulo: "Descripción" },
+            { clave: "uso_en_reto", titulo: "Uso" },
           ]}
           filas={sb21}
           claveFila="codigo"
@@ -78,7 +61,7 @@ export default async function PaginaCatalogos() {
       </section>
 
       <section aria-labelledby="titulo-actualizar" className="mt-8">
-        <h2 id="titulo-actualizar" className="mb-1">Actualizar un catálogo</h2>
+        <h2 id="titulo-actualizar" className="mb-3">Actualizar un catálogo</h2>
         <FormularioCatalogo />
       </section>
     </>
