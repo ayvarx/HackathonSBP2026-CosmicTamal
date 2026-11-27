@@ -55,20 +55,21 @@ function Sparkline({ valores, color }) {
   return (
     <div className="spark" aria-hidden="true">
       <Grafico
-        altura={38}
+        altura={64}
         opcion={{
-          grid: { top: 6, right: 8, bottom: 2, left: 2, containLabel: false },
-          tooltip: { show: false },
-          xAxis: { type: "category", show: false, data: valores.map((_, i) => i) },
+          grid: { top: 10, right: 10, bottom: 4, left: 10, containLabel: false },
+          tooltip: { trigger: "axis", confine: true, formatter: (p) => `${p[0].name}: ${formatearEntero(p[0].value)}` },
+          xAxis: { type: "category", show: false, data: valores.map((_, i) => `Periodo ${i + 1}`) },
           yAxis: { type: "value", show: false, scale: true },
           series: [
             {
               type: "line",
-              data: valores.map((v, i) => ({ value: v, symbolSize: i === ultimo ? 7 : 0 })),
+              data: valores.map((v, i) => ({ value: v, symbolSize: i === ultimo ? 9 : 6, itemStyle: { color: i === ultimo ? color : "#ffffff", borderColor: color, borderWidth: 2 } })),
               smooth: true,
               symbol: "circle",
-              lineStyle: { color, width: 2 },
-              itemStyle: { color },
+              showAllSymbol: true,
+              lineStyle: { color, width: 2.5 },
+              areaStyle: { color: { type: "linear", x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: `${color}59` }, { offset: 1, color: `${color}00` }] } },
               markLine: { silent: true, symbol: "none", label: { show: false }, lineStyle: { color: "#bfe5ba", type: "dashed" }, data: [{ type: "max" }] },
             },
           ],
@@ -180,17 +181,21 @@ export default function Dashboard({
 
   const filasActivo = activo?.filas ?? [];
   const opcionBancos = {
-    grid: { top: 4, right: 24, left: 8, bottom: 4, containLabel: true },
-    xAxis: { type: "value", splitLine: { lineStyle: { color: "#e5f2e3", type: "dashed" } } },
+    grid: { top: 4, right: 96, left: 8, bottom: 4, containLabel: true },
+    xAxis: { type: "value", axisLabel: { formatter: (v) => formatearMontoCompacto(v) }, splitLine: { lineStyle: { color: "#e5f2e3", type: "dashed" } } },
     yAxis: { type: "category", inverse: true, data: filasActivo.map((f) => f.banco), axisLabel: { interval: 0 } },
     series: [
       {
         type: "bar",
         name: "Saldo",
         barCategoryGap: "22%",
+        barWidth: 18,
+        showBackground: true,
+        backgroundStyle: { color: "#eef5ea", borderRadius: 8 },
+        label: { show: true, position: "right", color: "#1f2937", fontSize: 12, fontWeight: 600, formatter: (p) => formatearMontoCompacto(filasActivo[p.dataIndex]?.saldo_actividad) },
         data: filasActivo.map((f) => ({
           value: aNumeroParaGrafico(f.saldo_actividad),
-          itemStyle: { color: f.posicion === 1 ? AMBAR : AZUL },
+          itemStyle: { color: f.posicion === 1 ? AMBAR : AZUL, borderRadius: [0, 8, 8, 0] },
         })),
       },
     ],
@@ -326,7 +331,7 @@ export default function Dashboard({
             </div>
           }
         >
-          <Grafico opcion={opcionBancos} altura={340} formatoValor="monto" />
+          <Grafico opcion={opcionBancos} altura={Math.max(300, filasActivo.length * 36)} formatoValor="monto" />
         </Panel>
 
         <Panel

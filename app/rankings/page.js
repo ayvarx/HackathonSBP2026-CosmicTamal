@@ -63,7 +63,7 @@ const TIPO_RANKING = {
 const sinCortes = (texto) => String(texto).replace(/ /g, " ");
 
 // Colores de las subactividades en las tarjetas de Amet (tonos del tema "Radar", bien distintos entre sí).
-const COLORES_SUBACTIVIDAD = ["#083502", "#287f1d", "#b5e1af", "#28e90e", "#59b84c", "#698b64", "#68c85b", "#3b8c30"];
+const COLORES_SUBACTIVIDAD = ["#052200", "#106003", "#7EAC39", "#136749", "#A9D18E", "#608D1A", "#297D5F", "#426B04"];
 const MAX_CORTES_TARJETA = 6;
 
 /** Lee todo lo que la pantalla necesita. Si falla la base, la página muestra un error claro. */

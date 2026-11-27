@@ -75,7 +75,7 @@ export default function LideresRanking({ lideres, fecha }) {
                 )}
               </div>
 
-              {estaAbierta && (
+              <div className={`lider-colapso ${estaAbierta ? "abierto" : ""}`} aria-hidden={!estaAbierta}><div className="lider-colapso-int">
                 <div className="lider-detalle" onClick={(e) => e.stopPropagation()}>
                   <h4>Evolución del líder por corte</h4>
                   <table>
@@ -109,11 +109,11 @@ export default function LideresRanking({ lideres, fecha }) {
                       </li>
                     ))}
                   </ol>
-                  <Link className="lider-ver" href={r.href}>
+                  <Link className="lider-ver" href={r.href} tabIndex={estaAbierta ? 0 : -1}>
                     Ver ranking completo →
                   </Link>
                 </div>
-              )}
+              </div></div>
 
               <small className="lider-corte">Corte {formatearFecha(fecha, "completa")}</small>
             </article>
