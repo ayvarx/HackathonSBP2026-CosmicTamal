@@ -362,7 +362,7 @@ export default async function PaginaRankings({ searchParams }) {
           </>
         }
       >
-        <div className="flex flex-row flex-wrap items-start gap-2">
+        <div className="flex flex-row flex-wrap items-start gap-2 sm:flex-nowrap">
         <BotonDescarga
           href="/api/exportar/rankings"
           parametros={{ fecha, ranking }}

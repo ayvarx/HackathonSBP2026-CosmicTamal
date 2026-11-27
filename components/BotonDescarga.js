@@ -49,7 +49,6 @@ export default function BotonDescarga({
       >
         <span aria-hidden="true">↓</span>
         {texto}
-        <span className="text-xs font-normal opacity-80">(CSV · XLSX · PDF)</span>
         <span aria-hidden="true" className="text-xs">▾</span>
       </summary>
       <div className="absolute left-0 top-full z-40 mt-1 flex min-w-full w-max max-w-xs flex-col rounded-md border border-borde bg-superficie p-1 shadow-lg">
