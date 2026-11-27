@@ -23,7 +23,7 @@ import {
   fechasDisponibles,
   textoParametro,
 } from "@/lib/consultas-rankings";
-import { aNumeroParaGrafico, compararDecimales, formatearEntero, formatearFecha, nombreBanco, nombreRanking } from "@/lib/formato";
+import { aNumeroParaGrafico, compararDecimales, formatearEntero, formatearFecha, nombreRanking } from "@/lib/formato";
 import Dashboard from "./_inicio/Dashboard";
 import LideresRanking from "./_inicio/LideresRanking";
 import StatusNotice from "./_inicio/StatusNotice";
@@ -121,7 +121,7 @@ function destacados(resumen, movs) {
   if (subida) {
     tarjetas.push({
       tipo: "subida",
-      titulo: "Mayor subida",
+      titulo: "Mayor aumento",
       icono: "▲",
       banco: subida.banco,
       ranking: nombreRanking(subida.ranking),
@@ -197,9 +197,14 @@ export default async function PaginaPanel({ searchParams }) {
   const composicionOrdenada = [...composicion].sort((a, b) => compararDecimales(b.saldo, a.saldo));
   // Gráfico: cartera local válida de cada banco (ya viene ordenada por el motor).
   const opcionBancos = {
-    grid: { left: 8, right: 24, top: 8, bottom: 24, containLabel: true },
+    grid: { left: 158, right: 24, top: 8, bottom: 24, containLabel: false },
     xAxis: { type: "value" },
-    yAxis: { type: "category", inverse: true, data: bancos.map((b) => `${b.posicion}. ${b.banco}`) },
+    yAxis: {
+      type: "category",
+      inverse: true,
+      data: bancos.map((b) => `${b.posicion}. ${b.banco}`),
+      axisLabel: { align: "left", margin: 150, width: 140, overflow: "truncate" },
+    },
     series: [{ type: "bar", name: "Cartera local válida", data: bancos.map((b) => aNumeroParaGrafico(b.total_cartera_local_valida)) }],
   };
 
@@ -236,32 +241,32 @@ export default async function PaginaPanel({ searchParams }) {
             rankings: "/api/exportar/rankings",
             desglose: "/api/exportar/subactividades",
           }}
+          lideres={<LideresRanking lideres={lideres} fecha={fecha} />}
         />
       )}
 
-      <div id="resumen" className="scroll-mt-24">
+      <div id="resumen" className="resumen-compacto scroll-mt-24">
         <EncabezadoPagina
           titulo={esPublico ? "Resumen del corte" : "Panel principal"}
-          descripcion={
-            <>
-              Resumen del corte de <strong>{formatearFecha(fecha)}</strong> (Fecha = {fecha})
-              {anterior ? <> comparado con {textoAnterior}</> : <>; es el primer corte cargado, sin período anterior</>}.
-            </>
-          }
-        />
+          descripcion={anterior ? <small>frente a {textoAnterior}</small> : undefined}
+        >
+          <Filtros
+            conLimpiar={false}
+            campos={[
+              {
+                nombre: "periodo",
+                etiqueta: "Período",
+                predeterminado: fecha,
+                opciones: [...datos.fechas].reverse().map((f) => ({ valor: f, texto: `${formatearFecha(f)} (${f})` })),
+              },
+            ]}
+          />
+        </EncabezadoPagina>
       </div>
 
-      <Filtros
-        conLimpiar={false}
-        campos={[
-          {
-            nombre: "periodo",
-            etiqueta: "Período",
-            predeterminado: fecha,
-            opciones: [...datos.fechas].reverse().map((f) => ({ valor: f, texto: `${formatearFecha(f)} (${f})` })),
-          },
-        ]}
-      />
+      {/* Líder de cada ranking: para Analista/Administrador, primera sección tras el encabezado */}
+      {esAnalista && <LideresRanking lideres={lideres} fecha={fecha} />}
+
       {periodo.invalido && (
         <StatusNotice type="warning">
           El período «{pedido}» no está cargado; se muestra el más reciente ({formatearFecha(fecha)}).
@@ -294,9 +299,6 @@ export default async function PaginaPanel({ searchParams }) {
         }}
       />
 
-      {/* Líder de cada ranking: visible para todos los perfiles (LideresRanking de Amet) */}
-      <LideresRanking lideres={lideres} fecha={fecha} />
-
       {/* Visualizaciones con su tabla (la tabla tiene la cifra oficial y es la alternativa accesible) */}
       <section aria-labelledby="titulo-composicion" className="mb-10">
         <h2 id="titulo-composicion" className="mb-3">Composición de la cartera local válida</h2>
@@ -320,35 +322,13 @@ export default async function PaginaPanel({ searchParams }) {
               compacta
             />
           </div>
-          <div id="cartera-bancos" className="flex scroll-mt-24 flex-col gap-3">
+          <div id="cartera-bancos" className="grafico-izquierda flex scroll-mt-24 flex-col gap-3 lg:col-span-2">
             <Grafico
               titulo={`Cartera local válida por banco · ${formatearFecha(fecha)}`}
               descripcion="Denominador de la ponderación: todo el universo local válido del banco."
               opcion={opcionBancos}
               altura={420}
               formatoValor="monto"
-            />
-            <TablaOrdenable
-              titulo="Cartera local válida por banco"
-              columnas={[
-                { clave: "Posicion", titulo: "#", tipo: "entero", alinear: "centro" },
-                { clave: "Banco", titulo: "Banco", enlace: urlRankings({ periodo: fecha }) + "&banco={Codigo_Banco}" },
-                { clave: "Total", titulo: "Cartera local válida", tipo: "monto" },
-                { clave: "Operaciones", titulo: "Operaciones", tipo: "entero" },
-                { clave: "Participacion", titulo: "Participación", tipo: "porcentaje", decimales: 2, ayuda: "Cartera del banco ÷ cartera de los 12 bancos × 100" },
-              ]}
-              filas={bancos.map((b) => ({
-                Posicion: b.posicion,
-                Codigo_Banco: b.codigo_banco,
-                // Espacios irrompibles: el nombre del banco no se parte en dos líneas.
-                Banco: nombreBanco(b.codigo_banco, b.banco).replace(/ /g, " "),
-                Total: b.total_cartera_local_valida,
-                Operaciones: b.operaciones,
-                Participacion: b.participacion_pct,
-              }))}
-              claveFila="Codigo_Banco"
-              ordenInicial={{ clave: "Posicion", direccion: "asc" }}
-              compacta
             />
           </div>
         </div>

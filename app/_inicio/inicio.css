@@ -67,3 +67,20 @@ a.lider-ver { text-decoration: none; display: inline-block; }
 .destacado--bajada { border-top-color: #b91c1c; background: #fef2f2; }
 .destacado--bajada .destacado-tipo, .destacado--bajada .destacado-cifra { color: #b91c1c; }
 @media (max-width: 900px) { .destacados { grid-template-columns: 1fr; } }
+
+/* Descargas de la portada: una sola fila compacta. */
+.descargas-fila { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.descargas-fila h2 { margin: 0; }
+.descargas-botones { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 10px; }
+
+/* Resumen del corte compacto: título a la izquierda y selector de período a la derecha, sin tarjeta. */
+.resumen-compacto > div { align-items: center; }
+.resumen-compacto form.tarjeta { margin: 0; padding: 0; border: 0; background: transparent; box-shadow: none; gap: 8px; }
+.resumen-compacto small { font-size: 12px; }
+
+/* Cartera local válida por banco: título y subtítulo a la izquierda. */
+.grafico-izquierda figcaption { text-align: left; }
+
+/* Líder de cada ranking: la actividad se ve más grande que el banco. */
+.lideres .lider-card header strong { font-size: 19px; font-weight: 800; }
+.lideres .lider-banco { font-size: 14px; }

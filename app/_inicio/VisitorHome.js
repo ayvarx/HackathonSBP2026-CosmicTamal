@@ -20,7 +20,7 @@ import "./visitor.css";
 import "./depth.css";
 import "./inicio.css";
 
-export default function VisitorHome({ fecha, cortes, obligatorios, actividades, urlRankings, urlsDescarga }) {
+export default function VisitorHome({ fecha, cortes, obligatorios, actividades, urlRankings, urlsDescarga, lideres }) {
   const [vista, setVista] = useState({ tipo: "inicio" });
   const codigos = actividades.map((a) => a.ranking);
   const bancos = actividades[0]?.filas.length ?? 0;
@@ -33,7 +33,6 @@ export default function VisitorHome({ fecha, cortes, obligatorios, actividades, 
   return (
     <div className="visitante">
       <header className="hero">
-        <span className="hero-etiqueta">PORTADA</span>
         <h1>Rankings de crédito por actividad</h1>
         <p className="hero-sub">
           Qué bancos lideran cada actividad económica de la cartera local y cómo se compone su saldo.
@@ -99,15 +98,13 @@ export default function VisitorHome({ fecha, cortes, obligatorios, actividades, 
             </div>
           </section>
 
-          <section className="seccion" aria-labelledby="titulo-descargas">
-            <div className="seccion-head">
-              <div>
-                <h2 id="titulo-descargas">Descargas</h2>
-                <small>Rankings y desglose por subactividad</small>
-              </div>
-              <button type="button" className="ver-mas" onClick={abrirDescargas}>
-                VER MÁS <span aria-hidden="true">›</span>
-              </button>
+          {lideres}
+
+          <section className="seccion descargas-fila" aria-labelledby="titulo-descargas">
+            <h2 id="titulo-descargas">Descargas</h2>
+            <div className="descargas-botones">
+              <BotonDescarga href={urlsDescarga.rankings} parametros={{ fecha }} texto="Rankings" variante="primario" />
+              <BotonDescarga href={urlsDescarga.desglose} parametros={{ fecha }} texto="Desglose por subactividad" />
             </div>
           </section>
         </>
@@ -184,11 +181,6 @@ export default function VisitorHome({ fecha, cortes, obligatorios, actividades, 
         </section>
       )}
 
-      <p className="periodo-pie">
-        Período de corte: <b>{formatearFecha(fecha)}</b> ({fecha})
-      </p>
-
-      <p className="pie-visitante">Datos ficticios.</p>
     </div>
   );
 }

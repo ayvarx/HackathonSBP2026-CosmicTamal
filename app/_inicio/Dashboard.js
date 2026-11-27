@@ -100,6 +100,29 @@ function Kpi({ etiqueta, valor, detalle, color, serie, enlace }) {
   );
 }
 
+/**
+ * Etiqueta compacta de gráfico en millones ("175.8 M", "50 M", "0"). Solo para ejes y
+ * etiquetas de barras: se deriva de formatearMontoCompacto (exacto) sin los decimales ".00".
+ */
+function montoEnMillones(valor, decimales = 0) {
+  if (valor === null || valor === undefined || valor === "") return "";
+  if (Number(valor) === 0) return "0";
+  const texto = formatearMontoCompacto(String(valor));
+  if (!texto.endsWith(" millones")) return texto.replace(/\.00$/, "");
+  // Redondeo aritmético exacto (BigInt) de centésimas de millón a `decimales` cifras.
+  const crudo = texto.replace(" millones", "").replace(/,/g, "");
+  const negativo = crudo.startsWith("-");
+  const [entero, frac = "00"] = crudo.replace("-", "").split(".");
+  const factor = 10n ** BigInt(2 - decimales);
+  let unidades = BigInt(entero + frac.padEnd(2, "0")) / factor;
+  if ((BigInt(entero + frac.padEnd(2, "0")) % factor) * 2n >= factor) unidades += 1n;
+  const base = 10n ** BigInt(decimales);
+  const ent = (unidades / base).toLocaleString("en-US");
+  const dec = decimales > 0 ? (unidades % base).toString().padStart(decimales, "0") : "";
+  const cifra = dec && !/^0+$/.test(dec) ? `${ent}.${dec}` : ent;
+  return `${negativo ? "-" : ""}${cifra} M`;
+}
+
 export default function Dashboard({
   fecha,
   anterior,
@@ -182,7 +205,7 @@ export default function Dashboard({
   const filasActivo = activo?.filas ?? [];
   const opcionBancos = {
     grid: { top: 4, right: 96, left: 8, bottom: 4, containLabel: true },
-    xAxis: { type: "value", axisLabel: { formatter: (v) => formatearMontoCompacto(v) }, splitLine: { lineStyle: { color: "#e5f2e3", type: "dashed" } } },
+    xAxis: { type: "value", splitNumber: 4, axisLabel: { hideOverlap: true, formatter: (v) => montoEnMillones(v) }, splitLine: { lineStyle: { color: "#e5f2e3", type: "dashed" } } },
     yAxis: { type: "category", inverse: true, data: filasActivo.map((f) => f.banco), axisLabel: { interval: 0 } },
     series: [
       {
@@ -192,7 +215,7 @@ export default function Dashboard({
         barWidth: 18,
         showBackground: true,
         backgroundStyle: { color: "#eef5ea", borderRadius: 8 },
-        label: { show: true, position: "right", color: "#1f2937", fontSize: 12, fontWeight: 600, formatter: (p) => formatearMontoCompacto(filasActivo[p.dataIndex]?.saldo_actividad) },
+        label: { show: true, position: "right", color: "#1f2937", fontSize: 12, fontWeight: 600, formatter: (p) => montoEnMillones(filasActivo[p.dataIndex]?.saldo_actividad, 1) },
         data: filasActivo.map((f) => ({
           value: aNumeroParaGrafico(f.saldo_actividad),
           itemStyle: { color: f.posicion === 1 ? AMBAR : AZUL, borderRadius: [0, 8, 8, 0] },
