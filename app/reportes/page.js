@@ -13,6 +13,7 @@ import { exigirPerfil, puede } from "@/lib/auth";
 import { RANKINGS, catalogos, periodos } from "@/lib/consultas";
 import { ErrorExportacion, COLUMNAS_PERSONALIZADO, leerFiltros, reportePersonalizado } from "@/lib/consultas-reportes";
 import { formatearEntero, formatearFecha, nombreBanco, nombreRanking } from "@/lib/formato";
+import ExportPanel from "./_amet/ExportPanel";
 import FormularioPersonalizado from "./FormularioPersonalizado";
 
 export const dynamic = "force-dynamic"; // los datos cambian al cargar cortes
@@ -91,6 +92,10 @@ export default async function PaginaReportes({ searchParams }) {
         titulo="Reportes y descargas"
         descripcion="Rankings por período, desglose por subactividad, reporte de calidad y movimientos de posición en CSV (UTF-8, montos con 2 decimales)."
       />
+
+      <section aria-label="Acceso rápido" className="mb-6">
+        <ExportPanel periodo={periodo || lista[lista.length - 1].fecha} textoPeriodo={formatearFecha(periodo || lista[lista.length - 1].fecha)} />
+      </section>
 
       <section aria-labelledby="t-alcance" className="tarjeta mb-6">
         <h2 id="t-alcance" className="mb-3">Alcance de las descargas</h2>

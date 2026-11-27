@@ -40,6 +40,7 @@ import {
   principalesMovimientos,
   unirLista,
 } from "./explicacion";
+import CompareView from "./_amet/CompareView";
 import { opcionCascada, opcionPosiciones } from "./graficos";
 import ReglaAplicada from "./ReglaAplicada";
 import SeccionEntidades, { MAX_BANCOS, MIN_BANCOS } from "./SeccionEntidades";
@@ -297,6 +298,21 @@ export default async function PaginaComparar({ searchParams }) {
         <a href="#cascada">Cascada del movimiento</a>
         <a href="#entidades">Bancos lado a lado</a>
       </nav>
+
+      {/* 0. Resumen visual (portado de Amet) ---------------------------------------- */}
+      <section aria-label="Resumen visual de movimientos" className="mb-10">
+        <CompareView
+          ranking={nombreRanking(ranking)}
+          textoPar={textoPar}
+          filas={movsRanking.map((m) => ({
+            codigo: m.codigo_banco,
+            banco: m.banco,
+            posicion: m.posicion_actual,
+            anterior: m.posicion_anterior,
+            cambio: m.cambio_posicion,
+          }))}
+        />
+      </section>
 
       {/* 1. Resumen de los 6 rankings ------------------------------------------------ */}
       <section id="resumen" aria-labelledby="titulo-resumen" className="mb-10 scroll-mt-24">
