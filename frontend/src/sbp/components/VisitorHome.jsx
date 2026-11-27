@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { api } from "../api";
 import { RANKING_LABELS } from "../constants";
+import ExportPanel from "./ExportPanel";
 import "./visitor.css";
 
 // Portada para visitantes. Cada opción muestra su información en la misma pantalla
@@ -109,21 +110,10 @@ export default function VisitorHome({ quality, rankings, reconciliations, period
           <div className="seccion-head">
             <div>
               <h2>Descargas</h2>
-              <small>Período {etiquetaPeriodo(period)} · archivos CSV</small>
+              <small>Período {etiquetaPeriodo(period)} · CSV, Excel y PDF</small>
             </div>
           </div>
-          <div className="grid-descargas">
-            <button className="desc-card" onClick={() => api.download(period, "rankings")}>
-              <strong>Rankings por actividad</strong>
-              <span>Posición, saldo, cartera total y peso de cada banco.</span>
-              <em>Descargar CSV ↓</em>
-            </button>
-            <button className="desc-card" onClick={() => api.download(period, "desglose")}>
-              <strong>Desglose por subactividad</strong>
-              <span>Saldo de cada banco en cada subactividad.</span>
-              <em>Descargar CSV ↓</em>
-            </button>
-          </div>
+          <ExportPanel period={period} />
         </section>
       )}
 

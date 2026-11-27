@@ -168,3 +168,34 @@
   .lider-card.abierta { display: flex; flex-direction: column; }
   .lider-card.abierta .lider-detalle { border-left: 0; padding: 12px 0 0; border-top: 1px solid #DDEBD5; }
 }
+
+/* Tarjetas de líder: más aire entre nombre, banco, cifras y estado. */
+.lider-card { padding: 20px 22px; gap: 12px; }
+.lider-resumen { display: flex; flex-direction: column; gap: 12px; }
+.lider-card dl { gap: 8px; margin: 2px 0; }
+.lider-estado { margin: 4px 0 0; }
+.lider-corte { margin-top: 2px; }
+
+.spark { height: 64px; margin: 0 -4px; }
+
+/* Tarjeta KPI: la mini gráfica queda dentro, con aire abajo y sin cortarse a los lados. */
+.kpi-card { padding-bottom: 22px; }
+.kpi-foot { gap: 8px; }
+.spark { height: 64px; margin: 6px 0 4px; overflow: visible; }
+
+/* Apertura y cierre en su lugar: la tarjeta crece hacia abajo sin saltar a ancho completo. */
+.lideres-grid { align-items: start; }
+.lider-card.abierta { grid-column: auto; display: flex; flex-direction: column; cursor: pointer; box-shadow: 0 0 0 2px #267F18, 0 10px 26px rgba(15,23,42,0.14); }
+.lider-card.abierta .lider-resumen { display: flex; flex-direction: column; gap: 12px; }
+.lider-card:focus, .lider-card:focus-visible { outline: none; }
+.lider-card:focus-visible { box-shadow: 0 0 0 3px rgba(38,127,24,0.4); }
+.lider-colapso { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows .35s cubic-bezier(.2,.8,.2,1), opacity .25s ease; }
+.lider-colapso.abierto { grid-template-rows: 1fr; opacity: 1; }
+.lider-colapso-int { overflow: hidden; min-height: 0; }
+.lider-card.abierta .lider-detalle, .lider-detalle { border-left: 0; padding: 14px 0 4px; border-top: 1px solid #DDEBD5; margin-top: 4px; cursor: default; }
+.lider-toggle { transition: transform .3s ease, background .2s; }
+.lider-card.abierta .lider-toggle { transform: rotate(180deg); background: #267F18; color: #ffffff; }
+@media (prefers-reduced-motion: reduce) { .lider-colapso, .lider-toggle { transition: none; } }
+
+.lider-card.abierta { align-items: stretch; grid-template-columns: none; gap: 12px; }
+.lider-card.abierta .lider-resumen, .lider-card.abierta .lider-colapso { width: 100%; }

@@ -93,3 +93,26 @@
 .cal-leyenda b { font-variant-numeric: tabular-nums; color: #094000; }
 .cal-leyenda em { font-style: normal; text-align: right; font-size: 13px; color: #4b5563; font-variant-numeric: tabular-nums; }
 @media (max-width: 700px) { .cal-leyenda { grid-template-columns: 1fr; } }
+
+/* Acabado de Calidad: tarjetas con acento, bloques redondeados y barra de reparto más cuidada. */
+.cal-resumen { border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(15,23,42,0.07); border-color: #dfeadb; }
+.cal-resumen > div { position: relative; padding: 20px 22px; }
+.cal-resumen > div::before { content: ""; position: absolute; left: 0; top: 18px; bottom: 18px; width: 3px; border-radius: 3px; background: #a9d18e; }
+.cal-resumen .destacado::before { background: #267F18; }
+.cal-resumen .alerta::before { background: #d98c1f; }
+.cal-resumen strong { font-size: 30px; letter-spacing: -0.015em; }
+.cal-bloque { border-radius: 16px; border-color: #dfeadb; padding: 24px 26px; box-shadow: 0 8px 24px rgba(15,23,42,0.06); }
+.cal-bloque h3 { font-size: 18px; }
+.cal-etiqueta { color: #267F18; }
+.cal-franja { height: 22px; border-radius: 999px; gap: 3px; background: #eef5ea; }
+.cal-franja-seg { border-radius: 999px; min-width: 6px; }
+.cal-leyenda li { transition: background .15s; padding-left: 8px; padding-right: 8px; border-radius: 10px; }
+.cal-leyenda li:hover { background: #f5faf2; }
+.cal-leyenda i { border-radius: 4px; }
+.cal-corte { border-radius: 14px; border-color: #dfeadb; transition: transform .2s, box-shadow .2s; }
+.cal-corte:hover { transform: translateY(-3px); box-shadow: 0 12px 26px rgba(15,23,42,0.1); }
+.cal-corte.activo { border-top: 4px solid #267F18; background: linear-gradient(180deg, #f6fbf3, #ffffff 55%); }
+.cal-corte-valido { font-size: 30px; }
+.cal-verif li { border-radius: 12px; background: #f6fbf3; border-color: #dfeadb; padding: 14px 16px; }
+.cal-verif li b { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: #267F18; color: #fff; font-size: 14px; }
+.cal-verif li.fallo b { background: #b91c1c; }

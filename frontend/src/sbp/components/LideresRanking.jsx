@@ -74,7 +74,7 @@ export default function LideresRanking({ rankings, historico, onVerRanking }) {
 
               </div>
 
-              {estaAbierta && (
+              <div className={`lider-colapso ${estaAbierta ? "abierto" : ""}`} aria-hidden={!estaAbierta}><div className="lider-colapso-int">
                 <div className="lider-detalle" onClick={(e) => e.stopPropagation()}>
                   <h4>Evolución del líder por corte</h4>
                   <table>
@@ -98,11 +98,11 @@ export default function LideresRanking({ rankings, historico, onVerRanking }) {
                       <li key={f.Codigo_Banco}><span>{f.Posicion}. {f.Banco}</span><b>{dinero(num(f.Saldo_Actividad))}</b></li>
                     ))}
                   </ol>
-                  <button className="lider-ver" onClick={(e) => { e.stopPropagation(); onVerRanking?.(nombre); }}>
+                  <button className="lider-ver" tabIndex={estaAbierta ? 0 : -1} onClick={(e) => { e.stopPropagation(); onVerRanking?.(nombre); }}>
                     Ver ranking completo →
                   </button>
                 </div>
-              )}
+              </div></div>
 
               <small className="lider-corte">Corte {etiquetaPeriodo(periodos.at(-1) || "")}</small>
             </article>

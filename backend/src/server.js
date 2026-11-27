@@ -1,7 +1,8 @@
 import express from "express";
 import cors from "cors";
 import { DATOS_DIR, datosListos, periodos, resultado } from "./servicio.js";
-import { iniciarSesion, cerrarSesion, sesionDe, requerirSesion } from "./auth.js";
+import { aCsv, aExcel, aPdf, COLUMNAS_RANKING, COLUMNAS_DESGLOSE } from "./exportar.js";
+import { iniciarSesion, iniciarSesionVisitante, cerrarSesion, sesionDe, requerirSesion } from "./auth.js";
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -30,6 +31,10 @@ app.post("/api/login", (req, res) => {
   const s = iniciarSesion(req.body?.usuario, req.body?.clave);
   if (!s) return res.status(401).json({ error: "Usuario o clave incorrectos." });
   res.json(s);
+});
+
+app.post("/api/visitante", (_req, res) => {
+  res.json(iniciarSesionVisitante());
 });
 
 app.post("/api/logout", (req, res) => {
@@ -75,31 +80,29 @@ app.get("/api/periodos/:fecha/desglose", conPeriodo((r, _req, res) => res.json(r
 
 app.get("/api/periodos/:fecha/reconciliaciones", conPeriodo((r, _req, res) => res.json(r.reconciliaciones)));
 
-// Exportación CSV del entregable 2 (Sección 10): columnas en el orden exacto del reto.
-const COLUMNAS_RANKING = [
-  "Fecha", "Ranking", "Posicion", "Codigo_Banco", "Banco",
-  "Saldo_Actividad", "Total_Cartera_Local_Valida", "Ponderacion_Pct", "Operaciones_Validas",
-];
+// Exportación de rankings y desglose en CSV, Excel (.xlsx) y PDF: /exportar/<rankings|desglose>.<csv|xlsx|pdf>
+const TIPOS_ARCHIVO = {
+  csv: "text/csv; charset=utf-8",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  pdf: "application/pdf",
+};
 
-function aCsv(filas, columnas) {
-  const escapar = (v) => {
-    const t = String(v ?? "");
-    return /[",\n\r]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t;
-  };
-  return [columnas.join(","), ...filas.map((f) => columnas.map((c) => escapar(f[c])).join(","))].join("\r\n") + "\r\n";
-}
-
-app.get("/api/periodos/:fecha/exportar/rankings.csv", conPeriodo((r, req, res) => {
-  const filas = Object.values(r.rankings).flat();
-  res.type("text/csv; charset=utf-8");
-  res.attachment(`rankings_${req.params.fecha}.csv`);
-  res.send("﻿" + aCsv(filas, COLUMNAS_RANKING));
-}));
-
-app.get("/api/periodos/:fecha/exportar/desglose.csv", conPeriodo((r, req, res) => {
-  res.type("text/csv; charset=utf-8");
-  res.attachment(`desglose_${req.params.fecha}.csv`);
-  res.send("﻿" + aCsv(r.desglose, ["Fecha", "Ranking", "Subactividad", "Codigo_Banco", "Saldo"]));
+app.get("/api/periodos/:fecha/exportar/:archivo", conPeriodo(async (r, req, res) => {
+  const m = /^(rankings|desglose)\.(csv|xlsx|pdf)$/.exec(req.params.archivo);
+  if (!m) return res.status(404).json({ error: "Formato de exportación no disponible. Use csv, xlsx o pdf." });
+  const [, contenido, formato] = m;
+  const filas = contenido === "rankings" ? Object.values(r.rankings).flat() : r.desglose;
+  const columnas = contenido === "rankings" ? COLUMNAS_RANKING : COLUMNAS_DESGLOSE;
+  try {
+    const cuerpo = formato === "csv" ? aCsv(filas, columnas)
+      : formato === "xlsx" ? await aExcel(filas, columnas, contenido, req.params.fecha)
+      : await aPdf(filas, columnas, contenido, req.params.fecha);
+    res.type(TIPOS_ARCHIVO[formato]);
+    res.attachment(`${contenido}_${req.params.fecha}.${formato}`);
+    res.send(cuerpo);
+  } catch (e) {
+    res.status(500).json({ error: `No se pudo generar el archivo: ${e.message}` });
+  }
 }));
 
 app.listen(PORT, () => {

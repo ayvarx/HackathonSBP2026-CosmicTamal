@@ -124,6 +124,7 @@ export default function SbpApp() {
       )
     )}
 
+
     {page === "calidad" && <CalidadPage quality={quality} reconciliations={reconciliations} historico={historico} period={period} />}
 
     {page === "rankings" && <RankingsPage rankings={rankings} ranking={ranking} setRanking={setRanking} breakdown={breakdown} historico={historico} loading={loading} selector={selector} profile={profile} />}

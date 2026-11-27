@@ -30,15 +30,32 @@ function Panel({ titulo, eyebrow, lectura, aside, className = "", children }) {
 
 function Sparkline({ valores, color }) {
   if (!valores || valores.length < 2) return null;
-  const data = valores.map((v, i) => ({ i, v }));
+  const data = valores.map((v, i) => ({ i, v, etiqueta: `Periodo ${i + 1}` }));
+  // El eje no parte de cero: se ajusta al rango de los datos para que la subida o bajada se note.
+  const min = Math.min(...valores);
+  const max = Math.max(...valores);
+  const margen = (max - min || Math.abs(max) || 1) * 0.3;
+  const idGradiente = `spark-${String(color).replace("#", "")}`;
   return (
     <div className="spark">
-      <ResponsiveContainer width="100%" height={38}>
-        <LineChart data={data} margin={{ top: 6, right: 8, bottom: 2, left: 2 }}>
-          <ReferenceLine y={Math.max(...valores)} stroke="#CFE3C4" strokeDasharray="3 3" />
-          <Line type="monotone" dataKey="v" stroke={color} strokeWidth={2} isAnimationActive={false}
-            dot={(p) => (p.index === data.length - 1 ? <circle key={p.index} cx={p.cx} cy={p.cy} r={3.5} fill={color} /> : null)} />
-        </LineChart>
+      <ResponsiveContainer width="100%" height={64}>
+        <AreaChart data={data} margin={{ top: 10, right: 10, bottom: 4, left: 10 }}>
+          <defs>
+            <linearGradient id={idGradiente} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor={color} stopOpacity={0.35} />
+              <stop offset="1" stopColor={color} stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <YAxis hide domain={[min - margen, max + margen]} />
+          <Tooltip
+            formatter={(v) => fmt(v)}
+            labelFormatter={(_, p) => p?.[0]?.payload?.etiqueta ?? ""}
+            wrapperStyle={{ zIndex: 5, pointerEvents: "none" }}
+            contentStyle={{ background: "#ffffff", border: "1px solid #CFE3C4", borderRadius: 6, fontSize: 12, padding: "4px 8px" }}
+          />
+          <Area type="monotone" dataKey="v" stroke={color} strokeWidth={2.5} fill={`url(#${idGradiente})`} isAnimationActive={false}
+            dot={(p) => <circle key={p.index} cx={p.cx} cy={p.cy} r={p.index === data.length - 1 ? 4.5 : 3} fill={p.index === data.length - 1 ? color : "#ffffff"} stroke={color} strokeWidth={2} />} />
+        </AreaChart>
       </ResponsiveContainer>
     </div>
   );
@@ -220,15 +237,16 @@ export default function Dashboard({ periods, period, quality, rankings, reconcil
               ))}
             </div>
           }>
-          <div className="chart-h">
+          <div className="chart-h" style={{ height: Math.max(300, datosBarras.length * 36) }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={datosBarras} layout="vertical" margin={{ top: 4, right: 24, left: 8, bottom: 4 }} barCategoryGap="22%">
+              <BarChart data={datosBarras} layout="vertical" margin={{ top: 4, right: 74, left: 8, bottom: 4 }} barCategoryGap="22%">
                 <CartesianGrid stroke="#e3e8f2" strokeDasharray="3 5" horizontal={false} />
-                <XAxis type="number" tick={{ fill: "#64748b", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={fmt} />
+                <XAxis type="number" tick={{ fill: "#64748b", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${fmt(v / 1e6)} M`} />
                 <YAxis type="category" dataKey="banco" width={170} tick={{ fill: "#334155", fontSize: 12 }} axisLine={false} tickLine={false} interval={0} />
                 <Tooltip formatter={(v) => fmt2(v)} contentStyle={{ background: "#ffffff", border: "1px solid #d7dde9", borderRadius: 10 }} />
-                <Bar dataKey="saldo" name="Saldo" radius={[0, 0, 0, 0]} isAnimationActive={false}>
+                <Bar dataKey="saldo" name="Saldo" barSize={18} radius={[0, 8, 8, 0]} background={{ fill: "#eef5ea", radius: 8 }} isAnimationActive={false}>
                   {datosBarras.map((d, i) => <Cell key={i} fill={d.pos === 1 ? "#f5a524" : "#267F18"} />)}
+                  <LabelList dataKey="saldo" position="right" formatter={(v) => `${fmt2(v / 1e6)} M`} fill="#1f2937" fontSize={12} fontWeight={600} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>

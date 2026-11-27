@@ -45,3 +45,35 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, *::-webkit-scrollbar { display
 .app-salir { background: #ffffff; color: #094000; border: 0; padding: 8px 12px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: 0 3px 0 #021a00; }
 .app-salir:hover { transform: translateY(-1px); }
 .app-salir:active { transform: translateY(2px); box-shadow: 0 0 0 #021a00; }
+
+/* Selector de período con ancho fijo (no ocupa toda la fila). */
+.periodo-barra > label.field { flex: 0 0 auto; width: auto; display: inline-flex; flex-direction: row; align-items: center; gap: 10px; }
+.periodo-barra > label.field select { width: 200px; flex: 0 0 200px; }
+
+/* Cerrar sesión al final de la barra de pestañas. */
+.app-tabs .app-salir-tab { margin-left: auto; align-self: center; background: #094000; color: #ffffff; border: 0; border-bottom: 0; padding: 8px 14px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: 0 3px 0 #021a00; white-space: nowrap; }
+.app-tabs .app-salir-tab:hover { background: #267F18; }
+.app-tabs .app-salir-tab:active { transform: translateY(2px); box-shadow: 0 0 0 #021a00; }
+
+/* Cabecera más trabajada: brillo, línea de acento, marca más grande y bloque de usuario. */
+.app-cabecera { position: relative; padding: 18px 32px; background: radial-gradient(900px 220px at 85% -40%, rgba(126,172,57,0.35), transparent 70%), linear-gradient(90deg, #052200 0%, #094000 55%, #0f5a06 100%); box-shadow: 0 4px 18px rgba(5,34,0,0.25); }
+.app-cabecera::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: linear-gradient(90deg, #7EAC39, #267F18 45%, transparent); }
+.app-marca { gap: 16px; }
+.app-marca .brand-mark, .app-marca .logo-radar { width: 50px; height: 50px; flex: 0 0 50px; filter: drop-shadow(0 6px 10px rgba(0,0,0,0.35)); }
+.app-marca h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.015em; }
+.app-marca small { font-size: 12.5px; color: #cfe3c4; margin-top: 3px; letter-spacing: .01em; }
+.app-perfil { gap: 12px; padding: 6px 6px 6px 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16); border-radius: 999px; backdrop-filter: blur(6px); }
+.app-avatar { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; background: linear-gradient(160deg, #a9d18e, #267F18); color: #fff; font-weight: 800; font-size: 16px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), 0 3px 8px rgba(0,0,0,0.3); }
+.app-usuario { display: flex; flex-direction: column; line-height: 1.15; gap: 3px; padding-right: 4px; }
+.app-usuario strong { font-size: 14px; color: #ffffff; font-weight: 700; }
+.app-rol { align-self: flex-start; font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; background: #a9d18e; color: #052200; }
+.app-rol.rol-analista { background: #7EAC39; }
+.app-rol.rol-admin { background: #f2c46d; }
+.app-salir { display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; padding: 9px 16px; box-shadow: 0 2px 0 rgba(0,0,0,0.25); transition: transform .15s, background .2s; }
+.app-salir:hover { background: #eaf5e3; transform: translateY(-1px); }
+.app-salir:active { transform: translateY(1px); }
+
+/* Logotipo animado en la cabecera, sobre un halo suave. */
+.app-logo { position: relative; display: grid; place-items: center; width: 58px; height: 58px; flex: 0 0 58px; }
+.app-logo::before { content: ""; position: absolute; inset: -4px; border-radius: 20px; background: radial-gradient(circle, rgba(169,209,142,0.45), transparent 70%); }
+.app-logo svg { position: relative; display: block; filter: drop-shadow(0 6px 10px rgba(0,0,0,0.35)); }

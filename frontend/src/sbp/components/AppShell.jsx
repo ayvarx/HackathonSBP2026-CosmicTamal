@@ -1,6 +1,8 @@
 import { NAV_ITEMS, PROFILE_LABELS, etiquetaPeriodo } from "../constants";
 import PeriodSelect from "./PeriodSelect";
-import LogoRadar from "./LogoRadar";
+import LogoAnimado from "./LogoAnimado";
+import "./sidebar.css";
+import "./depth.css";
 import "./topbar.css";
 
 // Estructura de la aplicación: cabecera azul con marca y perfil, pestañas de sección debajo,
@@ -15,15 +17,19 @@ export default function AppShell({
     <div className="app-shell">
       <header className="app-cabecera">
         <div className="app-marca">
-          <LogoRadar size={42} />
+          <span className="app-logo"><LogoAnimado size={54} /></span>
           <div>
             <h1>Rankings de crédito bancario</h1>
             <small>Por banco y actividad económica · Hackathon SBP 2026</small>
           </div>
         </div>
         <div className="app-perfil">
-          <span>{usuario} · {PROFILE_LABELS[profile]}</span>
-          <button className="app-salir" onClick={onCerrarSesion}>Cerrar sesión</button>
+          <span className="app-avatar" aria-hidden="true">{(usuario || "?").charAt(0).toUpperCase()}</span>
+          <span className="app-usuario"><strong>{usuario}</strong><small className={`app-rol rol-${profile}`}>{PROFILE_LABELS[profile]}</small></span>
+          <button className="app-salir" onClick={onCerrarSesion}>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" /></svg>
+            Cerrar sesión
+          </button>
         </div>
       </header>
 

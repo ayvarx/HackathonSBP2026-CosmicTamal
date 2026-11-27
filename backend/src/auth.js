@@ -67,3 +67,10 @@ export function requerirSesion(req, res, next) {
   req.sesion = s;
   next();
 }
+
+// Acceso como visitante: sesión con rol "publico" sin usuario ni clave.
+export function iniciarSesionVisitante() {
+  const token = crypto.randomBytes(32).toString("hex");
+  sesiones.set(token, { usuario: "visitante", rol: "publico", expira: Date.now() + DURACION_SESION });
+  return { token, usuario: "visitante", rol: "publico" };
+}
