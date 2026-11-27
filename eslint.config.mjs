@@ -7,6 +7,9 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
+    // Carpetas de compilación y bases locales de cada servidor de prueba.
+    ".next-*/**",
+    ".pgdata*/**",
     "out/**",
     "build/**",
     "next-env.d.ts",

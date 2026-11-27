@@ -1,0 +1,91 @@
+Prueba de punta a punta — 2026-11-27T16:53:48.710Z — next build + next start en http://localhost:3120
+Compilando (next build)…
+
+== Fase 0: base vacía (sin cortes cargados) ==
+  ✓ [vacía] administrador abre / — HTTP 200
+  ✓ [vacía] administrador abre /rankings — HTTP 200
+  ✓ [vacía] administrador abre /indicadores — HTTP 200
+  ✓ [vacía] administrador abre /calidad — HTTP 200
+  ✓ [vacía] administrador abre /verificacion — HTTP 200
+  ✓ [vacía] administrador abre /reportes — HTTP 200
+  ✓ [vacía] administrador abre /comparar — HTTP 200
+  ✓ [vacía] administrador abre /rankings/detalle — HTTP 200
+  ✓ [vacía] administrador abre /reportes/imprimir — HTTP 200
+  ✓ [vacía] administrador abre /admin — HTTP 200
+  ✓ [vacía] administrador abre /admin/resumen — HTTP 200
+  ✓ [vacía] administrador abre /admin/parametros — HTTP 200
+  ✓ [vacía] administrador abre /admin/catalogos — HTTP 200
+  ✓ [vacía] administrador abre /admin/bitacora — HTTP 200
+  ✓ [vacía] administrador abre /perfil — HTTP 200
+  ✓ [vacía] exportar rankings sin cortes da un mensaje claro — HTTP 404: Aún no hay cortes cargados. Cargue un corte AT03 desde el perfil Administrador.
+  ✓ [vacía] exportar subactividades sin cortes da un mensaje claro — HTTP 404: Aún no hay cortes cargados. Cargue un corte AT03 desde el perfil Administrador.
+  ✓ [vacía] exportar calidad sin cortes da un mensaje claro — HTTP 404: Aún no hay cortes cargados. Cargue un corte AT03 desde el perfil Administrador.
+  ✓ [vacía] exportar exclusiones sin cortes da un mensaje claro — HTTP 404: Aún no hay cortes cargados. Cargue un corte AT03 desde el perfil Administrador.
+  ✓ [vacía] exportar movimientos sin cortes da un mensaje claro — HTTP 404: Aún no hay cortes cargados. Cargue un corte AT03 desde el perfil Administrador.
+
+== Fase 1: base limpia y siembra de julio y agosto (scripts/seed.mjs) ==
+  Base: pglite (.pgdata-e2e)
+  ✓ AT03_sintetico_202607.csv: período 20260731, 25000 filas, universo válido 24004 (E1 20, E2 886, E3 48, E4 42) en 2424 ms
+  ✓ AT03_sintetico_202608.csv: período 20260831, 27500 filas, universo válido 26410 (E1 25, E2 967, E3 52, E4 46) en 3103 ms
+  ✓ [siembra] julio y agosto cargados
+
+== Fase 2: perfil Público ==
+  ✓ [público] publico abre / — HTTP 200
+  ✓ [público] publico abre /rankings — HTTP 200
+  ✓ [público] publico abre /indicadores — HTTP 200
+  ✓ [público] publico abre /calidad — HTTP 200
+  ✓ [público] publico abre /verificacion — HTTP 200
+  ✓ [público] publico abre /reportes — HTTP 200
+  ✓ [público] publico abre /rankings?periodo=20260731&ranking=CONSTRUCCION&banco=112 — HTTP 200
+  ✓ [público] el ranking filtrado muestra CONSTRUCCION
+  ✓ [público] descarga CSV del ranking filtrado (12 bancos) — HTTP 200, 12 filas, attachment; filename="rankings_20260831_hipotecario.csv"
+  ✓ [público] descarga CSV de subactividades de CONSUMO (3 × 12) — HTTP 200, 36 filas
+  ✓ [público] Público NO puede cargar un período (403) — HTTP 403: Esta operación requiere el perfil Administrador. Su perfil actual es Público.
+  ✓ [público] publico NO puede abrir /admin — HTTP 307 /acceso-restringido?requiere=administrador&desde=%2Fadmin
+  ✓ [público] publico NO puede abrir /comparar — HTTP 307 /acceso-restringido?requiere=analista&desde=%2Fcomparar
+  ✓ [público] publico NO puede abrir /rankings/detalle?periodo=20260831&ranking=HIPOTECARIO&banco=101 — HTTP 307 /acceso-restringido?requiere=analista&desde=%2Frankings%2Fdetalle%3Fperiodo%3D20260831%26ranking%3DHIPOTECARIO%26banco%3D101
+  ✓ [público] publico abre /acceso-restringido?requiere=analista&desde=%2Frankings%2Fdetalle — HTTP 200
+  ✓ [público] el aviso de acceso nombra la sección y el perfil que se necesita
+  ✓ [público] Público NO descarga el reporte de movimientos de analista (403) — HTTP 403
+  ✓ [público] una cookie de perfil falsificada no da acceso (403) — HTTP 403
+
+== Fase 3: perfil Administrador ==
+  ✓ [admin] administrador abre /admin — HTTP 200
+  ✓ [admin] administrador abre /admin/resumen — HTTP 200
+  ✓ [admin] administrador abre /admin/parametros — HTTP 200
+  ✓ [admin] administrador abre /admin/catalogos — HTTP 200
+  ✓ [admin] administrador abre /admin/bitacora — HTTP 200
+  ✓ [admin] archivo inválido columnas_faltantes.csv se rechaza con mensaje claro — HTTP 422: archivo rechazado (1 error(es)). Faltan 1 columna(s) en el encabezado: Destino. El archivo debe tener las 61 columnas del diccionario AT03. | Faltan 1 columna(s) en el encabezado: Destino. El archivo debe tener las 61 columnas del diccionario AT03.
+  ✓ [admin] archivo inválido no_es_csv.csv se rechaza con mensaje claro — HTTP 422: archivo rechazado (1 error(es)). El archivo "no_es_csv.csv" no parece un CSV del AT03: la primera línea debería ser el encabezado con 61 columnas separadas por coma y solo tiene 1. Verifique que eligió el archivo correcto y que el separador sea la coma (no punto y coma). | El archivo "no_es_csv.csv" no parece un CSV del AT03: la primera línea debería ser el encabezado con 61 columnas separadas por coma y solo tiene 1. Verifique que eligió el archivo correcto y que el separador sea la coma (no punto y coma).
+  ✓ [admin] archivo inválido ceros_perdidos.csv se rechaza con mensaje claro — HTTP 422: archivo rechazado (10 error(es)). Se perdieron ceros a la izquierda en la fila 2, columna Tipo_Credito: vale "1" y debería ser "001". Suele pasar al abrir y guardar el CSV en Excel. Vuelva a exportarlo importando esa columna como Texto. | Se perdieron ceros a la izquierda en la fila 2, columna Tipo_Credito: vale "1" y debería ser "001". Suele pasar al abrir y guardar el CSV en Excel. Vuelva a exportarlo importando esa columna como Texto.
+  ✓ [admin] archivo inválido fecha_invalida.csv se rechaza con mensaje claro — HTTP 422: archivo rechazado (1 error(es)). Fecha inválida en la fila 3: "31/07/2026". Debe tener formato AAAAMMDD (8 dígitos, por ejemplo 20260930) y ser una fecha real. | Fecha inválida en la fila 3: "31/07/2026". Debe tener formato AAAAMMDD (8 dígitos, por ejemplo 20260930) y ser una fecha real.
+  ✓ [admin] los archivos inválidos no cambiaron los datos (siguen 2 períodos) — 2 cortes
+  ✓ [admin] validar el corte de septiembre sin comprimir (11 MB) no escribe datos — HTTP 200: 30000 filas, período 20260930
+  ✓ [admin] carga AT03_sintetico_202609.csv — HTTP 200 en 3907 ms; períodos 20260930
+  ✓ [admin] el resumen "Qué cambió" compara contra agosto — anterior=20260831; 72 movimientos, 23 significativos
+  ✓ [admin] los movimientos significativos traen explicación automática — Banco Regional (111) sube 1 posición en Hipotecario: pasa del 4.º al 3.º lugar. Su saldo aumenta 12,976,411.33 (+17.20 %): de 75,422,962.27 a 88,399,373.60. Desglose de la variación: 101 préstamos nuevos aportan +22,579,450.87; 48 préstamos que salieron (vencieron o dejaron de ser válidos) restan 8,811,861.16; los 393 préstamos que continúan varían -791,178.38 (amortización). Factor principal: la entrada de préstamos nuevos. Se marca como significativo por: Saldo varía 17.2049%.
+  ✓ [admin] aparece el período 20260930 — 20260930, 20260831, 20260731
+  ✓ [admin] administrador abre /admin/resumen?periodo=20260930 — HTTP 200
+  ✓ [admin] volver a subir el mismo período se rechaza (409) con mensaje — HTTP 409: El período ya está cargado: 20260930 (archivo AT03_sintetico_202609.csv, cargado 2026-11-27 16:54). Si quiere sustituirlo, vuelva a cargarlo marcando la opción "reemplazar".
+  ✓ [admin] la bitácora registra la carga
+  ✓ [admin] publico abre / — HTTP 200
+
+== Fase 4: perfil Analista ==
+  ✓ [analista] analista abre /comparar?anterior=20260831&periodo=20260930 — HTTP 200
+  ✓ [analista] la comparación muestra movimientos
+  ✓ [analista] analista abre /rankings/detalle?periodo=20260930&ranking=HIPOTECARIO&banco=112 — HTTP 200
+  ✓ [analista] el detalle de la cifra lista préstamos
+  ✓ [analista] analista abre /reportes/imprimir?fechas=20260930&rankings=HIPOTECARIO — HTTP 200
+  ✓ [analista] descarga el reporte de movimientos ago→sep (6 × 12) — HTTP 200, 72 filas
+  ✓ [analista] descarga un reporte personalizado — HTTP 200, 4 filas
+  ✓ [analista] Analista NO puede cargar un período (403) — HTTP 403
+  ✓ [analista] analista NO puede abrir /admin — HTTP 307 /acceso-restringido?requiere=administrador&desde=%2Fadmin
+
+== Fase 5: exactitud de extremo a extremo contra la clave de control ==
+  ✓ [exactitud] exportación rankings (perfil publico) = control_rankings.csv — 216 filas idénticas (períodos 20260731, 20260831, 20260930)
+  ✓ [exactitud] exportación subactividades (perfil publico) = control_subactividades.csv — 792 filas idénticas (períodos 20260731, 20260831, 20260930)
+  ✓ [exactitud] exportación calidad (perfil publico) = control_calidad.csv — 3 filas idénticas (períodos 20260731, 20260831, 20260930)
+  ✓ [exactitud] exportación exclusiones (perfil publico) = control_exclusiones.csv — 3284 filas idénticas (períodos 20260731, 20260831, 20260930)
+  ✓ [exactitud] exportación movimientos (perfil analista) = control_movimientos.csv — 216 filas idénticas (períodos 20260831, 20260930)
+
+Resultado: 72 de 72 comprobaciones correctas en 29 s.
