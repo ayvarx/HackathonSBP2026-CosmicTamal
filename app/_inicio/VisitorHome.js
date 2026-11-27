@@ -1,12 +1,13 @@
 "use client";
 // Portado del frontend de Amet: components/VisitorHome.jsx (+ visitor.css)
-// Portada para el perfil Público: bienvenida, qué puede hacer y accesos. Cada opción muestra
+// Portada para el perfil Público: bienvenida y accesos. Cada opción muestra
 // su información en la misma pantalla y un botón permite volver a la portada.
 // Los datos llegan como props desde app/page.js (lib/consultas*.js); los montos son texto
 // decimal exacto y se formatean con lib/formato.js. El líder de cada ranking no se repite
 // aquí: lo muestra LideresRanking más abajo en la misma página.
 import { useState } from "react";
 import Link from "next/link";
+import BotonDescarga from "@/components/BotonDescarga";
 import {
   aNumeroParaGrafico,
   formatearEntero,
@@ -77,35 +78,12 @@ export default function VisitorHome({ fecha, cortes, obligatorios, actividades, 
 
       {vista.tipo === "inicio" && (
         <>
-          <section className="seccion" aria-labelledby="titulo-capacidades">
-            <div className="seccion-head">
-              <div>
-                <h2 id="titulo-capacidades">Qué puede hacer</h2>
-                <small>Sin registrarse, con el perfil Público</small>
-              </div>
-            </div>
-            <ul className="lista-capacidades">
-              <li>
-                <strong>Consultar los rankings</strong>
-                <span>Los {formatearEntero(bancos)} bancos ordenados por saldo en cada una de las {formatearEntero(actividades.length)} actividades, con su ponderación.</span>
-              </li>
-              <li>
-                <strong>Entender el corte</strong>
-                <span>Universo local válido, composición de la cartera, líderes y movimientos frente al corte anterior.</span>
-              </li>
-              <li>
-                <strong>Descargar los datos</strong>
-                <span>Rankings y desglose por subactividad en CSV, con las cifras exactas al centavo.</span>
-              </li>
-            </ul>
-          </section>
-
           <section className="seccion" aria-labelledby="titulo-actividades">
             <div className="seccion-head">
               <div>
                 <h2 id="titulo-actividades">Rankings por actividad</h2>
                 <small>
-                  {formatearEntero(actividades.length)} actividades · {formatearEntero(bancos)} bancos
+                  Saldo total por actividad · toque una para ver sus {formatearEntero(bancos)} bancos
                 </small>
               </div>
               <button type="button" className="ver-mas" onClick={() => abrirActividad()}>
@@ -117,7 +95,6 @@ export default function VisitorHome({ fecha, cortes, obligatorios, actividades, 
                 <button key={a.ranking} type="button" className="tarjeta-tema" onClick={() => abrirActividad(a.ranking)}>
                   <span className="tt-etiqueta">{a.nombre}</span>
                   <strong className="tt-cifra">{formatearMontoCompacto(a.saldo_total)}</strong>
-                  <span className="tt-texto">Saldo total de la actividad. Ver los {formatearEntero(a.filas.length)} bancos ordenados por saldo.</span>
                 </button>
               ))}
             </div>
@@ -127,7 +104,7 @@ export default function VisitorHome({ fecha, cortes, obligatorios, actividades, 
             <div className="seccion-head">
               <div>
                 <h2 id="titulo-descargas">Descargas</h2>
-                <small>Rankings y desglose por subactividad en CSV</small>
+                <small>Rankings y desglose por subactividad</small>
               </div>
               <button type="button" className="ver-mas" onClick={abrirDescargas}>
                 VER MÁS <span aria-hidden="true">›</span>
@@ -195,23 +172,15 @@ export default function VisitorHome({ fecha, cortes, obligatorios, actividades, 
           <div className="seccion-head">
             <div>
               <h2 id="titulo-descargas-detalle">Descargas</h2>
-              <small>Período {formatearFecha(fecha)} ({fecha}) · archivos CSV</small>
+              <small>Período {formatearFecha(fecha)} ({fecha})</small>
             </div>
           </div>
-          <div className="grid-descargas">
-            <a className="desc-card" href={urlsDescarga.rankings}>
-              <strong>Rankings por actividad</strong>
-              <span>Posición, saldo, cartera total y peso de cada banco.</span>
-              <em>Descargar CSV ↓</em>
-            </a>
-            <a className="desc-card" href={urlsDescarga.desglose}>
-              <strong>Desglose por subactividad</strong>
-              <span>Saldo de cada banco en cada subactividad.</span>
-              <em>Descargar CSV ↓</em>
-            </a>
+          <div className="flex flex-row flex-wrap items-start gap-3">
+            <BotonDescarga href={urlsDescarga.rankings} parametros={{ fecha }} texto="Rankings por actividad" variante="primario" />
+            <BotonDescarga href={urlsDescarga.desglose} parametros={{ fecha }} texto="Desglose por subactividad" />
           </div>
           <p className="nota-visitante">
-            Más formatos y reportes en <Link href="/reportes">Reportes</Link>.
+            Más reportes en <Link href="/reportes">Reportes</Link>.
           </p>
         </section>
       )}
@@ -220,7 +189,7 @@ export default function VisitorHome({ fecha, cortes, obligatorios, actividades, 
         Período de corte: <b>{formatearFecha(fecha)}</b> ({fecha})
       </p>
 
-      <p className="pie-visitante">Datos ficticios con formato regulatorio. Uso informativo; no es una opinión formal de la SBP.</p>
+      <p className="pie-visitante">Datos ficticios.</p>
     </div>
   );
 }

@@ -4,18 +4,17 @@
 // (carpeta app/_inicio/). Para el perfil Público abre con la portada de visitante
 // (VisitorHome); para todos muestra el Dashboard de Amet (KPIs, tendencia, composición,
 // saldo por banco, descartes y verificaciones), el líder de cada ranking (LideresRanking,
-// visible para todos los perfiles), movimientos significativos, la cartera por banco y
-// accesos a los módulos según el perfil.
+// visible para todos los perfiles), movimientos significativos y la cartera por banco,
+// sin la lista de módulos (ya está en la navegación).
 // Filtro en la URL: ?periodo=AAAAMMDD. Todas las cifras vienen del motor SQL.
 // Componente de servidor.
-import Link from "next/link";
 import EncabezadoPagina from "@/components/EncabezadoPagina";
 import EstadoVacio from "@/components/EstadoVacio";
 import Filtros from "@/components/Filtros";
 import Grafico from "@/components/Grafico";
 import MensajeError from "@/components/MensajeError";
 import TablaOrdenable from "@/components/TablaOrdenable";
-import { alcanzaPerfil, exigirPerfil, NOMBRE_PERFIL, RUTAS_MENU } from "@/lib/auth";
+import { alcanzaPerfil, exigirPerfil } from "@/lib/auth";
 import { calidad, movimientos, rankings, reconciliaciones, resumenPanel } from "@/lib/consultas";
 import {
   carteraPorBanco,
@@ -29,7 +28,6 @@ import Dashboard from "./_inicio/Dashboard";
 import LideresRanking from "./_inicio/LideresRanking";
 import StatusNotice from "./_inicio/StatusNotice";
 import VisitorHome from "./_inicio/VisitorHome";
-import NotaFuente from "./rankings/NotaFuente";
 import { urlRankings } from "./rankings/urls";
 
 export const dynamic = "force-dynamic"; // los datos cambian al cargar cortes
@@ -99,35 +97,50 @@ function prepararLideres(resumen, hasta, gruposPorCorte, fecha) {
 }
 
 /**
- * Frases automáticas con lo más destacado del corte: cambios de líder, la mayor subida
- * y la mayor bajada. Solo compara posiciones (enteros), nunca montos.
+ * Lo más destacado del corte en tarjetas: nuevo líder, mayor subida y mayor bajada.
+ * Solo compara posiciones (enteros), nunca montos.
  */
-function destacados(resumen, movs, textoAnterior) {
-  const frases = [];
-  const cambios = resumen.rankings.filter((r) => r.cambio_de_lider);
-  for (const r of cambios) {
-    frases.push(`En ${r.nombre}, ${r.lider.banco} pasa a liderar el ranking (antes: ${r.lider_anterior.banco}).`);
-  }
-  if (!cambios.length && resumen.rankings.some((r) => r.lider_anterior)) {
-    frases.push(`Los ${resumen.rankings.length} rankings mantienen a su líder respecto a ${textoAnterior}.`);
+function destacados(resumen, movs) {
+  const tarjetas = [];
+  const cambio = resumen.rankings.find((r) => r.cambio_de_lider);
+  if (cambio) {
+    tarjetas.push({
+      tipo: "lider",
+      titulo: "Nuevo líder",
+      icono: "★",
+      banco: cambio.lider.banco,
+      ranking: cambio.nombre,
+      cifra: "Puesto 1",
+      frase: `Antes: ${cambio.lider_anterior.banco}`,
+    });
   }
   const subida = movs.reduce((mejor, m) => (m.cambio_posicion > (mejor?.cambio_posicion ?? 0) ? m : mejor), null);
   const bajada = movs.reduce((peor, m) => (m.cambio_posicion < (peor?.cambio_posicion ?? 0) ? m : peor), null);
-  // Si varios bancos empatan en el mismo cambio, se dice cuántos más hay (para no exagerar al primero).
   const empatados = (m) => movs.filter((x) => x.cambio_posicion === m.cambio_posicion).length - 1;
-  const conEmpates = (m) => (empatados(m) > 0 ? ` Otros ${empatados(m)} casos con el mismo cambio.` : "");
+  const conEmpates = (m) => (empatados(m) > 0 ? `+${empatados(m)} casos iguales` : "Caso único");
   if (subida) {
-    frases.push(
-      `Mayor subida: ${subida.banco} en ${nombreRanking(subida.ranking)}, del puesto ${subida.posicion_anterior} al ${subida.posicion_actual} (+${subida.cambio_posicion}).${conEmpates(subida)}`,
-    );
+    tarjetas.push({
+      tipo: "subida",
+      titulo: "Mayor subida",
+      icono: "▲",
+      banco: subida.banco,
+      ranking: nombreRanking(subida.ranking),
+      cifra: `${subida.posicion_anterior} → ${subida.posicion_actual} (+${subida.cambio_posicion})`,
+      frase: conEmpates(subida),
+    });
   }
   if (bajada) {
-    frases.push(
-      `Mayor bajada: ${bajada.banco} en ${nombreRanking(bajada.ranking)}, del puesto ${bajada.posicion_anterior} al ${bajada.posicion_actual} (${bajada.cambio_posicion}).${conEmpates(bajada)}`,
-    );
+    tarjetas.push({
+      tipo: "bajada",
+      titulo: "Mayor bajada",
+      icono: "▼",
+      banco: bajada.banco,
+      ranking: nombreRanking(bajada.ranking),
+      cifra: `${bajada.posicion_anterior} → ${bajada.posicion_actual} (${bajada.cambio_posicion})`,
+      frase: conEmpates(bajada),
+    });
   }
-  if (movs.length && !subida && !bajada) frases.push("Ningún banco cambió de posición en ningún ranking.");
-  return frases;
+  return tarjetas;
 }
 
 export default async function PaginaPanel({ searchParams }) {
@@ -180,7 +193,7 @@ export default async function PaginaPanel({ searchParams }) {
   const esPublico = !alcanzaPerfil(perfil, "analista");
   const esAnalista = !esPublico;
   const significativos = movs.filter((m) => m.significativo);
-  const frases = anterior ? destacados(resumen, movs, textoAnterior) : [];
+  const tarjetasDestacadas = anterior ? destacados(resumen, movs) : [];
 
   // Composición por macroactividad, de mayor a menor saldo (orden exacto sobre texto decimal).
   const composicionOrdenada = [...composicion].sort((a, b) => compararDecimales(b.saldo, a.saldo));
@@ -212,9 +225,6 @@ export default async function PaginaPanel({ searchParams }) {
   const calidadActual = calidades.find((c) => c.fecha === fecha) ?? null;
   const serie = calidades.filter((c) => c.fecha <= fecha).map((c) => ({ fecha: c.fecha, universo: c.universo_local_valido }));
 
-  // Módulos: los que el perfil puede abrir y, aparte, los que requieren otro perfil.
-  const modulos = RUTAS_MENU.filter((r) => r.ruta !== "/");
-
   return (
     <>
       {esPublico && (
@@ -225,8 +235,8 @@ export default async function PaginaPanel({ searchParams }) {
           actividades={actividades}
           urlRankings={urlRankings({ periodo: fecha })}
           urlsDescarga={{
-            rankings: `/api/exportar/rankings?fecha=${fecha}`,
-            desglose: `/api/exportar/subactividades?fecha=${fecha}`,
+            rankings: "/api/exportar/rankings",
+            desglose: "/api/exportar/subactividades",
           }}
         />
       )}
@@ -294,9 +304,6 @@ export default async function PaginaPanel({ searchParams }) {
         <h2 id="titulo-composicion" className="mb-3">Composición de la cartera local válida</h2>
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="flex flex-col gap-3">
-            <p className="text-sm text-texto-suave">
-              Cifras exactas de la dona «Saldo por macroactividad» del panel: suma del saldo de los 12 bancos en cada ranking.
-            </p>
             <TablaOrdenable
               titulo="Saldo por macroactividad"
               columnas={[
@@ -359,16 +366,22 @@ export default async function PaginaPanel({ searchParams }) {
           </EstadoVacio>
         ) : (
           <>
-            <p className="mb-3 max-w-3xl text-sm text-texto-suave">
-              {formatearFecha(fecha)} frente a {textoAnterior}. Un movimiento es significativo según la regla configurable
-              que define el Administrador (cambio de posición mínimo, cambio de líder o variación de saldo mínima).
-            </p>
-            {frases.length > 0 && (
-              <ul className="tarjeta mb-4 list-disc space-y-1 pl-8 text-sm" aria-label="Lo más destacado">
-                {frases.map((f) => (
-                  <li key={f}>{f}</li>
+            {tarjetasDestacadas.length > 0 ? (
+              <ul className="destacados" aria-label="Lo más destacado">
+                {tarjetasDestacadas.map((t) => (
+                  <li key={t.tipo} className={`destacado destacado--${t.tipo}`}>
+                    <span className="destacado-tipo">
+                      <span aria-hidden="true">{t.icono}</span> {t.titulo}
+                    </span>
+                    <strong className="destacado-banco">{t.banco}</strong>
+                    <span className="destacado-ranking">{t.ranking}</span>
+                    <span className="destacado-cifra cifra">{t.cifra}</span>
+                    <small>{t.frase}</small>
+                  </li>
                 ))}
               </ul>
+            ) : (
+              <p className="mb-3 text-sm text-texto-suave">Sin cambios de posición frente a {textoAnterior}.</p>
             )}
             <TablaOrdenable
               titulo={`${formatearEntero(significativos.length)} movimientos significativos · ${textoAnterior} → ${formatearFecha(fecha)}`}
@@ -403,35 +416,7 @@ export default async function PaginaPanel({ searchParams }) {
         )}
       </section>
 
-      {/* Accesos a los módulos según el perfil */}
-      <section aria-labelledby="titulo-modulos" className="mb-6">
-        <h2 id="titulo-modulos" className="mb-3">Módulos</h2>
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {modulos.map((m) => {
-            const permitido = alcanzaPerfil(perfil, m.minimo);
-            return (
-              <li key={m.ruta} className={`tarjeta flex flex-col gap-1 ${permitido ? "" : "border-dashed"}`}>
-                {permitido ? (
-                  <Link href={m.ruta} className="font-semibold">
-                    {m.etiqueta}
-                  </Link>
-                ) : (
-                  <span className="font-semibold text-texto-suave">{m.etiqueta}</span>
-                )}
-                <span className="text-sm text-texto-suave">{m.descripcion}</span>
-                {!permitido && (
-                  <span className="mt-auto pt-1 text-xs text-texto-tenue">
-                    Requiere el perfil {NOMBRE_PERFIL[m.minimo]}.{" "}
-                    <Link href={`/perfil?volver=${encodeURIComponent(m.ruta)}`}>Cambiar de perfil</Link>
-                  </span>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      </section>
-
-      <NotaFuente fecha={fecha} anterior={anterior} />
+      <p className="mt-10 border-t border-borde pt-4 text-xs font-semibold text-texto-tenue">Datos ficticios.</p>
     </>
   );
 }

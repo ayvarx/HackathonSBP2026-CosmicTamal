@@ -21,10 +21,16 @@ import "./dashboard.css";
 import "./depth.css";
 import "./inicio.css";
 
-// Paleta del tema Radar (la de Amet, sin el azul repetido).
-const PALETA = ["#287f1d", "#68c85b", "#f5a524", "#f87171", "#2dd4bf", "#e879f9", "#98b894"];
-const AZUL = "#287f1d";
+// Paleta verde del equipo (primario, secundario 1 y secundario 2), alternando tonos para distinguir sectores.
+const PALETA = ["#106003", "#7EAC39", "#297D5F", "#419A33", "#034E33", "#426B04", "#136749"];
+const AZUL = "#106003";
 const AMBAR = "#f5a524";
+// Explicación corta de cada reconciliación (la completa está en /verificacion).
+const RECON_CORTA = {
+  1: "Subactividades = saldo de la actividad",
+  2: "6 actividades = cartera del banco",
+  3: "12 bancos = universo válido",
+};
 
 function Panel({ titulo, eyebrow, lectura, aside, className = "", children }) {
   return (
@@ -157,9 +163,12 @@ export default function Dashboard({
       {
         type: "pie",
         name: "Saldo",
-        radius: ["62%", "92%"],
+        radius: ["62%", "90%"],
+        center: ["50%", "50%"],
         padAngle: 2,
         label: { show: false },
+        labelLine: { show: false },
+        emphasis: { label: { show: false }, scale: false },
         data: composicion.map((c, i) => ({
           name: nombreRanking(c.ranking),
           value: aNumeroParaGrafico(c.saldo),
@@ -196,7 +205,14 @@ export default function Dashboard({
         { k: "E4", t: "Actividad no catalogada", v: calidad.e4_actividad_no_catalogada },
       ]
     : [];
+  // Barras de E1–E4 relativas al mayor de ellos (para que se distingan entre sí).
+  const maxExclusion = Math.max(1, ...exclusiones.map((e) => Number(e.v) || 0));
+  const pctUniverso = calidad && leidas ? (Number(calidad.universo_local_valido) / leidas) * 100 : 0;
   const recOk = reconciliaciones.filter((r) => r.todas_cuadran).length;
+  // Total de la dona en dos líneas cortas para que quepa en el hueco central.
+  const totalCompacto = formatearMontoCompacto(universo.saldo_universo_local_valido);
+  const totalCifra = totalCompacto.replace(/ millones$/, "");
+  const totalUnidad = totalCifra === totalCompacto ? "Saldo total" : "millones · total";
 
   return (
     <div className="dash">
@@ -234,7 +250,7 @@ export default function Dashboard({
         <Kpi
           etiqueta="Saldo del universo local válido"
           valor={formatearMontoCompacto(universo.saldo_universo_local_valido)}
-          color="#68c85b"
+          color="#7EAC39"
           detalle={`Exacto: ${formatearMonto(universo.saldo_universo_local_valido)}`}
         />
         <Kpi
@@ -268,20 +284,20 @@ export default function Dashboard({
           )}
         </Panel>
 
-        <Panel eyebrow="COMPOSICIÓN" titulo="Saldo por macroactividad">
+        <Panel className="donut-panel" eyebrow="COMPOSICIÓN" titulo="Saldo por macroactividad">
           <div className="donut-wrap">
             <div className="donut">
-              <Grafico opcion={opcionDona} altura={200} formatoValor="monto" />
+              <Grafico opcion={opcionDona} altura={220} formatoValor="monto" />
               <div className="donut-center">
-                <strong>{formatearMontoCompacto(universo.saldo_universo_local_valido)}</strong>
-                <small>Saldo total</small>
+                <strong>{totalCifra}</strong>
+                <small>{totalUnidad}</small>
               </div>
             </div>
             <ul className="legend">
               {composicion.map((c, i) => (
                 <li key={c.ranking}>
                   <span className="sw" style={{ background: PALETA[i % PALETA.length] }} />
-                  <span>{nombreRanking(c.ranking)}</span>
+                  <span className="legend-nombre" title={nombreRanking(c.ranking)}>{nombreRanking(c.ranking)}</span>
                   <b>{formatearPorcentaje(c.participacion_pct, 2)}</b>
                 </li>
               ))}
@@ -320,7 +336,7 @@ export default function Dashboard({
         >
           <ul className="quality-list">
             {exclusiones.map((e) => {
-              const pct = leidas ? (Number(e.v) / leidas) * 100 : 0;
+              const pct = ((Number(e.v) || 0) / maxExclusion) * 100;
               return (
                 <li key={e.k}>
                   <div className="q-head">
@@ -337,8 +353,14 @@ export default function Dashboard({
             })}
             {calidad && (
               <li className="q-total">
-                <span>Universo local válido</span>
-                <b>{formatearEntero(calidad.universo_local_valido)}</b>
+                <div className="q-head">
+                  <span>Universo local válido</span>
+                  <b>{formatearEntero(calidad.universo_local_valido)}</b>
+                </div>
+                <div className="q-bar q-bar--ok">
+                  <i style={{ width: `${Math.min(100, pctUniverso)}%` }} />
+                </div>
+                <small className="q-nota">{formatearPorcentaje(pctUniverso.toFixed(2), 2)} de los leídos · barras E1–E4 relativas al mayor</small>
               </li>
             )}
           </ul>
@@ -358,7 +380,7 @@ export default function Dashboard({
             {reconciliaciones.map((r) => (
               <li key={r.reconciliacion} className={r.todas_cuadran ? "ok" : "fallo"}>
                 <span>
-                  {r.reconciliacion}. {r.descripcion} ({formatearEntero(r.cuadran)}/{formatearEntero(r.comprobaciones)})
+                  {RECON_CORTA[r.reconciliacion] ?? r.descripcion} ({formatearEntero(r.cuadran)}/{formatearEntero(r.comprobaciones)})
                 </span>
                 <b aria-label={r.todas_cuadran ? "Cuadra" : "No cuadra"}>{r.todas_cuadran ? "✔" : "✖"}</b>
               </li>

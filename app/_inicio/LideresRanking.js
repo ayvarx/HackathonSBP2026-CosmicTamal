@@ -17,7 +17,6 @@ import {
 import "./dashboard.css";
 import "./inicio.css";
 
-const TIPO_RANKING = { obligatorio: "Obligatorio", recomendado: "Recomendado", bonus: "Bonus" };
 
 export default function LideresRanking({ lideres, fecha }) {
   const [abierta, setAbierta] = useState(null);
@@ -48,7 +47,6 @@ export default function LideresRanking({ lideres, fecha }) {
               <div className="lider-resumen">
                 <header>
                   <strong>{r.nombre}</strong>
-                  <span className={`lider-etiqueta ${r.tipo === "obligatorio" ? "oblig" : ""}`}>{TIPO_RANKING[r.tipo] ?? r.tipo}</span>
                   <span className="lider-toggle" aria-hidden="true">
                     {estaAbierta ? "−" : "+"}
                   </span>
