@@ -41,9 +41,7 @@ export default function ConmutadorPerfil({ perfilActual, perfiles }) {
         ))}
       </select>
       <button type="submit">Cambiar</button>
-      <Link href={`/perfil?volver=${encodeURIComponent(ruta)}`}>
-        ¿Qué puede hacer cada perfil?
-      </Link>
+      <Link href="/login">Cambiar de vista</Link>
     </form>
   );
 }

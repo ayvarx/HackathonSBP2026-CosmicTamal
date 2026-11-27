@@ -17,8 +17,8 @@ export default function LogoRadar({ size = 42, decorativo = false }) {
     <svg className="logo-radar" viewBox="0 0 64 64" width={size} height={size} {...accesible}>
       <defs>
         <linearGradient id="lr-fondo" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#4ee03b" />
-          <stop offset="1" stopColor="#13520b" />
+          <stop offset="0" stopColor="#419A33" />
+          <stop offset="1" stopColor="#094000" />
         </linearGradient>
         <linearGradient id="lr-barra" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#eef8ed" />

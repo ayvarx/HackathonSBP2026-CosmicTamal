@@ -13,12 +13,12 @@ export function descargasBanco({ fecha, ranking, codigo }) {
   const corte = new URLSearchParams({ fecha, ranking, banco: codigo });
   return [
     {
-      texto: "Histórico ↓",
+      texto: "Histórico",
       href: `/api/exportar/rankings?${historico}`,
       descripcion: "Posición, saldo y ponderación del banco en todos los cortes cargados (entregable 2)",
     },
     {
-      texto: "Desglose ↓",
+      texto: "Desglose",
       href: `/api/exportar/subactividades?${corte}`,
       descripcion: "Saldo del banco por subactividad en este corte (entregable 3)",
     },

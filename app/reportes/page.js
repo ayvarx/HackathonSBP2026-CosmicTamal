@@ -109,7 +109,7 @@ export default async function PaginaReportes({ searchParams }) {
       </section>
 
       <section aria-labelledby="t-descargas" className="mb-8">
-        <h2 id="t-descargas" className="mb-3">Entregables en CSV</h2>
+        <h2 id="t-descargas" className="mb-3">Entregables (CSV, Excel o PDF)</h2>
         <div className="grid gap-4 md:grid-cols-2">
           <div className="tarjeta">
             <h3>Rankings por período</h3>
@@ -176,7 +176,7 @@ export default async function PaginaReportes({ searchParams }) {
                   {vista.filas.length > MAXIMO_VISTA_PREVIA ? ` (se muestran las primeras ${MAXIMO_VISTA_PREVIA}; el CSV las incluye todas)` : ""}.
                 </p>
                 <div className="flex flex-wrap items-start gap-2">
-                  <BotonDescarga href={hrefPersonalizado("/api/exportar/personalizado")} texto="Descargar CSV" variante="primario" />
+                  <BotonDescarga href={hrefPersonalizado("/api/exportar/personalizado")} texto="Descargar reporte" variante="primario" />
                   <Link href={hrefPersonalizado("/reportes/imprimir")} className="boton boton-secundario">Versión imprimible</Link>
                 </div>
               </div>

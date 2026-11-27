@@ -4,6 +4,7 @@ import "./globals.css";
 import Cabecera from "@/components/Cabecera";
 import FranjaDatos from "@/components/FranjaDatos";
 import PiePagina from "@/components/PiePagina";
+import { headers } from "next/headers";
 import { obtenerPerfil } from "@/lib/auth";
 import { fechasDisponibles } from "@/lib/consultas-rankings";
 
@@ -36,6 +37,9 @@ async function obtenerPeriodoVigente() {
 export default async function RootLayout({ children }) {
   const perfil = await obtenerPerfil();
   const periodoVigente = await obtenerPeriodoVigente();
+  // En el acceso temporal (/login y /perfil) no se muestran el menú ni el perfil.
+  const ruta = ((await headers()).get("x-ruta") ?? "").split("?")[0];
+  const esAcceso = ruta === "/login" || ruta === "/perfil";
 
   return (
     <html lang="es-PA">
@@ -43,8 +47,10 @@ export default async function RootLayout({ children }) {
         <a href="#contenido" className="saltar-contenido">
           Saltar al contenido
         </a>
-        <Cabecera perfil={perfil} />
-        <FranjaDatos periodoVigente={periodoVigente} />
+        <div className="barra-superior-fija">
+          {!esAcceso && <Cabecera perfil={perfil} />}
+          <FranjaDatos periodoVigente={periodoVigente} />
+        </div>
         <main id="contenido" className="contenedor flex-1 py-8">
           {children}
         </main>

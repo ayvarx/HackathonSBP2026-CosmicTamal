@@ -88,8 +88,10 @@ export default async function PaginaCalidad({ searchParams }) {
         titulo="Calidad de datos"
         descripcion={`Qué filas se leyeron, cuáles se excluyeron y por qué, y cuántas quedaron en el universo local válido. Período: ${formatearFecha(fecha)}.`}
       >
+        <div className="flex flex-row flex-wrap items-start gap-2">
         <BotonDescarga href="/api/exportar/calidad" texto="Reporte de calidad" descripcion="Los períodos cargados (entregable 4)." />
         <BotonDescarga href="/api/exportar/exclusiones" parametros={{ fecha }} texto="Filas excluidas" descripcion={`Todas las excluidas de ${formatearFecha(fecha)}.`} />
+        </div>
       </EncabezadoPagina>
 
       <Filtros campos={campos} reiniciar={["pagina"]} />

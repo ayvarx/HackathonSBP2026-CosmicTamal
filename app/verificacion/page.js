@@ -205,9 +205,10 @@ export default async function PaginaVerificacion({ searchParams }) {
             { clave: "operaciones", titulo: "Operaciones", tipo: "entero" },
           ]}
         />
-        <p className="mt-2 text-sm text-texto-suave">
-          Por banco: descargue <a href={`/api/exportar/subactividades?periodo=${fecha}`}>el desglose completo</a> ({nombreSubactividad("Tarjeta")} incluida).
-        </p>
+        <div className="mt-2 flex flex-row flex-wrap items-center gap-2 text-sm text-texto-suave">
+          <span>Por banco: el desglose completo ({nombreSubactividad("Tarjeta")} incluida).</span>
+          <BotonDescarga href="/api/exportar/subactividades" parametros={{ periodo: fecha }} texto="Desglose completo" />
+        </div>
       </section>
 
       <section id="p6" className="mt-8 scroll-mt-24" aria-labelledby="h-p6">

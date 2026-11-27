@@ -15,10 +15,7 @@ export default function PiePagina({ perfil }) {
             <span className="font-semibold text-texto-suave">Fuente:</span> Datos AT03 sintéticos · Hackathon SBP 2026.
             Rankings calculados desde los archivos de corte con los catálogos CINU/SB109, SB21 y de bancos suministrados.
           </p>
-          <p>
-            Datos ficticios: no representan al sistema bancario panameño. Uso informativo, no es opinión formal de la
-            Superintendencia de Bancos de Panamá.
-          </p>
+          <p>Datos ficticios</p>
         </div>
         <p className="flex items-start gap-2 md:justify-end md:text-right">
           <LogoRadar size={20} decorativo />

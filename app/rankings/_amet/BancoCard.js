@@ -12,6 +12,7 @@
 //   partes [{ nombre, valor (texto), color }], seleccionada, hrefSeleccion, descargas [{ texto, href, descripcion }].
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import BotonDescarga from "@/components/BotonDescarga";
 import { aNumeroParaGrafico, formatearMonto, formatearMontoCompacto, formatearPorcentaje } from "@/lib/formato";
 import { porcentajeDe, restarMontos } from "./numeros";
 
@@ -163,19 +164,13 @@ export default function BancoCard({ posicion, banco, saldo, serie, partes, selec
         </>
       )}
       {descargas.length > 0 && (
-        <div className="bc-acciones">
+        <div
+          className="bc-acciones flex flex-row flex-wrap items-start gap-2"
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
+        >
           {descargas.map((d) => (
-            <a
-              key={d.href}
-              className="bc-descargar"
-              href={d.href}
-              download
-              title={d.descripcion}
-              onClick={(e) => e.stopPropagation()}
-              onKeyDown={(e) => e.stopPropagation()}
-            >
-              {d.texto}
-            </a>
+            <BotonDescarga key={d.href} href={d.href} texto={d.texto} descripcion={d.descripcion} />
           ))}
         </div>
       )}

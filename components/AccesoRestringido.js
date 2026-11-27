@@ -33,7 +33,7 @@ export default function AccesoRestringido({ perfilActual, requiere, desde }) {
             Continuar a {seccion?.etiqueta ?? "la sección"}
           </Link>
         ) : (
-          <Link href={`/perfil?volver=${encodeURIComponent(volver)}`} className="boton">
+          <Link href="/login" className="boton">
             Cambiar de perfil
           </Link>
         )}

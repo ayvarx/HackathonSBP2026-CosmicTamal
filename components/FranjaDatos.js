@@ -17,7 +17,7 @@ import { useSearchParams } from "next/navigation";
 import { formatearFecha } from "@/lib/formato";
 
 const FUENTE = "Datos AT03 sintéticos · Hackathon SBP 2026";
-const AVISO = "Datos ficticios: no representan al sistema bancario panameño · Uso informativo, no es opinión formal de la SBP";
+const AVISO = "Datos ficticios";
 
 const esCorte = (valor) => /^\d{8}$/.test(valor ?? "");
 

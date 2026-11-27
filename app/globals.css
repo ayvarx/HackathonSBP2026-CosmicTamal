@@ -24,11 +24,11 @@
   --text: #122a0f;
   --text-2: #375533;
   --muted: #698b64;
-  --blue: #287f1d;
-  --blue-2: #1a690f;
-  --green: #287f1d;
+  --blue: #106003;
+  --blue-2: #094000;
+  --green: #267F18;
   --amber: #f5a524;
-  --purple: #68c85b;
+  --purple: #297D5F;
   --danger: #f87171;
   --radius: 14px;
 }
@@ -50,16 +50,16 @@
   --color-borde-fuerte: #83b37d;    /* 3.2:1: borde de controles de formulario */
 
   /* Identidad Radar: azul marino */
-  --color-primario: #287f1d;        /* = --blue    10.2:1 con texto blanco */
-  --color-primario-oscuro: #1a690f; /* = --blue-2 */
+  --color-primario: #106003;        /* = --blue    7.8:1 con texto blanco */
+  --color-primario-oscuro: #094000; /* = --blue-2 */
   --color-primario-suave: #e9f6e8;
   --color-sobre-primario: #ffffff;
   --color-sobre-primario-suave: #cfebcc; /* texto secundario sobre la cabecera azul */
-  --color-enlace: #287f1d;
-  --color-acento: #68c85b;          /* = --purple */
+  --color-enlace: #106003;
+  --color-acento: #297D5F;          /* = --purple */
 
   /* Foco de teclado (visible sobre fondos claros y oscuros) */
-  --color-foco: #42d62f;
+  --color-foco: #419A33;
   --color-foco-oscuro: #ffd166;
 
   /* Aviso de datos ficticios (ámbar oscuro para que el texto conserve contraste AA) */
@@ -228,7 +228,7 @@
   }
   .boton:hover {
     color: var(--color-sobre-primario);
-    background: linear-gradient(135deg, var(--color-primario-oscuro), #13520b);
+    background: linear-gradient(135deg, var(--color-primario-oscuro), #094000);
     text-decoration: none;
   }
   .boton:disabled,
@@ -361,7 +361,7 @@
     border-radius: 999px;
     font-size: 0.72rem;
     font-weight: 600;
-    color: #083502;
+    color: #052200;
     background: #f1f9f0;
     white-space: nowrap;
   }
@@ -381,9 +381,16 @@
   /* ---------------------------------------------------------------- */
   /* Franja fija: fuente, período y aviso (estilo .persistent-disclaimer de Amet) */
   /* ---------------------------------------------------------------- */
-  .franja-fija {
+  /* Barra superior fija: cabecera + pestañas + franja siguen la pantalla al desplazarse. */
+  .barra-superior-fija {
     position: sticky;
     top: 0;
+    z-index: 50;
+  }
+  /* Los anclajes (#seccion) no quedan tapados por la barra fija. */
+  [id] { scroll-margin-top: 12rem; }
+  .franja-fija {
+    position: relative;
     z-index: 30;
     padding-block: 0.5rem;
     background: rgba(245, 251, 244, 0.94);

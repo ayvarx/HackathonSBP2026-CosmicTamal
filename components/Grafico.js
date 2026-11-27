@@ -33,8 +33,8 @@ import dynamic from "next/dynamic";
 // Paleta categórica validada (orden fijo, segura para daltonismo en pares adyacentes).
 // El color 1 (azul) es el predeterminado de una sola serie; el 2 (naranja) sirve para resaltar.
 // Tema Radar: el color 1 es el azul marino de la marca (--blue) y el 4 el azul claro (--purple).
-export const COLORES_GRAFICO = ["#287f1d", "#d9622b", "#1a9a72", "#68c85b", "#d0679a", "#d99a00", "#60d650", "#c93f3e"];
-export const COLOR_RESALTADO = "#d9622b";
+export const COLORES_GRAFICO = ["#106003", "#297D5F", "#7EAC39", "#136749", "#608D1A", "#419A33", "#034E33", "#426B04"];
+export const COLOR_RESALTADO = "#f5a524";
 
 // Tema sobrio: ejes y rejilla discretos, texto con los colores de la interfaz.
 const TEMA_SBP = {

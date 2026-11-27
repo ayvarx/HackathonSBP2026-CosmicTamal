@@ -362,6 +362,7 @@ export default async function PaginaRankings({ searchParams }) {
           </>
         }
       >
+        <div className="flex flex-row flex-wrap items-start gap-2">
         <BotonDescarga
           href="/api/exportar/rankings"
           parametros={{ fecha, ranking }}
@@ -375,6 +376,7 @@ export default async function PaginaRankings({ searchParams }) {
           texto="Descargar desglose"
           descripcion="Entregable 3, por subactividad."
         />
+        </div>
       </EncabezadoPagina>
 
       {/* Cabecera de actividad (Amet): chips de los 6 rankings agrupados en obligatorios, recomendado

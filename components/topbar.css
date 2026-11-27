@@ -3,7 +3,7 @@
    Adaptado: las pestañas son enlaces de ruta (<a>), el contenido se alinea con .contenedor
    y NO se oculta la barra de desplazamiento (se conserva por accesibilidad). */
 .app-cabecera {
-  background: linear-gradient(90deg, #083502 0%, #1a690f 100%);
+  background: linear-gradient(90deg, #052200 0%, #094000 100%);
   color: #ffffff;
 }
 .app-cabecera-fila {
@@ -19,8 +19,8 @@
 .app-perfil { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; font-size: 13px; color: #cfebcc; }
 .app-perfil label { color: #cfebcc; }
 .app-perfil select {
-  background: #ffffff; color: #1a690f; border: 0; border-radius: 8px; padding: 7px 12px; font-weight: 700; font-size: 14px;
-  min-width: 170px; min-height: 36px; cursor: pointer; box-shadow: 0 3px 0 #13520b;
+  background: #ffffff; color: #094000; border: 0; border-radius: 8px; padding: 7px 12px; font-weight: 700; font-size: 14px;
+  min-width: 170px; min-height: 36px; cursor: pointer; box-shadow: 0 3px 0 #094000;
 }
 .app-perfil button {
   min-height: 36px; padding: 6px 14px; border-radius: 8px; border: 1px solid rgba(207, 235, 204, 0.7);
@@ -40,9 +40,9 @@
   display: inline-block; padding: 14px 16px; color: #4e634b; font-weight: 600; font-size: 14px; text-decoration: none;
   border-bottom: 3px solid transparent; margin-bottom: -1px; white-space: nowrap;
 }
-.app-tabs a:hover { color: #1a690f; border-bottom-color: #bfe5ba; text-decoration: none; }
-.app-tabs a.activa { color: #1a690f; font-weight: 700; border-bottom-color: #287f1d; }
-.app-tabs a:focus-visible { outline: 3px solid #42d62f; outline-offset: -3px; }
+.app-tabs a:hover { color: #094000; border-bottom-color: #bfe5ba; text-decoration: none; }
+.app-tabs a.activa { color: #094000; font-weight: 700; border-bottom-color: #106003; }
+.app-tabs a:focus-visible { outline: 3px solid #419A33; outline-offset: -3px; }
 
 @media (max-width: 700px) {
   .app-cabecera-fila { padding-block: 12px; }
