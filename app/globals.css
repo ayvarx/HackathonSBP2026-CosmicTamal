@@ -95,6 +95,7 @@
 /* ------------------------------------------------------------------ */
 @layer base {
   html {
+    overscroll-behavior: none;
     color-scheme: light;
     -webkit-text-size-adjust: 100%;
     font-synthesis: none;
@@ -105,6 +106,7 @@
   body {
     margin: 0;
     min-width: 320px;
+    overscroll-behavior: none;
     background:
       radial-gradient(900px 500px at 85% -10%, rgba(40, 127, 29, 0.14), transparent 60%),
       radial-gradient(700px 400px at -10% 110%, rgba(65, 145, 54, 0.06), transparent 60%),

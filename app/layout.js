@@ -37,24 +37,25 @@ async function obtenerPeriodoVigente() {
 export default async function RootLayout({ children }) {
   const perfil = await obtenerPerfil();
   const periodoVigente = await obtenerPeriodoVigente();
-  // En el acceso temporal (/login y /perfil) no se muestran el menú ni el perfil.
+  // En el acceso (/login y /perfil) no se muestra el marco: ni cabecera, ni franja, ni pie.
+  // La franja queda solo para lectores de pantalla (sr-only) con la fuente y el período.
   const ruta = ((await headers()).get("x-ruta") ?? "").split("?")[0];
   const esAcceso = ruta === "/login" || ruta === "/perfil";
 
   return (
     <html lang="es-PA">
-      <body className="flex min-h-screen flex-col">
+      <body className={esAcceso ? "h-dvh overflow-hidden" : "flex min-h-dvh flex-col"}>
         <a href="#contenido" className="saltar-contenido">
           Saltar al contenido
         </a>
-        <div className="barra-superior-fija">
+        <div className={esAcceso ? "sr-only" : "barra-superior-fija"}>
           {!esAcceso && <Cabecera perfil={perfil} />}
           <FranjaDatos periodoVigente={periodoVigente} />
         </div>
-        <main id="contenido" className="contenedor flex-1 py-8">
+        <main id="contenido" className={esAcceso ? "h-dvh" : "contenedor w-full flex-1 py-8"}>
           {children}
         </main>
-        <PiePagina perfil={perfil} />
+        {!esAcceso && <PiePagina perfil={perfil} />}
       </body>
     </html>
   );

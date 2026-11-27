@@ -185,3 +185,66 @@
 .login-rapido button:hover { background: #eaf5e3; }
 @media (prefers-reduced-motion: reduce) { .login * { animation: none !important; } }
 .lv-barras > div { grid-template-columns: minmax(0, 140px) 1fr auto; }
+
+/* ===== Acceso a pantalla completa: exactamente la ventana, sin desplazamiento ===== */
+.login { height: 100dvh; min-height: 0; overflow: hidden; border-radius: 0; box-shadow: none; }
+.login-formulario { padding: 20px 40px; min-height: 0; overflow: hidden; }
+.login-centro { padding: 8px 0; min-height: 0; }
+.login-icono { margin-bottom: 8px; }
+.login-icono svg { width: 72px; height: 72px; }
+.login-icono::after { width: 56px; height: 10px; bottom: -8px; }
+.login-centro h1 { font-size: 24px; margin-bottom: 18px; }
+.login-form { gap: 12px; }
+.login-form input { padding: 10px 16px; font-size: 14px; }
+.login-form .login-entrar { margin-top: 2px; padding: 11px; }
+.login-form .login-visitante { padding: 10px; }
+.login-rapido { margin-top: 14px; padding-top: 12px; }
+.login-rapido > span { margin-bottom: 8px; }
+.login-pie { font-size: 11px; color: #5f6f5b; }
+@media (max-height: 760px) {
+  .login-icono svg { width: 56px; height: 56px; }
+  .login-centro h1 { font-size: 22px; margin-bottom: 14px; }
+  .login-form { gap: 10px; }
+}
+
+/* ===== Panel de presentación: verde oscuro, sobrio, con el líder de cada ranking ===== */
+.login-presentacion {
+  min-height: 0; height: 100dvh; overflow: hidden; animation: none;
+  background: linear-gradient(165deg, #052200 0%, #094000 55%, #106003 100%);
+  padding: 48px 56px 40px; display: flex; flex-direction: column; justify-content: space-between; gap: 28px;
+  text-align: left; color: #ffffff;
+}
+.login-presentacion::before { display: none; }
+.lp-encabezado h2 { margin: 0; color: #ffffff; font-size: 36px; font-weight: 800; line-height: 1.1; letter-spacing: -0.025em; max-width: 520px; animation: subir .6s ease-out both; }
+.lp-encabezado p { margin: 10px 0 0; font-size: 16px; color: #d6e8cf; animation: subir .6s ease-out .08s both; }
+
+.lp-grafico { margin: 0; flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; max-width: 560px; }
+.lp-grafico figcaption { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #b9d6ad; margin-bottom: 14px; }
+.lp-grafico ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.lp-fila { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 14px; }
+.lp-actividad { font-weight: 700; color: #ffffff; }
+.lp-monto { font-weight: 700; color: #ffffff; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lp-pista { margin: 6px 0 4px; height: 8px; border-radius: 999px; background: rgba(255,255,255,0.12); overflow: hidden; }
+.lp-pista i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #419A33, #7EAC39); transform-origin: left; animation: lp-crecer 1s cubic-bezier(.2,.8,.2,1) both; }
+.lp-lider { font-size: 12px; color: #c9dfc0; }
+@keyframes lp-crecer { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+.lp-cifras { border-top: 1px solid rgba(255,255,255,0.18); padding-top: 18px; }
+.lp-cifras dl { margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.lp-cifras dt { font-size: 12px; color: #c9dfc0; }
+.lp-cifras dd { margin: 4px 0 0; font-size: 22px; font-weight: 800; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lp-cifras p { margin: 12px 0 0; font-size: 13px; color: #d6e8cf; }
+
+@media (max-height: 760px) {
+  .login-presentacion { padding: 32px 48px 28px; gap: 18px; }
+  .lp-encabezado h2 { font-size: 30px; }
+  .lp-grafico ul { gap: 9px; }
+  .lp-fila { font-size: 13px; }
+  .lp-pista { margin: 4px 0 2px; height: 7px; }
+  .lp-lider { font-size: 11px; }
+  .lp-cifras { padding-top: 12px; }
+  .lp-cifras dd { font-size: 19px; }
+  .lp-cifras p { margin-top: 8px; }
+}
+@media (max-width: 900px) { .login-presentacion { display: none; } }
+@media (prefers-reduced-motion: reduce) { .lp-pista i, .lp-encabezado * { animation: none !important; } }

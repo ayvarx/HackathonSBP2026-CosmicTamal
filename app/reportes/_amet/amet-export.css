@@ -1,11 +1,17 @@
-/* Portado del frontend de Amet: exportar.css (versión nueva), paleta verde. */
-.exportar .exp-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: stretch; }
-.exportar .exp-card { position: relative; background: linear-gradient(180deg, #fbfdf9 0%, #ffffff 45%); border: 1px solid #dfeadb; border-radius: 20px; padding: 28px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 14px 34px rgba(15,23,42,0.08); }
-.exportar .exp-card::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 5px; border-radius: 20px 20px 0 0; background: linear-gradient(90deg, #7EAC39, #267F18 60%, #094000); }
-.exportar .exp-cabecera { display: flex; align-items: center; gap: 16px; }
-.exportar .exp-icono { width: 54px; height: 54px; border-radius: 16px; display: grid; place-items: center; flex-shrink: 0; background: linear-gradient(160deg, #419A33, #106003 60%, #094000); box-shadow: inset 0 2px 0 rgba(255,255,255,0.4), 0 8px 18px rgba(16,96,3,0.35); }
-.exportar .exp-etiqueta { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #267F18; }
-.exportar .exp-card h3 { margin: 2px 0 0; font-size: 22px; font-weight: 800; letter-spacing: -0.015em; color: #052200; }
-.exportar .exp-card > p { margin: 0 0 6px; font-size: 14px; color: #4b5b48; line-height: 1.55; max-width: 460px; min-height: 44px; }
-.exportar .exp-formatos { position: relative; z-index: 1; }
-@media (max-width: 1100px) { .exportar .exp-grid { grid-template-columns: 1fr; } }
+/* Portado del frontend de Amet: styles.css / depth.css (solo lo que usa ExportPanel), acotado a .amet-exp */
+.amet-exp .panel { background: #fff; border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 12px 30px -18px rgba(18, 42, 15,0.12); padding: 22px; min-width: 0; }
+.amet-exp .export-panel { max-width: 680px; }
+.amet-exp .panel h2 { font-size: 18px; font-weight: 700; margin: 6px 0; letter-spacing: -0.01em; }
+.amet-exp .panel p { color: var(--muted); font-size: 12px; line-height: 1.65; margin: 0; }
+.amet-exp .eyebrow { font-size: 10px; letter-spacing: 1.4px; color: var(--muted); font-weight: 700; text-transform: uppercase; }
+.amet-exp .helper-text { font-size: 11px !important; margin: 12px 0 16px !important; }
+.amet-exp .field { display: flex; flex-direction: column; gap: 7px; min-width: 0; max-width: 380px; margin: 20px 0; }
+.amet-exp .field > span { font-size: 11px; color: var(--muted); font-weight: 600; }
+.amet-exp .field select { background: #f6fbf6; color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; min-height: 40px; }
+.amet-exp .primary-button {
+  display: inline-block; text-decoration: none; background: linear-gradient(to bottom, #4abf3b 0%, #287f1d 100%); color: #fff;
+  border: 1px solid #1a690f; border-radius: 10px; padding: 11px 18px; font-weight: 700; font-size: 13px; cursor: pointer;
+  box-shadow: 0 4px 0 #13520b, 0 8px 14px rgba(40, 127, 29,0.35);
+}
+.amet-exp .primary-button:hover { transform: translateY(-2px); }
+.amet-exp .primary-button:active { transform: translateY(4px); box-shadow: 0 0 0 #13520b; }
