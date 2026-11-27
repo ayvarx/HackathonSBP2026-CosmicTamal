@@ -2,7 +2,7 @@
 .app-shell { min-height: 100vh; display: flex; flex-direction: column; }
 
 .app-cabecera {
-  background: linear-gradient(90deg, #021335 0%, #0F2D69 100%);
+  background: linear-gradient(90deg, #052200 0%, #094000 100%);
   color: #ffffff; padding: 16px 28px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
 }
 .app-marca { display: flex; align-items: center; gap: 14px; min-width: 0; }
@@ -12,25 +12,25 @@
 
 .app-perfil { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #c9d7ee; }
 .app-perfil select {
-  background: #ffffff; color: #0F2D69; border: 0; padding: 8px 12px; font-weight: 700; font-size: 14px; min-width: 170px; cursor: pointer;
-  box-shadow: 0 3px 0 #0B2452;
+  background: #ffffff; color: #094000; border: 0; padding: 8px 12px; font-weight: 700; font-size: 14px; min-width: 170px; cursor: pointer;
+  box-shadow: 0 3px 0 #052200;
 }
 
 .app-tabs {
-  background: #ffffff; border-bottom: 1px solid #D4DEF0; padding: 0 28px; display: flex; gap: 6px; overflow-x: auto;
+  background: #ffffff; border-bottom: 1px solid #CFE3C4; padding: 0 28px; display: flex; gap: 6px; overflow-x: auto;
   box-shadow: 0 2px 6px rgba(15,23,42,0.05);
 }
 .app-tabs button {
   background: transparent; border: 0; padding: 14px 16px; color: #4b5563; font-weight: 600; font-size: 14px; cursor: pointer;
   border-bottom: 3px solid transparent; margin-bottom: -1px; white-space: nowrap;
 }
-.app-tabs button:hover { color: #0F2D69; }
-.app-tabs button.activa { color: #0F2D69; font-weight: 700; border-bottom-color: #1D3E7F; }
-.app-tabs button:focus-visible { outline: 2px solid #1D3E7F; outline-offset: -2px; }
+.app-tabs button:hover { color: #094000; }
+.app-tabs button.activa { color: #094000; font-weight: 700; border-bottom-color: #267F18; }
+.app-tabs button:focus-visible { outline: 2px solid #267F18; outline-offset: -2px; }
 
 .app-shell .main-area { flex: 1; min-width: 0; }
 .estado-api { margin-left: auto; font-weight: 700; color: #b45309; }
-.estado-api.ok { color: #1D3E7F; }
+.estado-api.ok { color: #267F18; }
 
 @media (max-width: 700px) {
   .app-cabecera { padding: 14px 16px; }
@@ -40,3 +40,8 @@
 /* Sin barra de desplazamiento visible (el contenido sigue desplazándose con la rueda y el teclado). */
 html, body { scrollbar-width: none; -ms-overflow-style: none; }
 html::-webkit-scrollbar, body::-webkit-scrollbar, *::-webkit-scrollbar { display: none; width: 0; height: 0; }
+
+.app-perfil { display: flex; align-items: center; gap: 12px; font-size: 13px; color: #e5edd9; }
+.app-salir { background: #ffffff; color: #094000; border: 0; padding: 8px 12px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: 0 3px 0 #021a00; }
+.app-salir:hover { transform: translateY(-1px); }
+.app-salir:active { transform: translateY(2px); box-shadow: 0 0 0 #021a00; }

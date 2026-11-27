@@ -14,7 +14,7 @@ const dinero = (v) => new Intl.NumberFormat("es-PA", { minimumFractionDigits: 2,
 const porcentaje = (v) => `${Number(v).toLocaleString("es-PA", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} %`;
 const etiquetaPeriodo = (p) => `${p.slice(0, 4)}-${p.slice(4, 6)}-${p.slice(6, 8)}`;
 // Colores de tonos muy distintos entre sí, para que cada subactividad se distinga de un vistazo.
-const COLORES = ["#021335", "#1D3E7F", "#93c5fd", "#0ea5e9", "#4C7DB8", "#64748b", "#5B82C8", "#30648C"];
+const COLORES = ["#052200", "#267F18", "#7EAC39", "#136749", "#A9D18E", "#608D1A", "#297D5F", "#426B04"];
 
 const PESTANAS = [
   { id: "posiciones", titulo: "Posiciones" },

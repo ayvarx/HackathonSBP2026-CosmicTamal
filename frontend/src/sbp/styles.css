@@ -10,11 +10,11 @@
   --text: #0f172a;
   --text-2: #334155;
   --muted: #64748b;
-  --blue: #1D3E7F;
-  --blue-2: #0F2D69;
-  --green: #1D3E7F;
+  --blue: #267F18;
+  --blue-2: #094000;
+  --green: #267F18;
   --amber: #f5a524;
-  --purple: #5B82C8;
+  --purple: #608D1A;
   --danger: #f87171;
   --radius: 14px;
   color-scheme: light;
@@ -30,8 +30,8 @@ body {
   margin: 0;
   min-width: 320px;
   background:
-    radial-gradient(900px 500px at 85% -10%, rgba(29,62,127, 0.14), transparent 60%),
-    radial-gradient(700px 400px at -10% 110%, rgba(54,85,145, 0.06), transparent 60%),
+    radial-gradient(900px 500px at 85% -10%, rgba(38,127,24, 0.14), transparent 60%),
+    radial-gradient(700px 400px at -10% 110%, rgba(65,154,51, 0.06), transparent 60%),
     var(--bg);
 }
 button, select, input { font: inherit; }
@@ -59,10 +59,10 @@ button:focus-visible, select:focus-visible, input:focus-visible, [tabindex="0"]:
 .brand-lockup small { color: var(--muted); font-size: 11px; margin-top: 3px; }
 .brand-mark {
   width: 38px; height: 38px; border-radius: 11px;
-  background: linear-gradient(145deg, #30648C, #0F2D69);
+  background: linear-gradient(145deg, #136749, #094000);
   display: grid; place-items: center; color: #fff;
   font-weight: 800; font-size: 12px; letter-spacing: 0.04em;
-  box-shadow: 0 8px 24px rgba(29,62,127, 0.35);
+  box-shadow: 0 8px 24px rgba(38,127,24, 0.35);
 }
 
 /* Campos */
@@ -73,7 +73,7 @@ button:focus-visible, select:focus-visible, input:focus-visible, [tabindex="0"]:
   border: 1px solid var(--border); border-radius: 10px;
   padding: 10px 12px; min-height: 40px; min-width: 0;
 }
-.field select:hover, .field input:hover { border-color: #A9BEE3; }
+.field select:hover, .field input:hover { border-color: #A9D18E; }
 .profile-field { padding: 0 6px 22px; }
 
 /* Navegación */
@@ -86,8 +86,8 @@ button:focus-visible, select:focus-visible, input:focus-visible, [tabindex="0"]:
 }
 .nav-item:hover { background: var(--surface); color: var(--text); }
 .nav-item.is-active {
-  background: linear-gradient(90deg, rgba(29,62,127, 0.22), rgba(29,62,127, 0.05));
-  color: #0F2D69; font-weight: 600; box-shadow: inset 3px 0 var(--blue);
+  background: linear-gradient(90deg, rgba(38,127,24, 0.22), rgba(38,127,24, 0.05));
+  color: #094000; font-weight: 600; box-shadow: inset 3px 0 var(--blue);
 }
 .nav-dot { width: 7px; height: 7px; border: 1px solid #4a5d7d; border-radius: 50%; }
 .is-active .nav-dot { background: var(--blue-2); border-color: var(--blue-2); box-shadow: 0 0 10px rgba(106, 166, 255, 0.7); }
@@ -97,7 +97,7 @@ button:focus-visible, select:focus-visible, input:focus-visible, [tabindex="0"]:
   color: var(--muted); font-size: 11px; display: flex; gap: 8px; align-items: center;
 }
 .connection-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); }
-.connection-dot.online { background: var(--green); box-shadow: 0 0 8px rgba(54,85,145, 0.6); }
+.connection-dot.online { background: var(--green); box-shadow: 0 0 8px rgba(65,154,51, 0.6); }
 
 /* Cabecera */
 .topbar {
@@ -109,15 +109,15 @@ button:focus-visible, select:focus-visible, input:focus-visible, [tabindex="0"]:
 .topbar-controls { display: flex; align-items: end; gap: 12px; }
 .topbar-controls .field { min-width: 160px; }
 .profile-chip, .live-pill {
-  border: 1px solid #B9C8E6; background: #eef3fb; color: #021335;
+  border: 1px solid #CFE3C4; background: #eef3fb; color: #052200;
   border-radius: 999px; padding: 8px 13px; font-size: 11px; white-space: nowrap;
 }
-.live-pill { color: var(--green); border-color: #a7e3c2; background: #E6EDF8; }
+.live-pill { color: var(--green); border-color: #a7e3c2; background: #EEF7E8; }
 
 /* Aviso persistente (fuente, período, datos ficticios) */
 .persistent-disclaimer {
   margin: 0 34px; padding: 10px 14px;
-  border: 1px solid #c9d6ea; background: rgba(29,62,127, 0.06);
+  border: 1px solid #c9d6ea; background: rgba(38,127,24, 0.06);
   border-radius: 10px; display: flex; align-items: center; gap: 22px; flex-wrap: wrap;
   color: var(--text-2); font-size: 11px;
 }
@@ -143,7 +143,7 @@ button:focus-visible, select:focus-visible, input:focus-visible, [tabindex="0"]:
 .metric-card { padding: 18px 20px; min-width: 0; position: relative; overflow: hidden; }
 .metric-card::after {
   content: ""; position: absolute; right: -30px; top: -30px; width: 110px; height: 110px;
-  border-radius: 50%; background: radial-gradient(circle, rgba(29,62,127, 0.18), transparent 70%);
+  border-radius: 50%; background: radial-gradient(circle, rgba(38,127,24, 0.18), transparent 70%);
 }
 .metric-card span { display: block; color: var(--text-2); font-size: 12px; }
 .metric-card strong {
@@ -168,7 +168,7 @@ button:focus-visible, select:focus-visible, input:focus-visible, [tabindex="0"]:
   padding: 15px; text-align: left; color: var(--text); cursor: pointer; display: grid; gap: 6px;
   transition: border-color .15s, background .15s, transform .15s;
 }
-.ranking-shortcut:hover, .ranking-shortcut.selected { border-color: var(--blue); background: #E6EDF8; transform: translateY(-1px); }
+.ranking-shortcut:hover, .ranking-shortcut.selected { border-color: var(--blue); background: #EEF7E8; transform: translateY(-1px); }
 .ranking-shortcut span { font-size: 12px; color: var(--text-2); }
 .ranking-shortcut b { font-size: 22px; font-weight: 800; }
 .ranking-shortcut small { font-size: 11px; color: var(--blue-2); }
@@ -203,7 +203,7 @@ td small.subtle { display: block; margin-top: 3px; }
 
 .rank-pill {
   display: inline-grid; place-items: center; min-width: 28px; height: 26px; padding: 0 7px;
-  border-radius: 8px; background: #E6EDF8; color: #021335; font-weight: 700; font-size: 12px;
+  border-radius: 8px; background: #EEF7E8; color: #052200; font-weight: 700; font-size: 12px;
 }
 tbody tr:nth-child(1) .rank-pill { background: linear-gradient(135deg, #fcd34d, #f59e0b); color: #2b1a00; }
 tbody tr:nth-child(2) .rank-pill { background: linear-gradient(135deg, #e5e7eb, #9ca3af); color: #111827; }
@@ -211,7 +211,7 @@ tbody tr:nth-child(3) .rank-pill { background: linear-gradient(135deg, #fdba74, 
 
 .empty-inline { color: var(--muted); font-size: 12px; padding: 16px; }
 .helper-text { font-size: 11px !important; color: var(--muted) !important; margin: 12px 0 16px !important; line-height: 1.6; }
-code { color: #0F2D69; font-size: 0.95em; }
+code { color: #094000; font-size: 0.95em; }
 
 /* Avisos */
 .notice {
@@ -219,8 +219,8 @@ code { color: #0F2D69; font-size: 0.95em; }
   display: flex; justify-content: space-between; gap: 15px; align-items: center;
 }
 .notice--error { background: #fee2e2; border-color: #6b2a38; color: #991b1b; }
-.notice--info { background: #E6EDF8; color: #021335; }
-.notice--success { background: #E6EDF8; color: #1D3E7F; }
+.notice--info { background: #EEF7E8; color: #052200; }
+.notice--success { background: #EEF7E8; color: #267F18; }
 .text-button { background: transparent; border: 0; color: inherit; text-decoration: underline; cursor: pointer; }
 
 /* Períodos */
@@ -229,8 +229,8 @@ code { color: #0F2D69; font-size: 0.95em; }
   border: 1px solid var(--border); background: #f5f7fc; color: var(--text);
   padding: 13px 16px; border-radius: 10px; cursor: pointer; transition: border-color .15s;
 }
-.period-option:hover { border-color: #A9BEE3; }
-.period-option.selected { border-color: var(--blue); background: #E6EDF8; }
+.period-option:hover { border-color: #A9D18E; }
+.period-option.selected { border-color: var(--blue); background: #EEF7E8; }
 .period-option span { margin-left: 12px; color: var(--blue-2); font-size: 11px; }
 
 /* Reconciliaciones y administración */
@@ -251,9 +251,9 @@ code { color: #0F2D69; font-size: 0.95em; }
 .export-panel { max-width: 680px; }
 .export-panel .field { max-width: 380px; margin: 20px 0; }
 .primary-button {
-  background: linear-gradient(135deg, #1D3E7F, #0F2D69); color: #fff; border: 0;
+  background: linear-gradient(135deg, #267F18, #094000); color: #fff; border: 0;
   border-radius: 10px; padding: 11px 18px; font-weight: 700; font-size: 13px; cursor: pointer;
-  box-shadow: 0 8px 22px -8px rgba(29,62,127, 0.7);
+  box-shadow: 0 8px 22px -8px rgba(38,127,24, 0.7);
 }
 .primary-button:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
 

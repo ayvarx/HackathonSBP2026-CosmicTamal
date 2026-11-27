@@ -36,7 +36,7 @@
 .leyenda-item i { width: 12px; height: 12px; display: inline-block; }
 
 .barras-banco { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
-.barra-banco { display: grid; grid-template-columns: 220px minmax(0, 1fr) 150px; align-items: center; gap: 16px; padding-bottom: 12px; border-bottom: 1px dashed #B9C8E6; }
+.barra-banco { display: grid; grid-template-columns: 220px minmax(0, 1fr) 150px; align-items: center; gap: 16px; padding-bottom: 12px; border-bottom: 1px dashed #CFE3C4; }
 .barra-nombre { display: flex; align-items: center; gap: 10px; font-size: 13px; min-width: 0; }
 .barra-nombre strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rank-pill-mini { display: inline-grid; place-items: center; min-width: 22px; height: 22px; background: var(--surface-2); color: var(--text-2); font-size: 11px; font-weight: 700; }
@@ -44,7 +44,7 @@
 .barra-seg { height: 100%; transition: filter .15s; border-right: 2px solid #ffffff; }
 .barra-seg:last-child { border-right: 0; }
 .barra-seg:hover { filter: brightness(1.25); }
-.barra-total { text-align: right; font-size: 13px; font-weight: 700; color: #021335; font-variant-numeric: tabular-nums; color: var(--text); }
+.barra-total { text-align: right; font-size: 13px; font-weight: 700; color: #052200; font-variant-numeric: tabular-nums; color: var(--text); }
 
 /* Podio: los tres primeros puestos */
 .podio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
@@ -127,10 +127,10 @@
 
 /* Tarjetas por banco (Posiciones): estilo de la referencia, con línea de evolución. */
 .bancos-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
-.banco-card { background: #fff; padding: 18px 20px; box-shadow: 0 2px 10px rgba(15,23,42,0.08); border-top: 3px solid #1D3E7F; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.banco-card { background: #fff; padding: 18px 20px; box-shadow: 0 2px 10px rgba(15,23,42,0.08); border-top: 3px solid #267F18; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .bc-puesto { font-size: 12px; font-weight: 700; color: #4b5563; text-transform: uppercase; letter-spacing: .05em; }
 .bc-nombre { display: block; font-size: 17px; color: #111827; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bc-cifra { font-size: 26px; font-weight: 700; color: #1D3E7F; font-variant-numeric: tabular-nums; margin-top: 8px; }
+.bc-cifra { font-size: 26px; font-weight: 700; color: #267F18; font-variant-numeric: tabular-nums; margin-top: 8px; }
 .bc-sub { margin: 0; font-size: 12px; color: #4b5563; }
 .bc-grafico { margin-top: 10px; }
 .bc-rango { font-size: 11px; color: #6b7280; }
@@ -154,11 +154,11 @@
 .bc-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .bc-col-valor { font-size: 12px; font-weight: 600; color: #4b5563; font-variant-numeric: tabular-nums; }
 .bc-col-barra { width: 100%; background: #cfe9d9; }
-.bc-col.ultimo .bc-col-barra { background: #1D3E7F; }
-.bc-col.ultimo .bc-col-valor { color: #0F2D69; font-weight: 700; }
+.bc-col.ultimo .bc-col-barra { background: #267F18; }
+.bc-col.ultimo .bc-col-valor { color: #094000; font-weight: 700; }
 .bc-col-fecha { font-size: 11px; color: #6b7280; }
 .bc-variacion { align-self: flex-start; font-size: 12px; font-weight: 700; padding: 4px 8px; }
-.bc-variacion.sube { background: #E6EDF8; color: #1D3E7F; }
+.bc-variacion.sube { background: #EEF7E8; color: #267F18; }
 .bc-variacion.baja { background: #fee2e2; color: #991b1b; }
 
 /* Tarjetas dinámicas: animación, interacción y plegado. */
@@ -166,7 +166,7 @@
 .banco-card:hover { box-shadow: 0 8px 22px rgba(15,23,42,0.14); transform: translateY(-2px); }
 .bc-cabecera { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; width: 100%; background: none; border: 0; padding: 0; text-align: left; cursor: pointer; color: inherit; }
 .bc-cabecera > span:first-child { display: flex; flex-direction: column; min-width: 0; }
-.bc-toggle { width: 26px; height: 26px; display: inline-grid; place-items: center; background: #E6EDF8; color: #0F2D69; font-weight: 700; flex: 0 0 26px; }
+.bc-toggle { width: 26px; height: 26px; display: inline-grid; place-items: center; background: #EEF7E8; color: #094000; font-weight: 700; flex: 0 0 26px; }
 .banco-card.plegada { gap: 6px; }
 .bc-col { position: relative; cursor: default; outline: none; }
 .bc-col.activa .bc-col-barra { filter: brightness(1.08); }
@@ -177,30 +177,30 @@
 .bc-partes-barra > div:hover { filter: brightness(1.15); }
 .bc-partes-barra > div.atenuada, .bc-partes li.atenuada { opacity: .35; }
 .bc-partes li { transition: background .15s, opacity .2s; cursor: pointer; padding: 3px 4px; margin: 0 -4px; }
-.bc-partes li.activa { background: #E6EDF8; }
-.bc-detalle { margin: 10px 0 0; font-size: 12px; color: #021335; background: #E6EDF8; padding: 8px 10px; }
+.bc-partes li.activa { background: #EEF7E8; }
+.bc-detalle { margin: 10px 0 0; font-size: 12px; color: #052200; background: #EEF7E8; padding: 8px 10px; }
 
 /* Tarjeta seleccionada y panel de detalle del banco. */
 .banco-card { cursor: pointer; }
-.banco-card.seleccionada { box-shadow: 0 0 0 2px #1D3E7F, 0 8px 22px rgba(15,23,42,0.14); }
-.banco-detalle { background: #ffffff; border-top: 4px solid #1D3E7F; box-shadow: 0 4px 16px rgba(15,23,42,0.1); padding: 22px 24px; display: flex; flex-direction: column; gap: 20px; }
+.banco-card.seleccionada { box-shadow: 0 0 0 2px #267F18, 0 8px 22px rgba(15,23,42,0.14); }
+.banco-detalle { background: #ffffff; border-top: 4px solid #267F18; box-shadow: 0 4px 16px rgba(15,23,42,0.1); padding: 22px 24px; display: flex; flex-direction: column; gap: 20px; }
 .bd-cabecera { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
 .bd-etiqueta { font-size: 12px; font-weight: 700; color: #4b5563; text-transform: uppercase; letter-spacing: .06em; }
 .bd-cabecera h3 { margin: 4px 0 0; font-size: 24px; color: #111827; }
-.bd-cerrar { background: #ffffff; border: 1px solid #B9C8E6; color: #0F2D69; padding: 8px 14px; font-weight: 700; cursor: pointer; }
-.bd-cerrar:hover { background: #E6EDF8; }
-.bd-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid #E1E9F5; border-bottom: 1px solid #E1E9F5; }
+.bd-cerrar { background: #ffffff; border: 1px solid #CFE3C4; color: #094000; padding: 8px 14px; font-weight: 700; cursor: pointer; }
+.bd-cerrar:hover { background: #EEF7E8; }
+.bd-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid #DDEBD5; border-bottom: 1px solid #DDEBD5; }
 .bd-kpis > div { padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
-.bd-kpis > div + div { border-left: 1px solid #E1E9F5; }
+.bd-kpis > div + div { border-left: 1px solid #DDEBD5; }
 .bd-kpis span { font-size: 12px; color: #4b5563; }
-.bd-kpis strong { font-size: 20px; color: #0F2D69; font-variant-numeric: tabular-nums; }
+.bd-kpis strong { font-size: 20px; color: #094000; font-variant-numeric: tabular-nums; }
 .bd-kpis .bd-neg { color: #b91c1c; font-size: 16px; }
 .bd-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
 .bd-bloque h4 { margin: 0 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: #374151; }
 .bd-ancho { grid-column: 1 / -1; }
 .bd-puestos { list-style: none; margin: 0; padding: 0; display: flex; gap: 10px; }
-.bd-puestos li { flex: 1; background: #E6EDF8; border: 1px solid #D4DEF0; padding: 12px; display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #4b5563; }
-.bd-puestos b { font-size: 22px; color: #0F2D69; }
+.bd-puestos li { flex: 1; background: #EEF7E8; border: 1px solid #CFE3C4; padding: 12px; display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #4b5563; }
+.bd-puestos b { font-size: 22px; color: #094000; }
 .bd-partes { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
 .bd-parte-head { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; color: #1f2937; }
 .bd-parte-head i { display: inline-block; width: 10px; height: 10px; margin-right: 6px; }
@@ -208,9 +208,9 @@
 .bd-parte-barra { height: 8px; background: #eef3fb; margin-top: 6px; }
 .bd-parte-barra > div { height: 100%; }
 .bd-otras { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.bd-otras li { border: 1px solid #D4DEF0; padding: 12px 14px; display: grid; gap: 4px; font-size: 13px; color: #1f2937; }
-.bd-otras li.activa { background: #E6EDF8; border-color: #1D3E7F; }
-.bd-otras b { color: #0F2D69; }
+.bd-otras li { border: 1px solid #CFE3C4; padding: 12px 14px; display: grid; gap: 4px; font-size: 13px; color: #1f2937; }
+.bd-otras li.activa { background: #EEF7E8; border-color: #267F18; }
+.bd-otras b { color: #094000; }
 .bd-otras em { font-style: normal; font-size: 12px; color: #4b5563; font-variant-numeric: tabular-nums; }
 @media (max-width: 900px) {
   .bd-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -224,5 +224,5 @@
 .banco-card.plegada { gap: 4px; }
 
 /* Botón de descarga de datos del banco, dentro de cada tarjeta. */
-.bc-descargar { margin-top: 8px; align-self: flex-start; background: #ffffff; border: 1px solid #1D3E7F; color: #0F2D69; font-size: 12px; font-weight: 700; padding: 8px 12px; cursor: pointer; }
-.bc-descargar:hover { background: #1D3E7F; color: #ffffff; }
+.bc-descargar { margin-top: 8px; align-self: flex-start; background: #ffffff; border: 1px solid #267F18; color: #094000; font-size: 12px; font-weight: 700; padding: 8px 12px; cursor: pointer; }
+.bc-descargar:hover { background: #267F18; color: #ffffff; }

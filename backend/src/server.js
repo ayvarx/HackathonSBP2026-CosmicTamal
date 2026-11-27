@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { DATOS_DIR, datosListos, periodos, resultado } from "./servicio.js";
+import { iniciarSesion, cerrarSesion, sesionDe, requerirSesion } from "./auth.js";
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -9,7 +10,7 @@ const SIN_DATOS = {
   detalle: `Coloque el paquete AT03 de la SBP en la carpeta: ${DATOS_DIR}`,
 };
 
-// Acepta el frontend local en localhost o 127.0.0.1, en cualquier puerto (la API es de solo lectura).
+// Acepta el frontend local en localhost o 127.0.0.1, en cualquier puerto.
 // Para otro origen, define FRONTEND_ORIGIN.
 const origenLocal = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
 app.use(cors({
@@ -20,9 +21,29 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Públicas: estado del servicio e inicio/cierre de sesión.
 app.get("/api/health", (_req, res) => {
   res.json({ ok: true, datos_cargados: datosListos() });
 });
+
+app.post("/api/login", (req, res) => {
+  const s = iniciarSesion(req.body?.usuario, req.body?.clave);
+  if (!s) return res.status(401).json({ error: "Usuario o clave incorrectos." });
+  res.json(s);
+});
+
+app.post("/api/logout", (req, res) => {
+  const s = sesionDe(req);
+  if (s) cerrarSesion(s.token);
+  res.json({ ok: true });
+});
+
+app.get("/api/sesion", requerirSesion, (req, res) => {
+  res.json({ usuario: req.sesion.usuario, rol: req.sesion.rol });
+});
+
+// Protegidas: todos los datos exigen sesión iniciada.
+app.use("/api/periodos", requerirSesion);
 
 app.get("/api/periodos", (_req, res) => {
   const lista = periodos();

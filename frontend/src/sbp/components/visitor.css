@@ -2,13 +2,13 @@
    tarjetas blancas y cifras grandes en azul. Ocupa todo el ancho del área de contenido. */
 .visitante {
   margin: -22px -30px -30px;
-  background: #F1F5FC;
+  background: #F3F9EF;
   min-height: calc(100% + 52px);
   padding-bottom: 40px;
 }
 
 .hero {
-  background: linear-gradient(120deg, #021335 0%, #0F2D69 60%, #1D3E7F 100%);
+  background: linear-gradient(120deg, #052200 0%, #094000 60%, #267F18 100%);
   color: #fff;
   padding: 42px 40px 36px;
 }
@@ -22,12 +22,12 @@
 
 .saltos {
   display: flex; align-items: center; flex-wrap: wrap; gap: 14px; padding: 18px 40px;
-  background: #F1F5FC; border-bottom: 1px solid #B9C8E6; margin-top: 0;
+  background: #F3F9EF; border-bottom: 1px solid #CFE3C4; margin-top: 0;
 }
 .saltos span { font-weight: 700; color: #1f2937; font-size: 14px; }
 .saltos button {
-  background: none; border: 0; color: #1D3E7F; font-size: 15px; font-weight: 600; cursor: pointer; padding: 0;
-  padding-right: 14px; border-right: 1px solid #B9C8E6;
+  background: none; border: 0; color: #267F18; font-size: 15px; font-weight: 600; cursor: pointer; padding: 0;
+  padding-right: 14px; border-right: 1px solid #CFE3C4;
 }
 .saltos button:last-child { border-right: 0; }
 .saltos button:hover { text-decoration: underline; }
@@ -37,11 +37,11 @@
 .seccion-head h2 { margin: 0; font-size: 26px; font-weight: 800; color: #1f2937; }
 .seccion-head small { display: block; margin-top: 4px; font-size: 14px; color: #4b5563; font-weight: 600; }
 .ver-mas {
-  background: #fff; border: 1px solid #B9C8E6; color: #1D3E7F; font-weight: 700; font-size: 13px;
+  background: #fff; border: 1px solid #CFE3C4; color: #267F18; font-weight: 700; font-size: 13px;
   padding: 12px 18px; letter-spacing: .04em; cursor: pointer; white-space: nowrap;
   box-shadow: 0 1px 2px rgba(15,23,42,0.06);
 }
-.ver-mas:hover { border-color: #1D3E7F; }
+.ver-mas:hover { border-color: #267F18; }
 .ver-mas span { font-size: 18px; margin-left: 4px; }
 
 .grid-tarjetas { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
@@ -51,7 +51,7 @@
 }
 .tarjeta-tema:hover { box-shadow: 0 6px 18px rgba(15,23,42,0.14); }
 .tt-etiqueta { font-size: 13px; font-weight: 700; color: #4b5563; text-transform: uppercase; letter-spacing: .04em; }
-.tt-cifra { font-size: 24px; font-weight: 700; color: #1D3E7F; line-height: 1.2; }
+.tt-cifra { font-size: 24px; font-weight: 700; color: #267F18; line-height: 1.2; }
 .tt-texto { font-size: 13px; color: #4b5563; line-height: 1.5; }
 
 .pie-visitante { padding: 26px 40px 0; margin: 0; font-size: 12px; color: #4b5563; }
@@ -67,26 +67,26 @@
 
 /* Vistas internas de la portada: actividad y descargas, en la misma pantalla. */
 .detalle { padding-top: 22px; }
-.volver { display: inline-flex; align-items: center; gap: 8px; background: #1D3E7F; color: #ffffff; border: 0; font-size: 15px; font-weight: 700; padding: 11px 18px; cursor: pointer; margin: 0 0 22px; box-shadow: 0 2px 8px rgba(29,62,127,0.25); }
-.volver:hover { background: #0F2D69; text-decoration: none; }
+.volver { display: inline-flex; align-items: center; gap: 8px; background: #267F18; color: #ffffff; border: 0; font-size: 15px; font-weight: 700; padding: 11px 18px; cursor: pointer; margin: 0 0 22px; box-shadow: 0 2px 8px rgba(38,127,24,0.25); }
+.volver:hover { background: #094000; text-decoration: none; }
 .chips-visitante { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 20px; }
-.chips-visitante button { background: #fff; border: 1px solid #B9C8E6; color: #1f2937; padding: 9px 14px; font-size: 13px; font-weight: 600; cursor: pointer; }
-.chips-visitante button.on { background: #1D3E7F; border-color: #1D3E7F; color: #fff; }
+.chips-visitante button { background: #fff; border: 1px solid #CFE3C4; color: #1f2937; padding: 9px 14px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.chips-visitante button.on { background: #267F18; border-color: #267F18; color: #fff; }
 .lista-visitante { list-style: none; margin: 0; padding: 0; background: #fff; box-shadow: 0 2px 10px rgba(15,23,42,0.06); }
-.lista-visitante li { display: grid; grid-template-columns: 36px minmax(140px, 220px) minmax(120px, 1fr) 150px 80px; align-items: center; gap: 14px; padding: 12px 18px; border-bottom: 1px solid #E1E9F5; }
+.lista-visitante li { display: grid; grid-template-columns: 36px minmax(140px, 220px) minmax(120px, 1fr) 150px 80px; align-items: center; gap: 14px; padding: 12px 18px; border-bottom: 1px solid #DDEBD5; }
 .lista-visitante li:last-child { border-bottom: 0; }
 .lv-puesto { font-weight: 700; color: #4b5563; font-size: 13px; }
 .lv-banco { font-weight: 600; color: #1f2937; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lv-barra { height: 12px; background: #F1F5FC; }
-.lv-barra div { height: 100%; background: #1D3E7F; }
+.lv-barra { height: 12px; background: #F3F9EF; }
+.lv-barra div { height: 100%; background: #267F18; }
 .lv-saldo { text-align: right; font-size: 14px; font-variant-numeric: tabular-nums; color: #1f2937; }
 .lv-peso { text-align: right; font-size: 12px; color: #4b5563; font-variant-numeric: tabular-nums; }
 .nota-visitante { font-size: 12px; color: #4b5563; margin: 14px 0 0; }
 .grid-descargas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.desc-card { background: #fff; padding: 22px; display: flex; flex-direction: column; gap: 8px; text-decoration: none; color: #1f2937; box-shadow: 0 2px 10px rgba(15,23,42,0.08); border-top: 3px solid #1D3E7F; }
+.desc-card { background: #fff; padding: 22px; display: flex; flex-direction: column; gap: 8px; text-decoration: none; color: #1f2937; box-shadow: 0 2px 10px rgba(15,23,42,0.08); border-top: 3px solid #267F18; }
 .desc-card strong { font-size: 17px; }
 .desc-card span { font-size: 13px; color: #4b5563; line-height: 1.5; }
-.desc-card em { margin-top: auto; font-style: normal; font-weight: 700; color: #1D3E7F; font-size: 13px; }
+.desc-card em { margin-top: auto; font-style: normal; font-weight: 700; color: #267F18; font-size: 13px; }
 .desc-card:hover { box-shadow: 0 6px 18px rgba(15,23,42,0.14); }
 @media (max-width: 900px) {
   .lista-visitante li { grid-template-columns: 30px minmax(0, 1fr) 120px; }

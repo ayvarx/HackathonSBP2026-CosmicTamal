@@ -1,4 +1,4 @@
-import { NAV_ITEMS, etiquetaPeriodo } from "../constants";
+import { NAV_ITEMS, PROFILE_LABELS, etiquetaPeriodo } from "../constants";
 import PeriodSelect from "./PeriodSelect";
 import LogoRadar from "./LogoRadar";
 import "./topbar.css";
@@ -6,7 +6,7 @@ import "./topbar.css";
 // Estructura de la aplicación: cabecera azul con marca y perfil, pestañas de sección debajo,
 // y el contenido de cada sección en su propia página.
 export default function AppShell({
-  profile, setProfile, page, setPage, periods, period, setPeriod, children, apiState, selectorEnContenido
+  profile, usuario, onCerrarSesion, page, setPage, periods, period, setPeriod, children, apiState, selectorEnContenido
 }) {
   const visibleItems = NAV_ITEMS.filter((item) => item.profiles.includes(profile));
   const actual = visibleItems.find((item) => item.id === page);
@@ -21,14 +21,10 @@ export default function AppShell({
             <small>Por banco y actividad económica · Hackathon SBP 2026</small>
           </div>
         </div>
-        <label className="app-perfil">
-          <span>Perfil</span>
-          <select value={profile} onChange={(e) => setProfile(e.target.value)}>
-            <option value="publico">Público</option>
-            <option value="analista">Analista</option>
-            <option value="admin">Administrador</option>
-          </select>
-        </label>
+        <div className="app-perfil">
+          <span>{usuario} · {PROFILE_LABELS[profile]}</span>
+          <button className="app-salir" onClick={onCerrarSesion}>Cerrar sesión</button>
+        </div>
       </header>
 
       <nav className="app-tabs" aria-label="Secciones">

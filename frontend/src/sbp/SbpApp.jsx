@@ -5,23 +5,33 @@ import AppShell from "./components/AppShell";
 import Dashboard from "./components/Dashboard";
 import PeriodSelect from "./components/PeriodSelect";
 import LideresRanking from "./components/LideresRanking";
+import CalidadPage from "./components/CalidadPage";
+import LoginPage from "./components/LoginPage";
 import VisitorHome from "./components/VisitorHome";
 import RankingsPage from "./components/RankingsPage";
-import CompareView from "./components/CompareView";
 import ExportPanel from "./components/ExportPanel";
 import StatusNotice from "./components/StatusNotice";
 
 const money = (v) => new Intl.NumberFormat("es-PA", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(String(v ?? "0").replaceAll(",", "")));
 
 // Cada sección tiene su propia dirección (#rankings, #calidad…) para poder volver atrás con el navegador.
-const PAGINAS = ["datos", "rankings", "calidad", "comparar", "exportar", "administracion"];
+const PAGINAS = ["datos", "rankings", "calidad", "exportar", "administracion"];
 const paginaDesdeUrl = () => {
   const h = window.location.hash.replace("#", "");
   return PAGINAS.includes(h) ? h : "datos";
 };
 
 export default function SbpApp() {
-  const [profile, setProfile] = useState("publico");
+  // Sesión iniciada: el rol de la cuenta define el perfil (publico, analista o admin).
+  const [sesion, setSesion] = useState(null);
+  const [revisandoSesion, setRevisandoSesion] = useState(true);
+  const profile = sesion?.rol || "publico";
+  useEffect(() => {
+    api.sesion().then(setSesion).catch(() => setSesion(null)).finally(() => setRevisandoSesion(false));
+    const caducada = () => setSesion(null);
+    window.addEventListener("sesion-caducada", caducada);
+    return () => window.removeEventListener("sesion-caducada", caducada);
+  }, []);
   const [page, setPage] = useState(paginaDesdeUrl);
   const [periods, setPeriods] = useState([]);
   const [period, setPeriod] = useState("");
@@ -45,7 +55,7 @@ export default function SbpApp() {
     } catch (e) { setHealth(false); setPeriods([]); setPeriod(""); setError(e.message); }
   }, []);
 
-  useEffect(() => { loadPeriods(); }, [loadPeriods]);
+  useEffect(() => { if (sesion) loadPeriods(); }, [loadPeriods, sesion]);
 
   // Histórico: calidad y rankings de cada período disponible (para tendencias y comparación).
   useEffect(() => {
@@ -89,7 +99,10 @@ export default function SbpApp() {
   // En Rankings y en la portada de visitante el selector va junto al menú de actividades.
   const selectorEnContenido = page === "rankings" || (page === "datos" && profile === "publico");
 
-  return <AppShell profile={profile} setProfile={(next) => { setProfile(next); setPage(next === "admin" ? "administracion" : "datos"); }}
+  if (revisandoSesion) return null;
+  if (!sesion) return <LoginPage onEntrar={setSesion} />;
+  const cerrarSesion = async () => { await api.logout(); setSesion(null); setPage("datos"); };
+  return <AppShell profile={profile} usuario={sesion.usuario} onCerrarSesion={cerrarSesion}
     page={page} setPage={go} periods={periods} period={period} setPeriod={setPeriod} apiState={health} selectorEnContenido={selectorEnContenido}>
     {error && <StatusNotice type="error" onRetry={loadPeriods}>{error}</StatusNotice>}
 
@@ -111,19 +124,10 @@ export default function SbpApp() {
       )
     )}
 
-    {page === "calidad" && <div className="stack">
-      <div className="metric-grid">{["leidas", "E1", "E2", "E3", "E4", "validas"].map((key) => <article className="metric-card" key={key}><span>{{ leidas: "Registros leídos", E1: "E1 · préstamo repetido", E2: "E2 · destino extranjero", E3: "E3 · saldo cero o negativo", E4: "E4 · actividad no catalogada", validas: "Préstamos válidos" }[key]}</span><strong>{money(quality?.[key]).replace(/\.00$/, "")}</strong></article>)}</div>
-      <div className="panel"><div className="panel-heading"><div><span className="eyebrow">CONTROLES DE CONSISTENCIA</span><h2>Reconciliaciones</h2></div></div>
-        <div className="reconciliation-grid">{Object.entries(reconciliations || {}).map(([key, value]) => <div key={key}><span>{key.toUpperCase()}</span><b className={value ? "good" : "bad"}>{value ? "Correcta" : "Pendiente / no conciliada"}</b></div>)}</div>
-      </div>
-      <div className="panel"><span className="eyebrow">REGLA REGULATORIA</span><h2>Validación y reclasificación SB21</h2><p>La regla Crédito personal con facilidad 07 → Tarjeta la aplica el backend en el procesamiento AT03. Esta interfaz no reclasifica ni altera registros.</p>
-        <p className="helper-text">El detalle de alertas se recibe en el campo <code>alertas</code>. Solicita al backend un endpoint paginado si se requiere inspección completa de préstamos y trazabilidad de errores.</p>
-      </div>
-    </div>}
+    {page === "calidad" && <CalidadPage quality={quality} reconciliations={reconciliations} historico={historico} period={period} />}
 
     {page === "rankings" && <RankingsPage rankings={rankings} ranking={ranking} setRanking={setRanking} breakdown={breakdown} historico={historico} loading={loading} selector={selector} profile={profile} />}
 
-    {page === "comparar" && <CompareView periods={periods} currentPeriod={period} ranking={ranking} />}
 
     {page === "exportar" && <ExportPanel period={period} />}
 

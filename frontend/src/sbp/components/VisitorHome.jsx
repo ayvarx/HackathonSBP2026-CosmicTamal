@@ -113,16 +113,16 @@ export default function VisitorHome({ quality, rankings, reconciliations, period
             </div>
           </div>
           <div className="grid-descargas">
-            <a className="desc-card" href={api.urlExport(period, "rankings")}>
+            <button className="desc-card" onClick={() => api.download(period, "rankings")}>
               <strong>Rankings por actividad</strong>
               <span>Posición, saldo, cartera total y peso de cada banco.</span>
               <em>Descargar CSV ↓</em>
-            </a>
-            <a className="desc-card" href={api.urlExport(period, "desglose")}>
+            </button>
+            <button className="desc-card" onClick={() => api.download(period, "desglose")}>
               <strong>Desglose por subactividad</strong>
               <span>Saldo de cada banco en cada subactividad.</span>
               <em>Descargar CSV ↓</em>
-            </a>
+            </button>
           </div>
         </section>
       )}

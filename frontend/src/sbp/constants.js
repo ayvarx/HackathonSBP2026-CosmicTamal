@@ -4,14 +4,12 @@ export const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8
 //   Inicio      → ¿cómo está la cartera este mes?
 //   Rankings    → ¿quién ocupa cada posición y qué compone su saldo?
 //   Calidad     → ¿los datos son confiables? (analista y administrador)
-//   Comparar    → ¿qué cambió frente al mes anterior? (analista y administrador)
 //   Exportar    → ¿cómo me llevo los datos?
 //   Administración → operación del sistema (solo administrador)
 export const NAV_ITEMS = [
   { id: "datos", label: "Inicio", profiles: ["publico", "analista", "admin"] },
   { id: "rankings", label: "Rankings", profiles: ["publico", "analista", "admin"] },
   { id: "calidad", label: "Calidad", profiles: ["analista", "admin"] },
-  { id: "comparar", label: "Comparar", profiles: ["analista", "admin"] },
   { id: "exportar", label: "Exportar", profiles: ["publico", "analista", "admin"] },
   { id: "administracion", label: "Administración", profiles: ["admin"] },
 ];

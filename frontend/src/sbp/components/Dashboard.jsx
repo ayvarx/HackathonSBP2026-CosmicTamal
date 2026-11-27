@@ -10,7 +10,7 @@ const num = (v) => Number(String(v ?? "0").replaceAll(",", ""));
 const fmt = (n) => new Intl.NumberFormat("es-PA", { maximumFractionDigits: 0 }).format(n);
 const fmt2 = (n) => new Intl.NumberFormat("es-PA", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
 const etiquetaPeriodo = (p) => (p ? `${p.slice(0, 4)}-${p.slice(4, 6)}-${p.slice(6, 8)}` : "—");
-const PALETA = ["#1D3E7F", "#1D3E7F", "#5B82C8", "#f5a524", "#f87171", "#2dd4bf", "#e879f9", "#94a3b8"];
+const PALETA = ["#267F18", "#7EAC39", "#136749", "#419A33", "#94a3b8", "#A9D18E", "#052200", "#608D1A"];
 
 function Panel({ titulo, eyebrow, lectura, aside, className = "", children }) {
   return (
@@ -35,7 +35,7 @@ function Sparkline({ valores, color }) {
     <div className="spark">
       <ResponsiveContainer width="100%" height={38}>
         <LineChart data={data} margin={{ top: 6, right: 8, bottom: 2, left: 2 }}>
-          <ReferenceLine y={Math.max(...valores)} stroke="#B9C8E6" strokeDasharray="3 3" />
+          <ReferenceLine y={Math.max(...valores)} stroke="#CFE3C4" strokeDasharray="3 3" />
           <Line type="monotone" dataKey="v" stroke={color} strokeWidth={2} isAnimationActive={false}
             dot={(p) => (p.index === data.length - 1 ? <circle key={p.index} cx={p.cx} cy={p.cy} r={3.5} fill={color} /> : null)} />
         </LineChart>
@@ -142,14 +142,14 @@ export default function Dashboard({ periods, period, quality, rankings, reconcil
       </div>
 
       <div className="kpi-row">
-        <Kpi etiqueta="Préstamos válidos" valor={fmt(num(quality?.universo_valido))} color="#1D3E7F"
+        <Kpi etiqueta="Préstamos válidos" valor={fmt(num(quality?.universo_valido))} color="#267F18"
           detalle={variacion == null ? "Un período cargado" : `${variacion >= 0 ? "+" : ""}${fmt2(variacion)}% vs período anterior`}
           serie={seriesUniverso} />
-        <Kpi etiqueta="Registros leídos" valor={fmt(leidas)} color="#5B82C8"
+        <Kpi etiqueta="Registros leídos" valor={fmt(leidas)} color="#608D1A"
           detalle={`${fmt(num(quality?.validas))} préstamos válidos tras E1–E4`} />
-        <Kpi etiqueta="Bancos incluidos" valor={fmt(filasActivo.length)} color="#1D3E7F"
+        <Kpi etiqueta="Bancos incluidos" valor={fmt(filasActivo.length)} color="#267F18"
           detalle={`${nombres.length} rankings disponibles`} />
-        <Kpi etiqueta="Controles que cuadran" valor={`${reconOk}/${reconTotal}`} color={reconOk === reconTotal ? "#1D3E7F" : "#f5a524"}
+        <Kpi etiqueta="Controles que cuadran" valor={`${reconOk}/${reconTotal}`} color={reconOk === reconTotal ? "#267F18" : "#f5a524"}
           detalle={reconOk === reconTotal ? "Todas cuadran al centavo" : "Revisar en Calidad"} />
       </div>
 
@@ -163,15 +163,15 @@ export default function Dashboard({ periods, period, quality, rankings, reconcil
                 <BarChart data={serie} margin={{ top: 52, right: 16, left: 4, bottom: 0 }}>
                   <defs>
                     <linearGradient id="gUniverso" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#1D3E7F" stopOpacity={0.5} />
-                      <stop offset="100%" stopColor="#1D3E7F" stopOpacity={0} />
+                      <stop offset="0%" stopColor="#267F18" stopOpacity={0.5} />
+                      <stop offset="100%" stopColor="#267F18" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid stroke="#e3e8f2" strokeDasharray="3 5" vertical={false} />
                   <XAxis dataKey="periodo" tick={{ fill: "#64748b", fontSize: 11 }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fill: "#64748b", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={fmt} width={84} label={{ value: "N° de préstamos", angle: -90, position: "insideLeft", fill: "#64748b", fontSize: 11, dx: -4 }} />
                   <Tooltip formatter={(v) => fmt(v)} contentStyle={{ background: "#ffffff", border: "1px solid #d7dde9", borderRadius: 10 }} />
-                  <Bar dataKey="universo" name="Universo válido" fill="#1D3E7F" maxBarSize={90} isAnimationActive={false}>
+                  <Bar dataKey="universo" name="Universo válido" fill="#267F18" maxBarSize={90} isAnimationActive={false}>
                     <LabelList dataKey="universo" position="top" content={etiquetaTendencia} />
                   </Bar>
                 </BarChart>
@@ -228,7 +228,7 @@ export default function Dashboard({ periods, period, quality, rankings, reconcil
                 <YAxis type="category" dataKey="banco" width={170} tick={{ fill: "#334155", fontSize: 12 }} axisLine={false} tickLine={false} interval={0} />
                 <Tooltip formatter={(v) => fmt2(v)} contentStyle={{ background: "#ffffff", border: "1px solid #d7dde9", borderRadius: 10 }} />
                 <Bar dataKey="saldo" name="Saldo" radius={[0, 0, 0, 0]} isAnimationActive={false}>
-                  {datosBarras.map((d, i) => <Cell key={i} fill={d.pos === 1 ? "#f5a524" : "#1D3E7F"} />)}
+                  {datosBarras.map((d, i) => <Cell key={i} fill={d.pos === 1 ? "#f5a524" : "#267F18"} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
