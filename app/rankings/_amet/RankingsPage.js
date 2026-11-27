@@ -20,7 +20,6 @@ export default function RankingsPage({ grupos, selector, incluye = [] }) {
         <nav aria-label="Elegir ranking" className="rk-grupos">
           {grupos.map((g) => (
             <div key={g.titulo}>
-              <p className="rk-grupo-titulo">{g.titulo}</p>
               <div className="chips grande">
                 {g.chips.map((c) => (
                   <Link

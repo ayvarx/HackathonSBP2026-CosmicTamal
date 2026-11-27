@@ -21,7 +21,7 @@
 }
 .rk-amet .field select:hover, .rk-amet .field input:hover { border-color: #b2e0ac; }
 .rk-amet .fila-chips { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-.rk-amet .fila-chips > .rk-grupos { flex: 1 1 auto; min-width: 0; display: flex; flex-wrap: wrap; gap: 12px 28px; }
+.rk-amet .fila-chips > .rk-grupos { flex: 1 1 auto; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; }
 .rk-amet .rk-grupo-titulo { margin: 0 0 6px; font-size: 11px; font-weight: 600; color: var(--muted, #698b64); }
 
 /* ---------- Selector de actividad y pestañas (rankings.css) ---------- */
