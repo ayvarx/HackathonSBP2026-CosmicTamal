@@ -302,8 +302,8 @@ export default async function PaginaPanel({ searchParams }) {
       {/* Visualizaciones con su tabla (la tabla tiene la cifra oficial y es la alternativa accesible) */}
       <section aria-labelledby="titulo-composicion" className="mb-10">
         <h2 id="titulo-composicion" className="mb-3">Composición de la cartera local válida</h2>
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div className="flex flex-col gap-3">
+        <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-2">
+          <div className="flex min-w-0 flex-col gap-3 overflow-x-auto [&_table]:text-[13px] [&_td]:px-2 [&_th]:px-2">
             <TablaOrdenable
               titulo="Saldo por macroactividad"
               columnas={[
@@ -322,12 +322,12 @@ export default async function PaginaPanel({ searchParams }) {
               compacta
             />
           </div>
-          <div id="cartera-bancos" className="grafico-izquierda flex scroll-mt-24 flex-col gap-3 lg:col-span-2">
+          <div id="cartera-bancos" className="grafico-izquierda flex min-w-0 scroll-mt-24 flex-col gap-3">
             <Grafico
               titulo={`Cartera local válida por banco · ${formatearFecha(fecha)}`}
               descripcion="Denominador de la ponderación: todo el universo local válido del banco."
               opcion={opcionBancos}
-              altura={420}
+              altura={360}
               formatoValor="monto"
             />
           </div>
@@ -394,7 +394,6 @@ export default async function PaginaPanel({ searchParams }) {
         )}
       </section>
 
-      <p className="mt-10 border-t border-borde pt-4 text-xs font-semibold text-texto-tenue">Datos ficticios.</p>
     </>
   );
 }

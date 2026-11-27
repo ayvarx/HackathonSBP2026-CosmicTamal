@@ -11,7 +11,6 @@ import BotonDescarga from "@/components/BotonDescarga";
 import {
   aNumeroParaGrafico,
   formatearEntero,
-  formatearFecha,
   formatearMonto,
   formatearMontoCompacto,
   formatearPorcentaje,
@@ -27,7 +26,6 @@ export default function VisitorHome({ fecha, cortes, obligatorios, actividades, 
   const actividad = actividades.find((a) => a.ranking === vista.ranking);
 
   const abrirActividad = (codigo) => setVista({ tipo: "actividad", ranking: codigo || codigos[0] });
-  const abrirDescargas = () => setVista({ tipo: "descargas" });
   const volver = () => setVista({ tipo: "inicio" });
 
   return (
@@ -65,9 +63,6 @@ export default function VisitorHome({ fecha, cortes, obligatorios, actividades, 
           <button type="button" onClick={() => abrirActividad()}>
             Rankings por actividad
           </button>
-          <button type="button" onClick={abrirDescargas}>
-            Descargas
-          </button>
           <button type="button" onClick={() => document.getElementById("resumen")?.scrollIntoView({ behavior: "smooth" })}>
             Resumen del corte
           </button>
@@ -96,17 +91,13 @@ export default function VisitorHome({ fecha, cortes, obligatorios, actividades, 
                 </button>
               ))}
             </div>
-          </section>
-
-          {lideres}
-
-          <section className="seccion descargas-fila" aria-labelledby="titulo-descargas">
-            <h2 id="titulo-descargas">Descargas</h2>
-            <div className="descargas-botones">
+            <div className="descargas-botones" aria-label="Descargas">
               <BotonDescarga href={urlsDescarga.rankings} parametros={{ fecha }} texto="Rankings" variante="primario" />
               <BotonDescarga href={urlsDescarga.desglose} parametros={{ fecha }} texto="Desglose por subactividad" />
             </div>
           </section>
+
+          {lideres}
         </>
       )}
 
@@ -159,28 +150,6 @@ export default function VisitorHome({ fecha, cortes, obligatorios, actividades, 
           </p>
         </section>
       )}
-
-      {vista.tipo === "descargas" && (
-        <section className="seccion detalle" aria-labelledby="titulo-descargas-detalle">
-          <button type="button" className="volver" onClick={volver}>
-            ‹ Volver a inicio
-          </button>
-          <div className="seccion-head">
-            <div>
-              <h2 id="titulo-descargas-detalle">Descargas</h2>
-              <small>Período {formatearFecha(fecha)} ({fecha})</small>
-            </div>
-          </div>
-          <div className="flex flex-row flex-wrap items-start gap-3">
-            <BotonDescarga href={urlsDescarga.rankings} parametros={{ fecha }} texto="Rankings por actividad" variante="primario" />
-            <BotonDescarga href={urlsDescarga.desglose} parametros={{ fecha }} texto="Desglose por subactividad" />
-          </div>
-          <p className="nota-visitante">
-            Más reportes en <Link href="/reportes">Reportes</Link>.
-          </p>
-        </section>
-      )}
-
     </div>
   );
 }

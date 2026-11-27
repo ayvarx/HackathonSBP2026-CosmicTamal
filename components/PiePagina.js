@@ -1,4 +1,5 @@
-// PiePagina — Pie común: repite la fuente y el aviso, y explica el alcance del prototipo.
+// PiePagina — Pie común: una línea discreta con la fuente y el perfil actual (el aviso de datos
+// ficticios lo muestra solo la franja superior fija).
 // Componente de servidor (ya incluido en app/layout.js).
 //
 // Props:
@@ -9,14 +10,11 @@ import LogoRadar from "./LogoRadar";
 export default function PiePagina({ perfil }) {
   return (
     <footer className="pie-radar mt-12">
-      <div className="contenedor flex flex-col gap-2 py-6 text-xs text-texto-tenue md:flex-row md:justify-between">
-        <div className="max-w-2xl space-y-1">
-          <p>
-            <span className="font-semibold text-texto-suave">Fuente:</span> Datos AT03 sintéticos · Hackathon SBP 2026.
-          </p>
-          <p>Datos ficticios</p>
-        </div>
-        <p className="flex items-start gap-2 md:justify-end md:text-right">
+      <div className="contenedor flex flex-col gap-2 py-4 text-xs text-texto-tenue md:flex-row md:items-center md:justify-between">
+        <p className="max-w-2xl">
+          <span className="font-semibold text-texto-suave">Fuente:</span> Datos AT03 sintéticos · Hackathon SBP 2026
+        </p>
+        <p className="flex items-center gap-2 md:justify-end md:text-right">
           <LogoRadar size={20} decorativo />
           <span>
             Perfil actual: <span className="font-semibold">{NOMBRE_PERFIL[perfil]}</span>

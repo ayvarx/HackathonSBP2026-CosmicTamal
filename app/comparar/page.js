@@ -22,7 +22,6 @@ import TablaOrdenable from "@/components/TablaOrdenable";
 import TarjetaIndicador from "@/components/TarjetaIndicador";
 import { exigirPerfil } from "@/lib/auth";
 import {
-  AVISO_DATOS_FICTICIOS,
   descomposicion,
   FUENTE,
   movimientos,
@@ -524,7 +523,7 @@ export default async function PaginaComparar({ searchParams }) {
       />
 
       <p className="mt-10 border-t border-borde pt-3 text-xs text-texto-tenue">
-        {FUENTE} Períodos comparados: {textoPar}. {AVISO_DATOS_FICTICIOS}
+        {FUENTE} Períodos comparados: {textoPar}.
       </p>
     </>
   );
