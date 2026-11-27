@@ -100,7 +100,7 @@ function claseAlineacion(columna, esEncabezado = false) {
   if (alinear === "centro") clases.push("centro");
   if (columna.tipo === "codigo" && !esEncabezado) clases.push("codigo");
   // Nombres de banco y similares en una sola línea (no se parten en dos o tres renglones).
-  if (!TIPOS_NUMERICOS.has(columna.tipo) && /banco|nombre|entidad/i.test(`${columna.clave} ${columna.titulo ?? ""}`)) clases.push("sin-corte");
+  if (columna.tipo === "fecha" || (!TIPOS_NUMERICOS.has(columna.tipo) && /banco|nombre|entidad/i.test(`${columna.clave} ${columna.titulo ?? ""}`))) clases.push("sin-corte");
   return clases.join(" ");
 }
 

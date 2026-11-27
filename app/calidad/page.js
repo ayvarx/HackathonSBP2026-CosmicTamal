@@ -26,7 +26,7 @@ const TIPOS_ALERTA = {
 };
 
 // Quita la tarjeta envolvente de Filtros para que los selectores queden en la fila del título.
-const SIN_TARJETA = "[&_.tarjeta]:m-0 [&_.tarjeta]:border-0 [&_.tarjeta]:bg-transparent [&_.tarjeta]:p-0 [&_.tarjeta]:shadow-none";
+const SIN_TARJETA = "[&_.tarjeta]:m-0 [&_.tarjeta]:border-0 [&_.tarjeta]:bg-transparent [&_.tarjeta]:p-0 [&_.tarjeta]:shadow-none [&_select]:min-w-[13rem]";
 
 export default async function PaginaCalidad({ searchParams }) {
   await exigirPerfil("publico");

@@ -11,11 +11,11 @@ import { exigirPerfil } from "@/lib/auth";
 import { formatearEntero, formatearFecha, formatearMonto, formatearPorcentaje, nombreRanking, ORDEN_RANKINGS } from "@/lib/formato";
 import {
   bancosDisponibles, carteraPorBanco, concentracionPorBanco, concentracionPorRanking, escaleraVencimientos,
-  evolucionIndicadores, indicadorCartera, matrizBancoActividad, participacionEnRanking, periodosDisponibles,
+  evolucionIndicadores, indicadorCartera, participacionEnRanking, periodosDisponibles,
   vencimientosPorBanco,
 } from "@/lib/consultas-indicadores";
 import {
-  BarrasApiladasVencimientos, BarrasMorosidad, EscaleraTramos, LineaMorosidad, MapaArbol, MapaCalor,
+  BarrasApiladasVencimientos, BarrasMorosidad, EscaleraTramos, LineaMorosidad,
 } from "./GraficosIndicadores";
 import AlternarVista from "./AlternarVista";
 
@@ -73,12 +73,10 @@ export default async function PaginaIndicadores({ searchParams }) {
 
   const {
     fecha, banco, ranking, periodos, bancos, cartera, porBanco, evolucion, tramos, apiladas,
-    concRanking, partRanking, concBanco, matriz,
+    concRanking, partRanking, concBanco,
   } = datos;
   const nombreBancoElegido = bancos.find((b) => b.codigo_banco === banco)?.nombre;
   const alcance = [nombreBancoElegido ?? "todo el sistema", ranking ? nombreRanking(ranking) : null].filter(Boolean).join(" · ");
-  const rankingsEnMatriz = ORDEN_RANKINGS.filter((r) => matriz.some((m) => m.ranking === r));
-  const nombresBancos = [...new Set(matriz.map((m) => m.banco))];
 
   return (
     <>
@@ -262,8 +260,6 @@ export default async function PaginaIndicadores({ searchParams }) {
           filaResaltada={banco}
           compacta
         />
-        <MapaCalor celdas={matriz} rankings={rankingsEnMatriz} bancos={nombresBancos} />
-        <MapaArbol filas={banco ? matriz.filter((m) => m.codigo_banco === banco) : matriz} bancoElegido={banco} />
       </Seccion>
     </>
   );
@@ -279,7 +275,7 @@ async function cargarDatos(parametros) {
   const banco = bancos.some((b) => b.codigo_banco === parametros?.banco) ? parametros.banco : "";
   const ranking = ORDEN_RANKINGS.includes(parametros?.ranking) ? parametros.ranking : "";
 
-  const [cartera, porBanco, evolucion, tramos, apiladas, concRanking, concBanco, matriz] = await Promise.all([
+  const [cartera, porBanco, evolucion, tramos, apiladas, concRanking, concBanco] = await Promise.all([
     indicadorCartera({ fecha, banco, ranking }),
     carteraPorBanco({ fecha, ranking }),
     evolucionIndicadores({ banco, ranking }),
@@ -287,8 +283,7 @@ async function cargarDatos(parametros) {
     vencimientosPorBanco({ fecha, ranking }),
     concentracionPorRanking({ fecha }),
     concentracionPorBanco({ fecha }),
-    matrizBancoActividad({ fecha }),
   ]);
   const partRanking = ranking ? await participacionEnRanking({ fecha, ranking }) : null;
-  return { fecha, banco, ranking, periodos, bancos, cartera, porBanco, evolucion, tramos, apiladas, concRanking, partRanking, concBanco, matriz };
+  return { fecha, banco, ranking, periodos, bancos, cartera, porBanco, evolucion, tramos, apiladas, concRanking, partRanking, concBanco };
 }
