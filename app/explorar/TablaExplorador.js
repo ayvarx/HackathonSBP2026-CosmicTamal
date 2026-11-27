@@ -12,6 +12,7 @@ import {
   CONJUNTOS_EXPLORADOR,
   ESTADO_VACIO,
   hayFiltros,
+  limpiarFecha,
   limpiarNumero,
   mostrarValor,
   normalizar,
@@ -44,9 +45,15 @@ function etiquetaValor(valor, tipo) {
   return mostrarValor(valor, tipo);
 }
 
+// AAAAMMDD → DD/MM/AAAA
+const fechaDia = (v) => `${v.slice(6, 8)}/${v.slice(4, 6)}/${v.slice(0, 4)}`;
+
 function describirFiltro(c, f) {
   const partes = [];
   if (f.v) partes.push(f.v.length <= 3 ? f.v.map((v) => etiquetaValor(v, c.tipo)).join(", ") : `${f.v.length} valores`);
+  if (f.desde && f.hasta) partes.push(`${fechaDia(f.desde)} – ${fechaDia(f.hasta)}`);
+  else if (f.desde) partes.push(`desde ${fechaDia(f.desde)}`);
+  else if (f.hasta) partes.push(`hasta ${fechaDia(f.hasta)}`);
   if (f.t) partes.push(`${OPERADORES_TEXTO[f.op]} «${f.t}»`);
   if (f.n === "entre") partes.push(`entre ${f.a ?? "…"} y ${f.b ?? "…"}`);
   else if (f.n) partes.push(`${OPERADORES_NUMERO[f.n]} ${f.a}`);
@@ -467,6 +474,24 @@ function MenuFiltro({ columna, filas, filtro, orden, onFiltro, onOrden }) {
         </div>
       )}
 
+      {columna.tipo === "periodo" && (
+        <div className="flex gap-2">
+          {[["desde", "Desde"], ["hasta", "Hasta"]].map(([clave, texto]) => (
+            <label key={clave} className="flex min-w-0 flex-1 flex-col gap-1">
+              <span className="text-xs font-semibold text-texto-suave">{texto}</span>
+              <input
+                type="date"
+                className="control min-w-0 px-1 py-1 text-xs"
+                value={aInputFecha(filtro[clave])}
+                min={clave === "hasta" ? aInputFecha(filtro.desde) || undefined : undefined}
+                max={clave === "desde" ? aInputFecha(filtro.hasta) || undefined : undefined}
+                onChange={(e) => onFiltro({ ...filtro, [clave]: limpiarFecha(e.target.value) || undefined })}
+              />
+            </label>
+          ))}
+        </div>
+      )}
+
       {distintos && (
         <div className="flex flex-col gap-1">
           <span className="text-xs font-semibold text-texto-suave">Valores</span>
@@ -513,6 +538,11 @@ function MenuFiltro({ columna, filas, filtro, orden, onFiltro, onOrden }) {
       </button>
     </>
   );
+}
+
+// AAAAMMDD → AAAA-MM-DD (valor del input type="date").
+function aInputFecha(v) {
+  return v && /^\d{8}$/.test(v) ? `${v.slice(0, 4)}-${v.slice(4, 6)}-${v.slice(6, 8)}` : "";
 }
 
 function CampoNumero({ etiqueta, valor, onCambio }) {
