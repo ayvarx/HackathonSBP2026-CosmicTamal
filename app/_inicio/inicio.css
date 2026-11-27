@@ -1,0 +1,49 @@
+/* Ajustes para integrar en el diseño Next los componentes portados del frontend de Amet
+   (VisitorHome, Dashboard, LideresRanking y StatusNotice). */
+
+/* Avisos — Portado del frontend de Amet: styles.css (StatusNotice). */
+.notice {
+  border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 13px;
+  display: flex; justify-content: space-between; gap: 15px; align-items: center; margin-bottom: 18px;
+}
+.notice--error { background: #fee2e2; border-color: #6b2a38; color: #991b1b; }
+.notice--info { background: #E6EDF8; color: #021335; }
+.notice--success { background: #E6EDF8; color: #1D3E7F; }
+.notice--warning { background: #fff4d6; border-color: #e3b341; color: #5c3c00; }
+.text-button { background: transparent; border: 0; color: inherit; text-decoration: underline; cursor: pointer; }
+
+/* En Amet la portada ocupaba toda el área con márgenes negativos; aquí es un bloque propio. */
+.visitante {
+  margin: 0 0 28px; min-height: 0; border-radius: var(--radius, 14px); overflow: hidden;
+  border: 1px solid #D4DEF0; padding-bottom: 28px;
+}
+@media (max-width: 900px) { .visitante { margin: 0 0 22px; } }
+.hero h1 { color: #fff; }
+.hero-acciones { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.hero-acciones a {
+  display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; font-weight: 700; font-size: 14px;
+  background: #ffffff; color: #0F2D69; text-decoration: none; border-radius: 10px;
+}
+.hero-acciones a.secundario { background: rgba(255,255,255,0.14); color: #ffffff; }
+.hero-acciones a:hover { text-decoration: underline; }
+.lista-capacidades { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 0; padding: 0; list-style: none; }
+.lista-capacidades li { background: #fff; padding: 18px 20px; box-shadow: 0 2px 10px rgba(15,23,42,0.08); border-top: 3px solid #1D3E7F; }
+.lista-capacidades strong { display: block; color: #0F2D69; font-size: 15px; margin-bottom: 6px; }
+.lista-capacidades span { font-size: 13px; color: #4b5563; line-height: 1.5; }
+@media (max-width: 900px) { .lista-capacidades { grid-template-columns: 1fr; } }
+
+/* Los gráficos ECharts (components/Grafico) van dentro de un panel: sin doble tarjeta. */
+.dash-panel figure.tarjeta { border: 0; padding: 0; margin: 0; box-shadow: none; background: transparent; }
+.dash { margin-bottom: 28px; }
+.dash-actions a.ghost { text-decoration: none; display: inline-flex; align-items: center; }
+.kpi-enlace { font-size: 12px; font-weight: 600; }
+.recon-pie { margin: 0; font-size: 12px; }
+
+/* Líderes: el enlace "Ver ranking completo" usa el botón de Amet. */
+.lideres { margin: 0 0 28px; }
+a.lider-ver { text-decoration: none; display: inline-block; }
+.lider-card header .lider-etiqueta { margin-left: auto; }
+.kpi-card figure.tarjeta { border: 0; padding: 0; margin: 0; box-shadow: none; background: transparent; }
+.lider-card header .lider-toggle { flex: none; }
+/* Portado del frontend de Amet: styles.css (.eyebrow). */
+.eyebrow { font-size: 10px; letter-spacing: 1.4px; color: var(--muted); font-weight: 700; text-transform: uppercase; }

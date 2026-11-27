@@ -1,0 +1,171 @@
+/* Portado del frontend de Amet: components/dashboard.css */
+/* Dashboard principal: rejilla de KPIs, gráficos y paneles de detalle. Usa los tokens de styles.css. */
+.dash { display: grid; gap: 18px; }
+
+.dash-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+.dash-head h2 { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; margin: 6px 0 4px; }
+.dash-head p { margin: 0; color: var(--muted); font-size: 13px; }
+.dash-actions { display: flex; gap: 8px; }
+.ghost {
+  background: var(--surface); color: var(--text-2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 9px 14px; font-size: 12px; cursor: pointer;
+}
+.ghost:hover { border-color: var(--blue); color: var(--text); }
+
+/* KPIs */
+.kpi-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.kpi-card {
+  background: linear-gradient(160deg, #ffffff 0%, #ffffff 100%);
+  border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px;
+  display: flex; flex-direction: column; gap: 10px; min-width: 0;
+  box-shadow: 0 12px 30px -18px rgba(15,23,42,0.12);
+}
+.kpi-top { display: flex; justify-content: space-between; align-items: center; }
+.kpi-label { font-size: 12px; color: var(--text-2); }
+.kpi-dot { width: 9px; height: 9px; border-radius: 50%; box-shadow: 0 0 10px currentColor; }
+.kpi-value { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.kpi-foot { display: flex; flex-direction: column; gap: 4px; }
+.kpi-foot small { color: var(--muted); font-size: 11px; }
+.spark { height: 38px; margin: 0 -4px; }
+
+/* Rejilla de paneles */
+.dash-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.span-2 { grid-column: span 2; }
+.dash-panel {
+  background: linear-gradient(160deg, #ffffff 0%, #ffffff 100%);
+  border: 1px solid var(--border); border-radius: var(--radius); padding: 20px;
+  min-width: 0; display: flex; flex-direction: column; gap: 14px;
+  box-shadow: 0 12px 30px -18px rgba(15,23,42,0.12);
+}
+.dash-panel-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.dash-panel h3 { margin: 4px 0 0; font-size: 15px; font-weight: 700; }
+.dash-lectura { margin: 4px 0 0; font-size: 12px; color: var(--muted); line-height: 1.5; max-width: 620px; }
+.pill { font-size: 11px; color: var(--text-2); border: 1px solid var(--border); border-radius: 999px; padding: 5px 10px; white-space: nowrap; }
+.dash-empty { color: var(--muted); font-size: 12px; margin: auto 0; padding: 30px 0; text-align: center; }
+
+.chart-h { height: 260px; width: 100%; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.dash .chip {
+  background: #f5f7fc; color: var(--text-2); border: 1px solid var(--border);
+  border-radius: 999px; padding: 5px 11px; font-size: 11px; cursor: pointer;
+}
+.dash .chip:hover { border-color: var(--blue); }
+.dash .chip.on { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+/* Donut */
+.donut-wrap { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.donut { position: relative; height: 200px; }
+.donut-center {
+  position: absolute; inset: 0; display: grid; place-content: center; text-align: center; pointer-events: none;
+}
+.donut-center strong { font-size: 16px; font-variant-numeric: tabular-nums; }
+.donut-center small { color: var(--muted); font-size: 11px; }
+.legend { list-style: none; padding: 0; margin: 0; display: grid; gap: 7px; }
+.legend li { display: grid; grid-template-columns: 10px 1fr auto; gap: 9px; align-items: center; font-size: 12px; color: var(--text-2); }
+.legend b { color: var(--text); font-variant-numeric: tabular-nums; }
+.sw { width: 10px; height: 10px; border-radius: 3px; }
+
+/* Calidad */
+.quality-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+.quality-list li { display: grid; gap: 7px; }
+.q-head { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-2); }
+.q-head b { color: var(--text); }
+.q-bar { height: 7px; background: #f5f7fc; border-radius: 999px; overflow: hidden; border: 1px solid var(--border-soft); }
+.q-bar i { display: block; height: 100%; background: linear-gradient(90deg, #f87171, #f5a524); border-radius: 999px; }
+.q-total { border-top: 1px solid var(--border); padding-top: 12px; display: flex !important; justify-content: space-between; font-size: 12px; color: var(--text-2); }
+.q-total b { color: var(--green); font-variant-numeric: tabular-nums; }
+
+/* Líderes */
+.leaders { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.leader {
+  background: #f5f7fc; border: 1px solid var(--border); border-radius: 12px; padding: 14px;
+  display: grid; gap: 6px; text-align: left; color: var(--text); cursor: pointer; transition: border-color .15s, transform .15s;
+}
+.leader:hover { border-color: var(--amber); transform: translateY(-1px); }
+.leader-name { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.leader strong { font-size: 14px; }
+.leader small { color: var(--amber); font-variant-numeric: tabular-nums; font-size: 12px; }
+
+/* Reconciliaciones */
+.recon { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.recon li {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  background: #f5f7fc; border: 1px solid var(--border); border-radius: 10px; padding: 11px 13px; font-size: 12px;
+}
+.recon li.ok b { color: var(--green); }
+.recon li.fallo b { color: var(--danger); }
+.recon span { color: var(--text-2); }
+
+.dash-foot { margin: 4px 0 0; color: var(--muted); font-size: 11px; }
+
+@media (max-width: 1100px) {
+  .dash-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .span-2 { grid-column: span 2; }
+  .kpi-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 700px) {
+  .dash-grid { grid-template-columns: 1fr; }
+  .span-2 { grid-column: span 1; }
+  .kpi-row { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .kpi-value { font-size: 20px; }
+  .leaders { grid-template-columns: 1fr; }
+  .chart-h { height: 220px; }
+}
+
+/* Panel que ocupa todo el ancho de la rejilla; sus verificaciones se muestran en tres columnas. */
+.span-3 { grid-column: 1 / -1; }
+.span-3 .recon { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 700px) { .span-3 .recon { grid-template-columns: 1fr; } }
+
+/* Tarjetas KPI con estilo de la referencia: cifra grande en azul. */
+.kpi-card .kpi-value { color: #1D3E7F; }
+
+/* Líder de cada ranking (solo Analista). */
+.lideres { margin-top: 18px; display: grid; gap: 12px; }
+.lideres h3 { margin: 0; font-size: 16px; font-weight: 800; color: #111827; }
+.lideres-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.lider-card { background: #ffffff; border: 1px solid #D4DEF0; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 2px 8px rgba(15,23,42,0.06); }
+.lider-card header { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.lider-card header strong { font-size: 15px; color: #111827; }
+.lider-etiqueta { font-size: 11px; font-weight: 700; padding: 3px 8px; border: 1px solid #9DB2DC; color: #1D3E7F; background: #F1F5FC; white-space: nowrap; }
+.lider-etiqueta.oblig { border-color: #1D3E7F; }
+.lider-banco { font-size: 16px; font-weight: 700; color: #0F2D69; }
+.lider-card dl { margin: 2px 0 0; display: grid; gap: 4px; }
+.lider-card dl > div { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; }
+.lider-card dt { color: #4b5563; }
+.lider-card dd { margin: 0; font-variant-numeric: tabular-nums; color: #111827; font-weight: 600; }
+.lider-estado { margin: 4px 0 0; font-size: 13px; font-weight: 700; color: #4b5563; }
+.lider-estado.nuevo { color: #1D3E7F; }
+.lider-corte { font-size: 11px; color: #6b7280; }
+@media (max-width: 900px) { .lideres-grid { grid-template-columns: 1fr; } }
+
+/* Tarjetas de líder desplegables. */
+.lider-card { cursor: pointer; transition: box-shadow .2s, transform .2s; }
+.lider-card:hover { box-shadow: 0 8px 22px rgba(15,23,42,0.14); transform: translateY(-2px); }
+.lider-card.abierta { grid-column: 1 / -1; cursor: default; }
+.lider-card header { display: flex; justify-content: space-between; align-items: center; }
+.lider-toggle { width: 26px; height: 26px; display: inline-grid; place-items: center; background: #E6EDF8; color: #0F2D69; font-weight: 700; }
+.lider-detalle { display: flex; flex-direction: column; gap: 10px; border-top: 1px solid #E1E9F5; padding-top: 12px; cursor: default; }
+.lider-detalle h4 { margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: #374151; }
+.lider-detalle table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.lider-detalle th, .lider-detalle td { padding: 7px 8px; border-bottom: 1px solid #E1E9F5; text-align: left; }
+.lider-detalle th { font-size: 11px; color: #4b5563; text-transform: uppercase; letter-spacing: .05em; }
+.lider-detalle .num { text-align: right; font-variant-numeric: tabular-nums; }
+.lider-top { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 13px; }
+.lider-top li { display: flex; justify-content: space-between; gap: 10px; }
+.lider-top b { font-variant-numeric: tabular-nums; }
+.lider-ver { align-self: flex-start; background: linear-gradient(to bottom, #3B6FBF 0%, #1D3E7F 100%); color: #fff; border: 0; padding: 10px 16px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: 0 4px 0 #0F2D69; }
+.lider-ver:hover { transform: translateY(-1px); }
+.lider-ver:active { transform: translateY(3px); box-shadow: 0 0 0 #0F2D69; }
+
+/* Tarjeta de líder abierta: resumen a la izquierda, detalle a la derecha, sin espacios vacíos. */
+.lider-card:focus { outline: none; }
+.lider-card:focus-visible { outline: 2px solid #1D3E7F; outline-offset: 3px; }
+.lider-card.abierta { display: grid; grid-template-columns: minmax(240px, 300px) minmax(0, 1fr); gap: 0 28px; align-items: start; }
+.lider-card.abierta .lider-resumen { display: flex; flex-direction: column; gap: 8px; }
+.lider-card.abierta .lider-detalle { border-top: 0; border-left: 1px solid #E1E9F5; padding: 0 0 0 24px; min-width: 0; }
+.lider-card.abierta .lider-corte { grid-column: 1; }
+@media (max-width: 900px) {
+  .lider-card.abierta { display: flex; flex-direction: column; }
+  .lider-card.abierta .lider-detalle { border-left: 0; padding: 12px 0 0; border-top: 1px solid #E1E9F5; }
+}

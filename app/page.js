@@ -1,8 +1,11 @@
 // Panel principal (/) — Resumen de un corte (por defecto el más reciente).
 //
-// Muestra: universo local válido y su saldo, número de bancos, líder de cada uno de los
-// 6 rankings, movimientos significativos frente al corte anterior, la composición de la
-// cartera y la cartera de cada banco, y accesos a los módulos según el perfil.
+// Versión fusionada: une el Panel original con componentes portados del frontend de Amet
+// (carpeta app/_inicio/). Para el perfil Público abre con la portada de visitante
+// (VisitorHome); para todos muestra el Dashboard de Amet (KPIs, tendencia, composición,
+// saldo por banco, descartes y verificaciones), el líder de cada ranking (LideresRanking,
+// visible para todos los perfiles), movimientos significativos, la cartera por banco y
+// accesos a los módulos según el perfil.
 // Filtro en la URL: ?periodo=AAAAMMDD. Todas las cifras vienen del motor SQL.
 // Componente de servidor.
 import Link from "next/link";
@@ -12,9 +15,8 @@ import Filtros from "@/components/Filtros";
 import Grafico from "@/components/Grafico";
 import MensajeError from "@/components/MensajeError";
 import TablaOrdenable from "@/components/TablaOrdenable";
-import TarjetaIndicador from "@/components/TarjetaIndicador";
 import { alcanzaPerfil, exigirPerfil, NOMBRE_PERFIL, RUTAS_MENU } from "@/lib/auth";
-import { movimientos, resumenPanel } from "@/lib/consultas";
+import { calidad, movimientos, rankings, reconciliaciones, resumenPanel } from "@/lib/consultas";
 import {
   carteraPorBanco,
   composicionCartera,
@@ -22,36 +24,78 @@ import {
   fechasDisponibles,
   textoParametro,
 } from "@/lib/consultas-rankings";
-import {
-  aNumeroParaGrafico,
-  compararDecimales,
-  formatearEntero,
-  formatearFecha,
-  formatearMonto,
-  formatearMontoCompacto,
-  formatearPorcentaje,
-  nombreBanco,
-  nombreRanking,
-} from "@/lib/formato";
+import { aNumeroParaGrafico, compararDecimales, formatearEntero, formatearFecha, nombreBanco, nombreRanking } from "@/lib/formato";
+import Dashboard from "./_inicio/Dashboard";
+import LideresRanking from "./_inicio/LideresRanking";
+import StatusNotice from "./_inicio/StatusNotice";
+import VisitorHome from "./_inicio/VisitorHome";
 import NotaFuente from "./rankings/NotaFuente";
 import { urlRankings } from "./rankings/urls";
 
 export const dynamic = "force-dynamic"; // los datos cambian al cargar cortes
-
-const TIPO_RANKING = { obligatorio: "Obligatorio", recomendado: "Recomendado", bonus: "Bonus" };
 
 /** Lee todo lo que el panel necesita para un período. */
 async function cargarDatos(pedido) {
   const fechas = await fechasDisponibles();
   const periodo = elegirPeriodo(pedido, fechas);
   if (!periodo.fecha) return { fechas, periodo };
-  const [resumen, composicion, bancos, movs] = await Promise.all([
+  // Cortes hasta el período elegido (para la tendencia y la historia de cada líder).
+  const hasta = fechas.filter((f) => f <= periodo.fecha);
+  const [resumen, composicion, bancos, movs, calidades, rec, rankingsPorCorte] = await Promise.all([
     resumenPanel(periodo.fecha),
     composicionCartera(periodo.fecha),
     carteraPorBanco(periodo.fecha),
     periodo.anterior ? movimientos({ anterior: periodo.anterior, actual: periodo.fecha }) : Promise.resolve([]),
+    calidad(),
+    reconciliaciones(periodo.fecha),
+    Promise.all(hasta.map((f) => rankings({ fecha: f }))),
   ]);
-  return { fechas, periodo, resumen, composicion, bancos, movs };
+  return { fechas, periodo, resumen, composicion, bancos, movs, calidades, rec, hasta, rankingsPorCorte };
+}
+
+/** Agrupa las filas de rankings() por código de ranking (conserva el orden por posición). */
+function agruparPorRanking(filas) {
+  const grupos = new Map();
+  for (const f of filas) {
+    if (!grupos.has(f.ranking)) grupos.set(f.ranking, []);
+    grupos.get(f.ranking).push(f);
+  }
+  return grupos;
+}
+
+/**
+ * Prepara los datos de LideresRanking: líder actual (de resumenPanel), desde qué corte lidera,
+ * su saldo/ponderación en cada corte y el top 3 de la actividad. Solo compara códigos y
+ * posiciones; los montos pasan como texto exacto.
+ */
+function prepararLideres(resumen, hasta, gruposPorCorte, fecha) {
+  return resumen.rankings.map((r) => {
+    const codigoLider = r.lider.codigo_banco;
+    let desde = fecha;
+    for (let i = hasta.length - 1; i >= 0; i--) {
+      const lider = gruposPorCorte[i].get(r.ranking)?.find((x) => x.posicion === 1);
+      if (lider?.codigo_banco === codigoLider) desde = hasta[i];
+      else break;
+    }
+    const detalle = hasta.map((f, i) => {
+      const x = gruposPorCorte[i].get(r.ranking)?.find((y) => y.codigo_banco === codigoLider);
+      return { fecha: f, saldo: x?.saldo_actividad ?? null, ponderacion: x?.ponderacion_pct ?? null, operaciones: x?.operaciones_validas ?? null };
+    });
+    const filas = gruposPorCorte.at(-1)?.get(r.ranking) ?? [];
+    return {
+      ranking: r.ranking,
+      nombre: r.nombre,
+      tipo: r.tipo,
+      lider: r.lider,
+      saldo_total: r.saldo_total,
+      lider_anterior: r.lider_anterior,
+      cambio_de_lider: r.cambio_de_lider,
+      desde,
+      detalle,
+      top3: filas.slice(0, 3).map((f) => ({ posicion: f.posicion, codigo_banco: f.codigo_banco, banco: f.banco, saldo_actividad: f.saldo_actividad })),
+      href: urlRankings({ periodo: fecha, ranking: r.ranking }),
+    };
+  });
 }
 
 /**
@@ -130,23 +174,17 @@ export default async function PaginaPanel({ searchParams }) {
     );
   }
 
-  const { resumen, composicion, bancos, movs } = datos;
+  const { resumen, composicion, bancos, movs, calidades, rec, hasta, rankingsPorCorte } = datos;
   const { fecha, anterior } = periodo;
   const textoAnterior = anterior ? formatearFecha(anterior) : null;
-  const esAnalista = alcanzaPerfil(perfil, "analista");
+  const esPublico = !alcanzaPerfil(perfil, "analista");
+  const esAnalista = !esPublico;
   const significativos = movs.filter((m) => m.significativo);
   const frases = anterior ? destacados(resumen, movs, textoAnterior) : [];
 
-  // Gráfico 1: composición de la cartera por macroactividad (orden de mayor a menor saldo).
-  // Orden exacto por saldo (texto decimal), sin pasar por punto flotante.
+  // Composición por macroactividad, de mayor a menor saldo (orden exacto sobre texto decimal).
   const composicionOrdenada = [...composicion].sort((a, b) => compararDecimales(b.saldo, a.saldo));
-  const opcionComposicion = {
-    grid: { left: 8, right: 24, top: 8, bottom: 24, containLabel: true },
-    xAxis: { type: "value" },
-    yAxis: { type: "category", inverse: true, data: composicionOrdenada.map((c) => nombreRanking(c.ranking)) },
-    series: [{ type: "bar", name: "Saldo", data: composicionOrdenada.map((c) => aNumeroParaGrafico(c.saldo)) }],
-  };
-  // Gráfico 2: cartera local válida de cada banco (ya viene ordenada por el motor).
+  // Gráfico: cartera local válida de cada banco (ya viene ordenada por el motor).
   const opcionBancos = {
     grid: { left: 8, right: 24, top: 8, bottom: 24, containLabel: true },
     xAxis: { type: "value" },
@@ -154,24 +192,56 @@ export default async function PaginaPanel({ searchParams }) {
     series: [{ type: "bar", name: "Cartera local válida", data: bancos.map((b) => aNumeroParaGrafico(b.total_cartera_local_valida)) }],
   };
 
+  // Datos para los componentes portados de Amet (app/_inicio/).
+  const gruposPorCorte = rankingsPorCorte.map(agruparPorRanking);
+  const gruposActuales = gruposPorCorte.at(-1) ?? new Map();
+  const actividades = resumen.rankings.map((r) => ({
+    ranking: r.ranking,
+    nombre: r.nombre,
+    saldo_total: r.saldo_total,
+    href: urlRankings({ periodo: fecha, ranking: r.ranking }),
+    filas: (gruposActuales.get(r.ranking) ?? []).map((f) => ({
+      posicion: f.posicion,
+      codigo_banco: f.codigo_banco,
+      banco: f.banco,
+      saldo_actividad: f.saldo_actividad,
+      ponderacion_pct: f.ponderacion_pct,
+    })),
+  }));
+  const lideres = prepararLideres(resumen, hasta, gruposPorCorte, fecha);
+  const calidadActual = calidades.find((c) => c.fecha === fecha) ?? null;
+  const serie = calidades.filter((c) => c.fecha <= fecha).map((c) => ({ fecha: c.fecha, universo: c.universo_local_valido }));
+
   // Módulos: los que el perfil puede abrir y, aparte, los que requieren otro perfil.
   const modulos = RUTAS_MENU.filter((r) => r.ruta !== "/");
 
   return (
     <>
-      <EncabezadoPagina
-        titulo="Panel principal"
-        descripcion={
-          <>
-            Resumen del corte de <strong>{formatearFecha(fecha)}</strong> (Fecha = {fecha})
-            {anterior ? <> comparado con {textoAnterior}</> : <>; es el primer corte cargado, sin período anterior</>}.
-          </>
-        }
-      >
-        <Link href={urlRankings({ periodo: fecha })} className="boton">
-          Ver rankings
-        </Link>
-      </EncabezadoPagina>
+      {esPublico && (
+        <VisitorHome
+          fecha={fecha}
+          cortes={datos.fechas.length}
+          obligatorios={resumen.rankings.filter((r) => r.tipo === "obligatorio").length}
+          actividades={actividades}
+          urlRankings={urlRankings({ periodo: fecha })}
+          urlsDescarga={{
+            rankings: `/api/exportar/rankings?fecha=${fecha}`,
+            desglose: `/api/exportar/subactividades?fecha=${fecha}`,
+          }}
+        />
+      )}
+
+      <div id="resumen" className="scroll-mt-24">
+        <EncabezadoPagina
+          titulo={esPublico ? "Resumen del corte" : "Panel principal"}
+          descripcion={
+            <>
+              Resumen del corte de <strong>{formatearFecha(fecha)}</strong> (Fecha = {fecha})
+              {anterior ? <> comparado con {textoAnterior}</> : <>; es el primer corte cargado, sin período anterior</>}.
+            </>
+          }
+        />
+      </div>
 
       <Filtros
         conLimpiar={false}
@@ -185,114 +255,48 @@ export default async function PaginaPanel({ searchParams }) {
         ]}
       />
       {periodo.invalido && (
-        <div className="mb-6">
-          <MensajeError
-            titulo="Período no disponible"
-            mensaje={`El período «${pedido}» no está cargado; se muestra el más reciente (${formatearFecha(fecha)}).`}
-          />
-        </div>
+        <StatusNotice type="warning">
+          El período «{pedido}» no está cargado; se muestra el más reciente ({formatearFecha(fecha)}).
+        </StatusNotice>
+      )}
+      {!resumen.reconciliaciones_cuadran && (
+        <StatusNotice type="error" accion={{ href: "/verificacion", texto: "Ver reconciliaciones" }}>
+          Atención: hay reconciliaciones que no cuadran en este corte.
+        </StatusNotice>
       )}
 
-      {/* Indicadores principales */}
-      <section aria-label="Indicadores del período" className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <TarjetaIndicador
-          titulo="Universo local válido"
-          valor={formatearEntero(resumen.universo.universo_local_valido)}
-          unidad="préstamos"
-          detalle={`De ${formatearEntero(resumen.universo.filas_leidas)} filas leídas; ${formatearEntero(resumen.universo.excluidas)} excluidas por los filtros E1–E4.`}
-          enlace={{ href: "/calidad", texto: "Ver reporte de calidad" }}
-        />
-        <TarjetaIndicador
-          titulo="Saldo del universo local válido"
-          valor={formatearMontoCompacto(resumen.universo.saldo_universo_local_valido)}
-          detalle={
-            <>
-              Exacto: <span className="cifra">{formatearMonto(resumen.universo.saldo_universo_local_valido)}</span>.{" "}
-              {resumen.reconciliaciones_cuadran
-                ? "Las reconciliaciones 1, 2 y 3 cuadran al centavo."
-                : "Atención: hay reconciliaciones que no cuadran."}
-            </>
-          }
-          enlace={{ href: "/verificacion", texto: "Ver reconciliaciones" }}
-        />
-        <TarjetaIndicador
-          titulo="Bancos"
-          valor={formatearEntero(bancos.length)}
-          unidad="bancos ficticios"
-          detalle="Todos aparecen en los 6 rankings; un banco sin cartera en una actividad figura con saldo 0.00."
-          enlace={{ href: "#cartera-bancos", texto: "Ver cartera por banco" }}
-        />
-        <TarjetaIndicador
-          titulo="Movimientos significativos"
-          valor={anterior ? formatearEntero(significativos.length) : "—"}
-          unidad={anterior ? `de ${formatearEntero(movs.length)} posiciones` : undefined}
-          detalle={
-            anterior
-              ? `Frente a ${textoAnterior}, según la regla configurable vigente.`
-              : "Es el primer corte cargado: no hay período anterior para comparar."
-          }
-          enlace={
-            anterior
-              ? esAnalista
-                ? { href: `/comparar?periodo=${fecha}&anterior=${anterior}`, texto: "Comparar períodos" }
-                : { href: "#movimientos", texto: "Ver la lista" }
-              : undefined
-          }
-        />
-      </section>
+      {/* Indicadores y tendencias (Dashboard de Amet) */}
+      <Dashboard
+        fecha={fecha}
+        anterior={anterior}
+        serie={serie}
+        calidad={calidadActual}
+        universo={resumen.universo}
+        numBancos={bancos.length}
+        movimientos={{ significativos: significativos.length, total: movs.length }}
+        reconciliaciones={rec.resumen}
+        composicion={composicionOrdenada}
+        rankings={actividades}
+        enlaces={{
+          rankings: urlRankings({ periodo: fecha }),
+          exportar: "/reportes",
+          movimientos: esAnalista
+            ? { href: `/comparar?periodo=${fecha}&anterior=${anterior}`, texto: "Comparar períodos" }
+            : { href: "#movimientos", texto: "Ver la lista" },
+        }}
+      />
 
-      {/* Líder de cada ranking */}
-      <section aria-labelledby="titulo-lideres" className="mb-10">
-        <h2 id="titulo-lideres" className="mb-3">Líder de cada ranking</h2>
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {resumen.rankings.map((r) => (
-            <li key={r.ranking} className="tarjeta flex flex-col gap-1">
-              <div className="flex items-center justify-between gap-2">
-                <h3>{r.nombre}</h3>
-                <span className="etiqueta">{TIPO_RANKING[r.tipo]}</span>
-              </div>
-              <p className="text-lg font-semibold">{nombreBanco(r.lider.codigo_banco, r.lider.banco)}</p>
-              <dl className="grid grid-cols-[auto_1fr] gap-x-3 text-sm">
-                <dt className="text-texto-suave">Saldo</dt>
-                <dd className="cifra text-right">{formatearMonto(r.lider.saldo_actividad)}</dd>
-                <dt className="text-texto-suave">Ponderación</dt>
-                <dd className="cifra text-right">{formatearPorcentaje(r.lider.ponderacion_pct)}</dd>
-                <dt className="text-texto-suave">Total del ranking</dt>
-                <dd className="cifra text-right">{formatearMontoCompacto(r.saldo_total)}</dd>
-              </dl>
-              <p className="text-sm">
-                {!r.lider_anterior ? (
-                  <span className="text-texto-tenue">Sin período anterior</span>
-                ) : r.cambio_de_lider ? (
-                  <span className="movimiento movimiento-sube">
-                    <span aria-hidden="true">▲</span> Nuevo líder (antes: {r.lider_anterior.banco})
-                  </span>
-                ) : (
-                  <span className="movimiento movimiento-igual">
-                    <span aria-hidden="true">=</span> Mantiene el liderazgo desde {textoAnterior}
-                  </span>
-                )}
-              </p>
-              <p className="mt-auto pt-1 text-sm">
-                <Link href={urlRankings({ periodo: fecha, ranking: r.ranking })}>Ver ranking completo</Link>
-              </p>
-            </li>
-          ))}
-        </ul>
-      </section>
+      {/* Líder de cada ranking: visible para todos los perfiles (LideresRanking de Amet) */}
+      <LideresRanking lideres={lideres} fecha={fecha} />
 
       {/* Visualizaciones con su tabla (la tabla tiene la cifra oficial y es la alternativa accesible) */}
       <section aria-labelledby="titulo-composicion" className="mb-10">
         <h2 id="titulo-composicion" className="mb-3">Composición de la cartera local válida</h2>
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="flex flex-col gap-3">
-            <Grafico
-              titulo={`Saldo por macroactividad · ${formatearFecha(fecha)}`}
-              descripcion="Suma del saldo de los 12 bancos en cada ranking."
-              opcion={opcionComposicion}
-              altura={300}
-              formatoValor="monto"
-            />
+            <p className="text-sm text-texto-suave">
+              Cifras exactas de la dona «Saldo por macroactividad» del panel: suma del saldo de los 12 bancos en cada ranking.
+            </p>
             <TablaOrdenable
               titulo="Saldo por macroactividad"
               columnas={[
