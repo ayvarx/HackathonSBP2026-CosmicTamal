@@ -13,14 +13,13 @@ export default function PiePagina({ perfil }) {
         <div className="max-w-2xl space-y-1">
           <p>
             <span className="font-semibold text-texto-suave">Fuente:</span> Datos AT03 sintéticos · Hackathon SBP 2026.
-            Rankings calculados desde los archivos de corte con los catálogos CINU/SB109, SB21 y de bancos suministrados.
           </p>
           <p>Datos ficticios</p>
         </div>
         <p className="flex items-start gap-2 md:justify-end md:text-right">
           <LogoRadar size={20} decorativo />
           <span>
-            Prototipo académico · Perfil actual: <span className="font-semibold">{NOMBRE_PERFIL[perfil]}</span>
+            Perfil actual: <span className="font-semibold">{NOMBRE_PERFIL[perfil]}</span>
           </span>
         </p>
       </div>

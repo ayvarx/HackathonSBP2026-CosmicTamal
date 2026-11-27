@@ -1,8 +1,15 @@
 "use server";
 // Acción de servidor del selector de perfil.
 // La cookie se escribe aquí, en el servidor, firmada con HMAC (ver lib/auth.js).
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { esPerfilValido, fijarPerfil, puedeVerRuta, rutaInternaSegura } from "@/lib/auth";
+import {
+  NOMBRE_COOKIE,
+  esPerfilValido,
+  fijarPerfil,
+  puedeVerRuta,
+  rutaInternaSegura,
+} from "@/lib/auth";
 
 /**
  * Recibe el formulario { perfil, volver } y fija el perfil elegido.
@@ -17,4 +24,11 @@ export async function cambiarPerfil(formulario) {
 
   const volver = rutaInternaSegura(formulario.get("volver"), "/");
   redirect(puedeVerRuta(perfil, volver) ? volver : "/");
+}
+
+/** Cierra la sesión: borra la cookie de perfil y lleva a /login. */
+export async function cerrarSesion() {
+  const almacen = await cookies();
+  almacen.delete({ name: NOMBRE_COOKIE, path: "/" });
+  redirect("/login");
 }

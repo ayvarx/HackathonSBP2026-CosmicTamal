@@ -9,7 +9,7 @@
 // Props:
 //   perfil (string)  'publico' | 'analista' | 'administrador'.
 import Link from "next/link";
-import { NOMBRE_PERFIL, PERFILES, rutasPermitidas } from "@/lib/auth";
+import { NOMBRE_PERFIL, rutasPermitidas } from "@/lib/auth";
 import ConmutadorPerfil from "./ConmutadorPerfil";
 import NavegacionPrincipal from "./NavegacionPrincipal";
 import LogoRadar from "./LogoRadar";
@@ -17,7 +17,6 @@ import "./topbar.css";
 
 export default function Cabecera({ perfil }) {
   const enlaces = rutasPermitidas(perfil).map(({ ruta, etiqueta }) => ({ ruta, etiqueta }));
-  const perfiles = PERFILES.map((valor) => ({ valor, nombre: NOMBRE_PERFIL[valor] }));
 
   return (
     <header>
@@ -30,7 +29,7 @@ export default function Cabecera({ perfil }) {
               <small>Por banco y actividad económica · Hackathon SBP 2026</small>
             </span>
           </Link>
-          <ConmutadorPerfil perfilActual={perfil} perfiles={perfiles} />
+          <ConmutadorPerfil nombrePerfil={NOMBRE_PERFIL[perfil]} />
         </div>
       </div>
       <NavegacionPrincipal enlaces={enlaces} />

@@ -14,7 +14,7 @@ export const metadata = {
     default: "Rankings de crédito bancario · Hackathon SBP 2026",
   },
   description:
-    "Rankings de crédito por banco y actividad económica calculados desde cortes AT03 sintéticos. Datos ficticios.",
+    "Rankings de crédito por banco y actividad económica. Datos ficticios.",
 };
 
 // Los datos cambian cada vez que el administrador carga un corte: nada se guarda en caché.

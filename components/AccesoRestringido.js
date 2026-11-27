@@ -23,10 +23,6 @@ export default function AccesoRestringido({ perfilActual, requiere, desde }) {
         {requiere !== "administrador" && " o superior"}. Su perfil actual es{" "}
         <strong>{NOMBRE_PERFIL[perfilActual]}</strong>.
       </p>
-      <p className="mt-2 text-sm text-texto-suave">
-        Cada perfil ve solo sus opciones. La verificación se hace en el servidor, por eso escribir la dirección
-        directamente tampoco permite entrar.
-      </p>
       <div className="mt-6 flex flex-wrap gap-2">
         {yaAlcanza ? (
           <Link href={volver} className="boton">
