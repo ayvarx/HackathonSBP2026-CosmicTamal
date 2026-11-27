@@ -1,26 +1,320 @@
+/* globals.css — Sistema visual de la plataforma (tema claro, institucional).
+ *
+ * Los colores, tipografías y radios se definen UNA vez como tokens en @theme.
+ * Tailwind 4 genera clases a partir de ellos con los mismos nombres en español:
+ *   --color-primario  →  bg-primario, text-primario, border-primario
+ *   --color-texto-suave → text-texto-suave
+ * Todos los pares texto/fondo usados aquí cumplen contraste AA (≥ 4.5:1).
+ *
+ * Más abajo hay clases de componente (.boton, .tarjeta, .tabla-datos, ...) para que
+ * todas las pantallas se vean iguales sin repetir listas largas de utilidades.
+ */
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* Superficies */
+  --color-fondo: #f3f5f7;           /* fondo general de la página */
+  --color-superficie: #ffffff;      /* tarjetas, tablas, formularios */
+  --color-superficie-alt: #eaeef2;  /* encabezados de tabla, zonas secundarias */
+
+  /* Texto */
+  --color-texto: #17212b;           /* 16.3:1 sobre blanco */
+  --color-texto-suave: #4b5866;     /* 7.3:1  — descripciones, etiquetas */
+  --color-texto-tenue: #5f6b78;     /* 5.4:1  — notas al pie, ayudas */
+
+  /* Bordes */
+  --color-borde: #d3dae2;
+  --color-borde-fuerte: #9aa6b2;
+
+  /* Identidad: azul marino sobrio de regulador financiero */
+  --color-primario: #0d3b66;        /* 11.5:1 con texto blanco */
+  --color-primario-oscuro: #092a4a;
+  --color-primario-suave: #e4ecf4;
+  --color-sobre-primario: #ffffff;
+  --color-sobre-primario-suave: #c9d6e3; /* texto secundario sobre la cabecera azul */
+  --color-enlace: #0b5394;
+
+  /* Foco de teclado (visible sobre fondos claros y oscuros) */
+  --color-foco: #1b6ec2;
+  --color-foco-oscuro: #ffd166;
+
+  /* Aviso de datos ficticios */
+  --color-aviso-fondo: #fff4d6;
+  --color-aviso-borde: #e3b341;
+  --color-aviso-texto: #5c3c00;
+
+  /* Movimientos de posición (siempre acompañados de flecha y texto, nunca solo color) */
+  --color-sube: #1d6b3a;
+  --color-baja: #a12a2a;
+  --color-neutro: #4b5866;
+
+  /* Mensajes */
+  --color-error-fondo: #fdeeee;
+  --color-error-borde: #e3a0a0;
+  --color-error-texto: #8a1f1f;
+  --color-exito-fondo: #e9f5ee;
+  --color-exito-borde: #9fcdb0;
+
+  /* Fila resaltada en tablas (p. ej. el banco seleccionado); azul claro para no confundirla con el aviso */
+  --color-resaltado: #e3edf8;
+
+  /* Tipografía del sistema: carga instantánea y funciona sin internet en la demo */
+  --font-sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Roboto, Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  --radius-control: 4px;
+  --radius-tarjeta: 6px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* ------------------------------------------------------------------ */
+/* Base                                                                */
+/* ------------------------------------------------------------------ */
+@layer base {
+  html {
+    color-scheme: light;
+    -webkit-text-size-adjust: 100%;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  body {
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  h1, h2, h3 {
+    color: var(--color-texto);
+    line-height: 1.25;
+    font-weight: 600;
+  }
+  h1 { font-size: 1.6rem; letter-spacing: -0.01em; }
+  h2 { font-size: 1.2rem; }
+  h3 { font-size: 1.02rem; }
+
+  a {
+    color: var(--color-enlace);
+    text-underline-offset: 2px;
+  }
+  a:hover { text-decoration-thickness: 2px; }
+
+  /* Foco visible para quien navega con teclado */
+  :focus-visible {
+    outline: 3px solid var(--color-foco);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+  .zona-oscura :focus-visible {
+    outline-color: var(--color-foco-oscuro);
+  }
+
+  /* Las cifras se alinean columna con columna */
+  table, .cifra {
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ------------------------------------------------------------------ */
+/* Componentes                                                         */
+/* ------------------------------------------------------------------ */
+@layer components {
+  /* Enlace "Saltar al contenido" (solo aparece al recibir foco) */
+  .saltar-contenido {
+    position: absolute;
+    left: 1rem;
+    top: -100px;
+    z-index: 50;
+    background: var(--color-superficie);
+    color: var(--color-texto);
+    padding: 0.5rem 0.75rem;
+    border: 2px solid var(--color-foco);
+  }
+  .saltar-contenido:focus { top: 0.5rem; }
+
+  /* Contenedor de ancho máximo para todas las pantallas */
+  .contenedor {
+    width: 100%;
+    max-width: 1240px;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+  @media (min-width: 768px) {
+    .contenedor { padding-inline: 1.5rem; }
+  }
+
+  /* Tarjeta / panel de contenido */
+  .tarjeta {
+    background: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radius-tarjeta);
+    padding: 1rem 1.25rem;
+  }
+
+  /* Botones */
+  .boton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 2.25rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: var(--radius-control);
+    border: 1px solid var(--color-primario);
+    background: var(--color-primario);
+    color: var(--color-sobre-primario);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .boton:hover { background: var(--color-primario-oscuro); }
+  .boton:disabled,
+  .boton[aria-disabled="true"] {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  .boton-secundario {
+    background: var(--color-superficie);
+    color: var(--color-primario);
+    border-color: var(--color-borde-fuerte);
+  }
+  .boton-secundario:hover {
+    background: var(--color-primario-suave);
+  }
+
+  /* Campos de formulario */
+  .etiqueta-campo {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-texto-suave);
+    margin-bottom: 0.25rem;
+  }
+  .control {
+    width: 100%;
+    min-height: 2.25rem;
+    padding: 0.35rem 0.6rem;
+    border: 1px solid var(--color-borde-fuerte);
+    border-radius: var(--radius-control);
+    background: var(--color-superficie);
+    color: var(--color-texto);
+    font-size: 0.9rem;
+  }
+
+  /* Tablas de datos: cifras a la derecha y números tabulares */
+  .marco-tabla {
+    overflow-x: auto;
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radius-tarjeta);
+    background: var(--color-superficie);
+  }
+  .tabla-datos {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+  .tabla-datos caption {
+    text-align: left;
+    padding: 0.75rem 0.9rem 0.25rem;
+    font-weight: 600;
+    color: var(--color-texto);
+  }
+  .tabla-datos th,
+  .tabla-datos td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--color-borde);
+    vertical-align: middle;
+  }
+  .tabla-datos thead th {
+    background: var(--color-superficie-alt);
+    color: var(--color-texto);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-align: left;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  .tabla-datos tbody tr:hover td { background: #f7f9fb; }
+  .tabla-datos tbody tr:last-child td { border-bottom: 0; }
+  .tabla-datos tfoot td {
+    border-top: 2px solid var(--color-borde-fuerte);
+    border-bottom: 0;
+    font-weight: 600;
+    background: var(--color-superficie-alt);
+  }
+  .tabla-datos .num { text-align: right; white-space: nowrap; }
+  .tabla-datos .centro { text-align: center; }
+  .tabla-datos .codigo { font-family: var(--font-mono); font-size: 0.82rem; }
+  .tabla-datos tr.fila-resaltada td {
+    background: var(--color-resaltado);
+    font-weight: 600;
+  }
+  .tabla-compacta th,
+  .tabla-compacta td { padding: 0.3rem 0.55rem; }
+
+  /* Botón de orden dentro del encabezado */
+  .boton-orden {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    text-align: inherit;
+  }
+  .boton-orden:hover { text-decoration: underline; }
+  .flecha-orden {
+    font-size: 0.7rem;
+    color: var(--color-texto-tenue);
+    min-width: 0.7rem;
+  }
+
+  /* Etiqueta de texto discreta (no se usa como adorno) */
+  .etiqueta {
+    display: inline-block;
+    padding: 0.05rem 0.4rem;
+    border: 1px solid var(--color-borde-fuerte);
+    border-radius: 3px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--color-texto-suave);
+    background: var(--color-superficie);
+    white-space: nowrap;
+  }
+
+  /* Indicador de movimiento */
+  .movimiento {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .movimiento-sube { color: var(--color-sube); }
+  .movimiento-baja { color: var(--color-baja); }
+  .movimiento-igual { color: var(--color-neutro); }
+}
+
+/* Texto solo para lectores de pantalla */
+@utility solo-lector {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

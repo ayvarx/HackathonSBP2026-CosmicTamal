@@ -1,0 +1,165 @@
+"use client";
+// Grafico — Envoltorio de ECharts (echarts-for-react) con el tema de colores de la plataforma.
+// ECharts necesita el navegador (canvas), por eso se carga sin SSR con next/dynamic y,
+// mientras llega, se muestra un espacio del mismo alto (la página no "salta").
+//
+// IMPORTANTE (dinero): ECharts dibuja con números de JavaScript. Use aNumeroParaGrafico(texto)
+// de lib/formato.js solo para el alto de barras/puntos. La cifra oficial siempre va en una
+// TablaOrdenable junto al gráfico (además es la alternativa accesible al gráfico).
+//
+// Uso desde una página de servidor (la opción es un objeto serializable):
+//   <Grafico
+//     titulo="Saldo de CONSTRUCCION por banco · septiembre de 2026"
+//     descripcion="Barras horizontales; el detalle exacto está en la tabla de abajo."
+//     altura={420}
+//     formatoValor="monto"
+//     opcion={{
+//       grid: { left: 140 },
+//       xAxis: { type: "value" },
+//       yAxis: { type: "category", data: nombresBancos, inverse: true },
+//       series: [{ type: "bar", data: saldos.map(aNumeroParaGrafico) }],
+//     }} />
+//
+// Props:
+//   opcion       Objeto de opciones de ECharts (https://echarts.apache.org/es/option.html).
+//   titulo       (string) Título visible sobre el gráfico y nombre accesible (aria-label).
+//   descripcion  (string) opcional  Explicación breve (también para lectores de pantalla).
+//   altura       (number px | string CSS) Predeterminado 360.
+//   formatoValor ("monto" | "porcentaje" | "entero") opcional  Formatea el tooltip y el eje de valores
+//                si la opción no trae sus propios formateadores.
+//   eventos      opcional  { click: (params) => ... } — SOLO desde otro componente cliente.
+import dynamic from "next/dynamic";
+
+// Paleta categórica validada (orden fijo, segura para daltonismo en pares adyacentes).
+// El color 1 (azul) es el predeterminado de una sola serie; el 2 (naranja) sirve para resaltar.
+export const COLORES_GRAFICO = ["#1f63b0", "#d9622b", "#1a9a72", "#d99a00", "#d0679a", "#16801f", "#6250d6", "#c93f3e"];
+export const COLOR_RESALTADO = "#d9622b";
+
+// Tema sobrio: ejes y rejilla discretos, texto con los colores de la interfaz.
+const TEMA_SBP = {
+  color: COLORES_GRAFICO,
+  backgroundColor: "transparent",
+  textStyle: { fontFamily: '"Segoe UI", system-ui, -apple-system, "Helvetica Neue", Roboto, Arial, sans-serif', color: "#17212b" },
+  title: { textStyle: { color: "#17212b", fontWeight: 600, fontSize: 14 }, subtextStyle: { color: "#4b5866" } },
+  legend: { textStyle: { color: "#4b5866" }, icon: "roundRect", itemWidth: 12, itemHeight: 12 },
+  tooltip: {
+    backgroundColor: "#ffffff",
+    borderColor: "#9aa6b2",
+    borderWidth: 1,
+    textStyle: { color: "#17212b", fontSize: 13 },
+    extraCssText: "box-shadow: 0 2px 6px rgba(23,33,43,0.12); border-radius: 4px;",
+  },
+  categoryAxis: {
+    axisLine: { lineStyle: { color: "#9aa6b2" } },
+    axisTick: { show: false },
+    axisLabel: { color: "#4b5866" },
+    splitLine: { show: false },
+  },
+  valueAxis: {
+    axisLine: { show: false },
+    axisTick: { show: false },
+    axisLabel: { color: "#4b5866" },
+    splitLine: { lineStyle: { color: "#e3e8ed" } },
+  },
+  bar: { itemStyle: { borderRadius: [0, 3, 3, 0] }, barMaxWidth: 28 },
+  line: { symbolSize: 8, lineStyle: { width: 2 } },
+};
+
+let temaRegistrado = false;
+
+// Carga perezosa: echarts (~1 MB) solo se descarga en las pantallas que tienen gráficos.
+const ReactECharts = dynamic(
+  async () => {
+    const [{ default: Componente }, echarts] = await Promise.all([import("echarts-for-react"), import("echarts")]);
+    if (!temaRegistrado) {
+      echarts.registerTheme("sbp", TEMA_SBP);
+      temaRegistrado = true;
+    }
+    return Componente;
+  },
+  { ssr: false, loading: () => <EspacioCargando /> }
+);
+
+function EspacioCargando() {
+  return (
+    <div className="flex h-full min-h-[inherit] items-center justify-center text-sm text-texto-tenue">
+      Cargando gráfico…
+    </div>
+  );
+}
+
+// Formateadores de presentación (los datos del gráfico ya son números de JS).
+const formatoDosDecimales = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const formatoEntero = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
+
+function formatearValorTooltip(tipo, valor) {
+  if (typeof valor !== "number" || Number.isNaN(valor)) return valor ?? "—";
+  if (tipo === "monto") return formatoDosDecimales.format(valor);
+  if (tipo === "porcentaje") return `${valor.toFixed(4)} %`;
+  if (tipo === "entero") return formatoEntero.format(valor);
+  return String(valor);
+}
+
+/** Eje abreviado en español de Panamá: 1,500,000 → "1.5 M"; 2,000,000,000 → "2,000 M". */
+function formatearValorEje(tipo, valor) {
+  if (tipo === "porcentaje") return `${valor} %`;
+  const absoluto = Math.abs(valor);
+  if (absoluto >= 1e6) {
+    const millones = valor / 1e6;
+    return `${absoluto >= 1e7 ? formatoEntero.format(millones) : millones.toFixed(1)} M`;
+  }
+  if (absoluto >= 1e3) return `${formatoEntero.format(valor / 1e3)} mil`;
+  return formatoEntero.format(valor);
+}
+
+/** Agrega formateadores a ejes de valor y tooltip si la opción no los trae. */
+function aplicarFormato(opcion, tipo) {
+  if (!tipo || !opcion) return opcion;
+  const conFormatoEje = (eje) => {
+    if (!eje) return eje;
+    if (Array.isArray(eje)) return eje.map(conFormatoEje);
+    if (eje.type !== "value" || eje.axisLabel?.formatter) return eje;
+    return { ...eje, axisLabel: { ...eje.axisLabel, formatter: (v) => formatearValorEje(tipo, v) } };
+  };
+  const tooltip = opcion.tooltip ?? {};
+  return {
+    ...opcion,
+    xAxis: conFormatoEje(opcion.xAxis),
+    yAxis: conFormatoEje(opcion.yAxis),
+    tooltip: tooltip.valueFormatter || tooltip.formatter ? tooltip : { ...tooltip, valueFormatter: (v) => formatearValorTooltip(tipo, v) },
+  };
+}
+
+export default function Grafico({ opcion, titulo, descripcion, altura = 360, formatoValor, eventos }) {
+  const alto = typeof altura === "number" ? `${altura}px` : altura;
+  // Valores por defecto: tooltip al pasar sobre cada categoría y márgenes ajustados.
+  // Lo que traiga `opcion` siempre tiene prioridad.
+  const base = {
+    tooltip: { trigger: "axis", axisPointer: { type: "shadow", shadowStyle: { color: "rgba(13, 59, 102, 0.06)" } } },
+    ...opcion,
+  };
+  if (!Array.isArray(base.grid)) base.grid = { top: 24, right: 24, bottom: 32, ...base.grid };
+  const opcionFinal = aplicarFormato(base, formatoValor);
+
+  return (
+    <figure className="tarjeta">
+      {(titulo || descripcion) && (
+        <figcaption className="mb-2">
+          {titulo && <span className="block text-sm font-semibold text-texto">{titulo}</span>}
+          {descripcion && <span className="block text-xs text-texto-tenue">{descripcion}</span>}
+        </figcaption>
+      )}
+      <div style={{ height: alto, minHeight: alto }} role="img" aria-label={descripcion ? `${titulo}. ${descripcion}` : titulo}>
+        <ReactECharts
+          option={opcionFinal}
+          theme="sbp"
+          notMerge
+          lazyUpdate
+          style={{ height: "100%", width: "100%" }}
+          opts={{ renderer: "canvas" }}
+          onEvents={eventos}
+        />
+      </div>
+    </figure>
+  );
+}
