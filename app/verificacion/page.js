@@ -1,5 +1,5 @@
 // Verificación (/verificacion) — los seis puntos de verificación de un período.
-// Pública. Cada sección tiene ancla (#p1 ... #p6) para llegar al dato en pocos segundos.
+// Pública. Los rankings se ven de uno en uno con un selector (?ranking=). Cada sección tiene ancla (#p1 ... #p6) para llegar al dato en pocos segundos.
 import EncabezadoPagina from "@/components/EncabezadoPagina";
 import EstadoVacio from "@/components/EstadoVacio";
 import MensajeError from "@/components/MensajeError";
@@ -10,14 +10,15 @@ import EmbudoCascada from "../calidad/EmbudoCascada";
 import { exigirPerfil } from "@/lib/auth";
 import { calidad, periodos, RANKINGS, rankings, reconciliaciones } from "@/lib/consultas";
 import { elegirPeriodo, reclasificacionSb21, totalesPorSubactividad } from "@/lib/consultas-calidad";
-import { CARACTER_RANKING, formatearEntero, formatearFecha, formatearMonto, nombreRanking, nombreSubactividad } from "@/lib/formato";
+import Link from "next/link";
+import { formatearEntero, formatearFecha, formatearMonto, nombreRanking, nombreSubactividad } from "@/lib/formato";
 
 export const dynamic = "force-dynamic"; // los datos cambian al cargar cortes
 export const metadata = { title: "Verificación" };
 
 const PUNTOS = [
   ["p1", "1. Calidad"],
-  ["p2", "2. Rankings principales"],
+  ["p2", "2. Hipotecario a Agropecuario"],
   ["p3", "3. Comercio y Consumo"],
   ["p4", "4. Cartera y ponderación"],
   ["p5", "5. Subactividades y SB21"],
@@ -28,9 +29,7 @@ const PUNTOS = [
 function TablaRanking({ clave, filas }) {
   return (
     <div>
-      <h3 className="mb-1">
-        {nombreRanking(clave)} <span className="text-sm font-normal text-texto-suave">({CARACTER_RANKING[clave]})</span>
-      </h3>
+      <h3 className="mb-1">Ranking {nombreRanking(clave)}</h3>
       <TablaOrdenable
         titulo={`Ranking ${nombreRanking(clave)}`}
         claveFila="codigo_banco"
@@ -50,10 +49,34 @@ function TablaRanking({ clave, filas }) {
   );
 }
 
+// Selector de ranking (?ranking=): un enlace por ranking; el elegido queda marcado.
+function SelectorRanking({ claves, elegido, fecha, ancla }) {
+  return (
+    <nav aria-label="Elegir ranking" className="mb-3 flex flex-wrap gap-2">
+      {claves.map((clave) => {
+        const activo = clave === elegido;
+        return (
+          <Link
+            key={clave}
+            href={`/verificacion?periodo=${fecha}&ranking=${clave}#${ancla}`}
+            scroll={false}
+            aria-current={activo ? "true" : undefined}
+            className={activo ? "boton" : "boton boton-secundario"}
+          >
+            {nombreRanking(clave)}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
 export default async function PaginaVerificacion({ searchParams }) {
   await exigirPerfil("publico");
   const sp = await searchParams;
   const pedido = (Array.isArray(sp.periodo) ? sp.periodo[0] : sp.periodo) || "";
+  const pedidoRanking = String((Array.isArray(sp.ranking) ? sp.ranking[0] : sp.ranking) || "").toUpperCase();
+  const rankingElegido = RANKINGS.some((r) => r.clave === pedidoRanking) ? pedidoRanking : RANKINGS[0].clave;
 
   let d;
   try {
@@ -91,6 +114,8 @@ export default async function PaginaVerificacion({ searchParams }) {
 
   const { lista, fecha, q, ranks, subs, sb21, recs } = d;
   const porRanking = (clave) => ranks.filter((r) => r.ranking === clave);
+  const principales = RANKINGS.filter((r) => r.tipo === "obligatorio").map((r) => r.clave);
+  const otros = RANKINGS.filter((r) => r.tipo !== "obligatorio").map((r) => r.clave);
 
   // Punto 4: una fila por banco con su total de cartera (igual en los 6 rankings) y las 6 ponderaciones.
   const bancos = new Map();
@@ -141,17 +166,23 @@ export default async function PaginaVerificacion({ searchParams }) {
       </section>
 
       <section id="p2" className="mt-8 scroll-mt-24" aria-labelledby="h-p2">
-        <h2 id="h-p2">2. Rankings principales</h2>
-        <div className="grid gap-6 xl:grid-cols-2">
-          {RANKINGS.filter((r) => r.tipo === "obligatorio").map((r) => <TablaRanking key={r.clave} clave={r.clave} filas={porRanking(r.clave)} />)}
-        </div>
+        <h2 id="h-p2">2. Rankings Hipotecario, Construcción, Industria y Agropecuario</h2>
+        <SelectorRanking claves={principales} elegido={rankingElegido} fecha={fecha} ancla="p2" />
+        {principales.includes(rankingElegido) ? (
+          <TablaRanking clave={rankingElegido} filas={porRanking(rankingElegido)} />
+        ) : (
+          <p className="text-sm text-texto-suave">Elija un ranking para ver su tabla aquí.</p>
+        )}
       </section>
 
       <section id="p3" className="mt-8 scroll-mt-24" aria-labelledby="h-p3">
-        <h2 id="h-p3">3. Comercio y Consumo</h2>
-        <div className="grid gap-6 xl:grid-cols-2">
-          {RANKINGS.filter((r) => r.tipo !== "obligatorio").map((r) => <TablaRanking key={r.clave} clave={r.clave} filas={porRanking(r.clave)} />)}
-        </div>
+        <h2 id="h-p3">3. Rankings Comercio y Consumo</h2>
+        <SelectorRanking claves={otros} elegido={rankingElegido} fecha={fecha} ancla="p3" />
+        {otros.includes(rankingElegido) ? (
+          <TablaRanking clave={rankingElegido} filas={porRanking(rankingElegido)} />
+        ) : (
+          <p className="text-sm text-texto-suave">Elija un ranking para ver su tabla aquí.</p>
+        )}
       </section>
 
       <section id="p4" className="mt-8 scroll-mt-24" aria-labelledby="h-p4">

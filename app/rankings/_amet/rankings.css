@@ -150,3 +150,8 @@
   .bd-grid { grid-template-columns: 1fr; }
   .bd-otras { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* Filtros de banco y subactividad dentro del mismo recuadro que los chips y el período. */
+.rk-actividad .rk-filtros { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border, #d9e9d7); }
+.rk-actividad .rk-filtros > form,
+.rk-actividad .rk-filtros > div { border: 0; background: transparent; box-shadow: none; padding: 0; margin: 0 0 8px; }

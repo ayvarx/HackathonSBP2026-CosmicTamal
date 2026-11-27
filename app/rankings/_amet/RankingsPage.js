@@ -9,12 +9,13 @@
 //   grupos    [{ titulo, chips: [{ clave, texto, href, activo }] }]
 //   selector  Elemento a la derecha de los chips (PeriodSelect).
 //   incluye   [texto] subactividades del ranking elegido.
+//   children  Filtros adicionales (banco, subactividad) dentro del mismo recuadro.
 import Link from "next/link";
 import "./rankings.css";
 
-export default function RankingsPage({ grupos, selector, incluye = [] }) {
+export default function RankingsPage({ grupos, selector, incluye = [], children }) {
   return (
-    <section className="rk-amet panel rk-actividad" aria-label="Elegir actividad económica y período">
+    <section className="rk-amet panel rk-actividad" aria-label="Filtros del ranking">
       <span className="eyebrow">Actividad económica</span>
       <div className="fila-chips">
         <nav aria-label="Elegir ranking" className="rk-grupos">
@@ -39,6 +40,7 @@ export default function RankingsPage({ grupos, selector, incluye = [] }) {
         {selector}
       </div>
       {incluye.length > 0 && <p className="incluye">Incluye: {incluye.join(" · ")}</p>}
+      {children && <div className="rk-filtros">{children}</div>}
     </section>
   );
 }

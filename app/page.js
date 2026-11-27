@@ -3,15 +3,16 @@
 // Versión fusionada: une el Panel original con componentes portados del frontend de Amet
 // (carpeta app/_inicio/). Para el perfil Público abre con la portada de visitante
 // (VisitorHome); para todos muestra el Dashboard de Amet (KPIs, tendencia, composición,
-// saldo por banco, descartes y verificaciones), el líder de cada ranking (LideresRanking,
-// visible para todos los perfiles), movimientos significativos y la cartera por banco,
-// sin la lista de módulos (ya está en la navegación).
+// saldo por banco, total descartado e insignia de reconciliaciones), el líder de cada ranking
+// y los movimientos destacados. Cada dato completo vive en su vista dueña (Comparar, Calidad,
+// Verificación, Rankings), a la que se enlaza.
 // Filtro en la URL: ?periodo=AAAAMMDD. Todas las cifras vienen del motor SQL.
 // Componente de servidor.
 import EncabezadoPagina from "@/components/EncabezadoPagina";
 import EstadoVacio from "@/components/EstadoVacio";
 import Filtros from "@/components/Filtros";
 import Grafico from "@/components/Grafico";
+import Link from "next/link";
 import MensajeError from "@/components/MensajeError";
 import TablaOrdenable from "@/components/TablaOrdenable";
 import { alcanzaPerfil, exigirPerfil } from "@/lib/auth";
@@ -23,7 +24,7 @@ import {
   fechasDisponibles,
   textoParametro,
 } from "@/lib/consultas-rankings";
-import { aNumeroParaGrafico, compararDecimales, formatearEntero, formatearFecha, nombreRanking } from "@/lib/formato";
+import { aNumeroParaGrafico, compararDecimales, formatearFecha, nombreRanking } from "@/lib/formato";
 import Dashboard from "./_inicio/Dashboard";
 import LideresRanking from "./_inicio/LideresRanking";
 import StatusNotice from "./_inicio/StatusNotice";
@@ -63,8 +64,7 @@ function agruparPorRanking(filas) {
 
 /**
  * Prepara los datos de LideresRanking: líder actual (de resumenPanel), desde qué corte lidera,
- * su saldo/ponderación en cada corte y el top 3 de la actividad. Solo compara códigos y
- * posiciones; los montos pasan como texto exacto.
+ * y enlace al ranking. Solo compara códigos y posiciones; los montos pasan como texto exacto.
  */
 function prepararLideres(resumen, hasta, gruposPorCorte, fecha) {
   return resumen.rankings.map((r) => {
@@ -75,11 +75,6 @@ function prepararLideres(resumen, hasta, gruposPorCorte, fecha) {
       if (lider?.codigo_banco === codigoLider) desde = hasta[i];
       else break;
     }
-    const detalle = hasta.map((f, i) => {
-      const x = gruposPorCorte[i].get(r.ranking)?.find((y) => y.codigo_banco === codigoLider);
-      return { fecha: f, saldo: x?.saldo_actividad ?? null, ponderacion: x?.ponderacion_pct ?? null, operaciones: x?.operaciones_validas ?? null };
-    });
-    const filas = gruposPorCorte.at(-1)?.get(r.ranking) ?? [];
     return {
       ranking: r.ranking,
       nombre: r.nombre,
@@ -89,8 +84,6 @@ function prepararLideres(resumen, hasta, gruposPorCorte, fecha) {
       lider_anterior: r.lider_anterior,
       cambio_de_lider: r.cambio_de_lider,
       desde,
-      detalle,
-      top3: filas.slice(0, 3).map((f) => ({ posicion: f.posicion, codigo_banco: f.codigo_banco, banco: f.banco, saldo_actividad: f.saldo_actividad })),
       href: urlRankings({ periodo: fecha, ranking: r.ranking }),
     };
   });
@@ -116,9 +109,9 @@ function destacados(resumen, movs) {
   }
   const subida = movs.reduce((mejor, m) => (m.cambio_posicion > (mejor?.cambio_posicion ?? 0) ? m : mejor), null);
   const bajada = movs.reduce((peor, m) => (m.cambio_posicion < (peor?.cambio_posicion ?? 0) ? m : peor), null);
-  const empatados = (m) => movs.filter((x) => x.cambio_posicion === m.cambio_posicion).length - 1;
-  const conEmpates = (m) => (empatados(m) > 0 ? `+${empatados(m)} casos iguales` : "Caso único");
-  if (subida) {
+  // Si varios casos comparten el cambio máximo, no hay un único destacado: la tarjeta no se muestra.
+  const unico = (m) => m && movs.filter((x) => x.cambio_posicion === m.cambio_posicion).length === 1;
+  if (unico(subida)) {
     tarjetas.push({
       tipo: "subida",
       titulo: "Mayor aumento",
@@ -126,10 +119,9 @@ function destacados(resumen, movs) {
       banco: subida.banco,
       ranking: nombreRanking(subida.ranking),
       cifra: `${subida.posicion_anterior} → ${subida.posicion_actual} (+${subida.cambio_posicion})`,
-      frase: conEmpates(subida),
     });
   }
-  if (bajada) {
+  if (unico(bajada)) {
     tarjetas.push({
       tipo: "bajada",
       titulo: "Mayor bajada",
@@ -137,10 +129,23 @@ function destacados(resumen, movs) {
       banco: bajada.banco,
       ranking: nombreRanking(bajada.ranking),
       cifra: `${bajada.posicion_anterior} → ${bajada.posicion_actual} (${bajada.cambio_posicion})`,
-      frase: conEmpates(bajada),
     });
   }
   return tarjetas;
+}
+
+/** Encabezado del resumen: h1 para Analista/Administrador; h2 en la portada pública (que ya tiene su h1). */
+function Encabezado({ nivel, titulo, descripcion, children }) {
+  if (nivel === 1) return <EncabezadoPagina titulo={titulo} descripcion={descripcion}>{children}</EncabezadoPagina>;
+  return (
+    <div className="mb-6 flex flex-col gap-3 border-b border-borde pb-4 md:flex-row md:items-end md:justify-between">
+      <div>
+        <h2>{titulo}</h2>
+        {descripcion && <p className="mt-1 max-w-3xl text-texto-suave">{descripcion}</p>}
+      </div>
+      {children && <div className="flex flex-wrap items-start gap-2">{children}</div>}
+    </div>
+  );
 }
 
 export default async function PaginaPanel({ searchParams }) {
@@ -191,6 +196,7 @@ export default async function PaginaPanel({ searchParams }) {
   const esPublico = !alcanzaPerfil(perfil, "analista");
   const esAnalista = !esPublico;
   const significativos = movs.filter((m) => m.significativo);
+  const urlComparar = `/comparar?periodo=${fecha}&anterior=${anterior}`;
   const tarjetasDestacadas = anterior ? destacados(resumen, movs) : [];
 
   // Composición por macroactividad, de mayor a menor saldo (orden exacto sobre texto decimal).
@@ -246,7 +252,8 @@ export default async function PaginaPanel({ searchParams }) {
       )}
 
       <div id="resumen" className="resumen-compacto scroll-mt-24">
-        <EncabezadoPagina
+        <Encabezado
+          nivel={esPublico ? 2 : 1}
           titulo={esPublico ? "Resumen del corte" : "Panel principal"}
           descripcion={anterior ? <small>frente a {textoAnterior}</small> : undefined}
         >
@@ -261,7 +268,7 @@ export default async function PaginaPanel({ searchParams }) {
               },
             ]}
           />
-        </EncabezadoPagina>
+        </Encabezado>
       </div>
 
       {/* Líder de cada ranking: para Analista/Administrador, primera sección tras el encabezado */}
@@ -293,13 +300,11 @@ export default async function PaginaPanel({ searchParams }) {
         enlaces={{
           rankings: urlRankings({ periodo: fecha }),
           exportar: "/reportes",
-          movimientos: esAnalista
-            ? { href: `/comparar?periodo=${fecha}&anterior=${anterior}`, texto: "Comparar períodos" }
-            : { href: "#movimientos", texto: "Ver la lista" },
+          movimientos: esAnalista ? { href: urlComparar, texto: "Ver todos los movimientos" } : undefined,
         }}
       />
 
-      {/* Visualizaciones con su tabla (la tabla tiene la cifra oficial y es la alternativa accesible) */}
+      {/* Composición (tabla) y cartera por banco (gráfico), lado a lado */}
       <section aria-labelledby="titulo-composicion" className="mb-10">
         <h2 id="titulo-composicion" className="mb-3">Composición de la cartera local válida</h2>
         <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-2">
@@ -336,7 +341,7 @@ export default async function PaginaPanel({ searchParams }) {
 
       {/* Movimientos significativos frente al corte anterior */}
       <section id="movimientos" aria-labelledby="titulo-movimientos" className="mb-10 scroll-mt-24">
-        <h2 id="titulo-movimientos" className="mb-1">Movimientos significativos</h2>
+        <h2 id="titulo-movimientos" className="mb-3">Movimientos destacados</h2>
         {!anterior ? (
           <EstadoVacio titulo="Sin período anterior">
             {formatearFecha(fecha)} es el primer corte cargado. Al cargar el siguiente, aquí se señalarán los cambios de
@@ -354,42 +359,24 @@ export default async function PaginaPanel({ searchParams }) {
                     <strong className="destacado-banco">{t.banco}</strong>
                     <span className="destacado-ranking">{t.ranking}</span>
                     <span className="destacado-cifra cifra">{t.cifra}</span>
-                    <small>{t.frase}</small>
+                    {t.frase && <small>{t.frase}</small>}
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="mb-3 text-sm text-texto-suave">Sin cambios de posición frente a {textoAnterior}.</p>
+              <p className="mb-3 text-sm text-texto-suave">
+                {movs.some((m) => m.cambio_posicion !== 0)
+                  ? `Sin un caso único destacado frente a ${textoAnterior}.`
+                  : `Sin cambios de posición frente a ${textoAnterior}.`}
+              </p>
             )}
-            <TablaOrdenable
-              titulo={`${formatearEntero(significativos.length)} movimientos significativos · ${textoAnterior} → ${formatearFecha(fecha)}`}
-              columnas={[
-                { clave: "Ranking", titulo: "Ranking", tipo: "ranking" },
-                { clave: "Banco", titulo: "Banco", enlace: urlRankings({ periodo: fecha }) + "&ranking={Ranking}&banco={Codigo_Banco}" },
-                { clave: "Posicion_Anterior", titulo: "Posición anterior", tipo: "entero", alinear: "centro" },
-                { clave: "Posicion_Actual", titulo: "Posición actual", tipo: "entero", alinear: "centro" },
-                { clave: "Cambio_Posicion", titulo: "Movimiento", tipo: "movimiento" },
-                { clave: "Var_Saldo", titulo: "Var. saldo", tipo: "monto_signo" },
-                { clave: "Var_Saldo_Pct", titulo: "Var. saldo %", tipo: "porcentaje", decimales: 4 },
-                { clave: "Motivo", titulo: "Por qué es significativo", ordenable: false },
-              ]}
-              filas={significativos.map((m) => ({
-                Clave: `${m.ranking}-${m.codigo_banco}`,
-                Ranking: m.ranking,
-                Codigo_Banco: m.codigo_banco,
-                Banco: m.banco,
-                Posicion_Anterior: m.posicion_anterior,
-                Posicion_Actual: m.posicion_actual,
-                Cambio_Posicion: m.cambio_posicion,
-                Var_Saldo: m.var_saldo,
-                Var_Saldo_Pct: m.var_saldo_pct,
-                Motivo: m.motivo,
-              }))}
-              claveFila="Clave"
-              mensajeVacio="Ningún movimiento cumple la regla de significancia vigente."
-              altoMaximo="28rem"
-              compacta
-            />
+            {esAnalista && (
+              <p className="mt-3 text-sm">
+                <Link href={urlComparar} className="font-semibold">
+                  Ver todos los movimientos →
+                </Link>
+              </p>
+            )}
           </>
         )}
       </section>

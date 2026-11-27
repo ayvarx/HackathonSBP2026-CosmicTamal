@@ -132,7 +132,7 @@
 
 /* Líder de cada ranking (solo Analista). */
 .lideres { margin-top: 18px; display: grid; gap: 12px; }
-.lideres h3 { margin: 0; font-size: 16px; font-weight: 800; color: #142711; }
+.lideres h2, .lideres h3 { margin: 0; font-size: 16px; font-weight: 800; color: #142711; }
 .lideres-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 .lider-card { background: #ffffff; border: 1px solid #d8efd5; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 2px 8px rgba(18, 42, 15,0.06); }
 .lider-card header { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
@@ -197,3 +197,11 @@
 .lider-toggle { transition: transform .3s ease, background .2s; }
 .lider-card.abierta .lider-toggle { background: #106003; color: #ffffff; }
 @media (prefers-reduced-motion: reduce) { .lider-colapso, .lider-toggle { transition: none; } }
+
+/* Línea de estado del Panel: total descartado (detalle en /calidad) e insignia de reconciliaciones. */
+.dash-estado { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; margin-top: 14px; padding: 12px 16px; background: #fff; border: 1px solid #d7e8d3; border-radius: 10px; font-size: 14px; }
+.dash-estado p { margin: 0; color: #2d4a29; }
+.dash-estado a { color: #106003; font-weight: 600; }
+.dash-insignia { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; text-decoration: none; }
+.dash-insignia.ok { background: #e3f1df; color: #094000; border: 1px solid #419A33; }
+.dash-insignia.alerta { background: #fff4de; color: #7a4d00; border: 1px solid #f5a524; }

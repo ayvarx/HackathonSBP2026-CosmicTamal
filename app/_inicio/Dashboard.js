@@ -25,13 +25,6 @@ import "./inicio.css";
 const PALETA = ["#106003", "#7EAC39", "#297D5F", "#419A33", "#034E33", "#426B04", "#136749"];
 const AZUL = "#106003";
 const AMBAR = "#f5a524";
-// Explicación corta de cada reconciliación (la completa está en /verificacion).
-const RECON_CORTA = {
-  1: "Subactividades = saldo de la actividad",
-  2: "6 actividades = cartera del banco",
-  3: "12 bancos = universo válido",
-};
-
 function Panel({ titulo, eyebrow, lectura, aside, className = "", children }) {
   return (
     <section className={`dash-panel ${className}`}>
@@ -225,18 +218,15 @@ export default function Dashboard({
   };
 
   const leidas = calidad?.filas_leidas ?? 0;
-  const exclusiones = calidad
-    ? [
-        { k: "E1", t: "Préstamo repetido", v: calidad.e1_duplicados },
-        { k: "E2", t: "Destino extranjero", v: calidad.e2_destino_extranjero },
-        { k: "E3", t: "Saldo cero o negativo", v: calidad.e3_saldo_no_positivo },
-        { k: "E4", t: "Actividad no catalogada", v: calidad.e4_actividad_no_catalogada },
-      ]
-    : [];
-  // Barras de E1–E4 relativas al mayor de ellos (para que se distingan entre sí).
-  const maxExclusion = Math.max(1, ...exclusiones.map((e) => Number(e.v) || 0));
-  const pctUniverso = calidad && leidas ? (Number(calidad.universo_local_valido) / leidas) * 100 : 0;
+  // Total descartado por la cascada E1–E4 (conteos enteros; el detalle está en /calidad).
+  const descartados = calidad
+    ? [calidad.e1_duplicados, calidad.e2_destino_extranjero, calidad.e3_saldo_no_positivo, calidad.e4_actividad_no_catalogada].reduce(
+        (t, v) => t + (Number(v) || 0),
+        0,
+      )
+    : null;
   const recOk = reconciliaciones.filter((r) => r.todas_cuadran).length;
+  const recTodas = recOk === reconciliaciones.length;
   // Total de la dona en dos líneas cortas para que quepa en el hueco central.
   const totalCompacto = formatearMontoCompacto(universo.saldo_universo_local_valido);
   const totalCifra = totalCompacto.replace(/ millones$/, "");
@@ -246,7 +236,6 @@ export default function Dashboard({
     <div className="dash">
       <div className="dash-head">
         <div>
-          <span className="eyebrow">PANEL PRINCIPAL</span>
           <h2>Cartera crediticia · {formatearFecha(fecha)}</h2>
           <p>
             {anterior ? `Comparado con ${formatearFecha(anterior)}.` : "Primer corte cargado: sin período anterior."}
@@ -286,7 +275,7 @@ export default function Dashboard({
           valor={formatearEntero(numBancos)}
           color={AZUL}
           detalle={`Todos figuran en los ${formatearEntero(rankings.length)} rankings (saldo 0.00 si no tienen cartera).`}
-          enlace={{ href: "#cartera-bancos", texto: "Ver cartera por banco" }}
+          enlace={{ href: enlaces.rankings, texto: "Ver rankings" }}
         />
         <Kpi
           etiqueta="Movimientos significativos"
@@ -334,7 +323,7 @@ export default function Dashboard({
         </Panel>
 
         <Panel
-          className="span-2"
+          className="span-3"
           eyebrow="ENTIDADES"
           titulo={`Saldo por banco · ${activo ? nombreRanking(activo.ranking) : ""}`}
           lectura="En ámbar, el líder de la actividad. Las cifras exactas están en Rankings."
@@ -357,64 +346,25 @@ export default function Dashboard({
           <Grafico opcion={opcionBancos} altura={Math.max(300, filasActivo.length * 36)} formatoValor="monto" />
         </Panel>
 
-        <Panel
-          eyebrow="CALIDAD"
-          titulo="Registros descartados"
-          lectura={calidad ? `De ${formatearEntero(leidas)} registros leídos (filtros en cascada E1–E4).` : undefined}
-        >
-          <ul className="quality-list">
-            {exclusiones.map((e) => {
-              const pct = ((Number(e.v) || 0) / maxExclusion) * 100;
-              return (
-                <li key={e.k}>
-                  <div className="q-head">
-                    <span>
-                      <b>{e.k}</b> {e.t}
-                    </span>
-                    <span>{formatearEntero(e.v)}</span>
-                  </div>
-                  <div className="q-bar">
-                    <i style={{ width: `${Math.min(100, pct)}%` }} />
-                  </div>
-                </li>
-              );
-            })}
-            {calidad && (
-              <li className="q-total">
-                <div className="q-head">
-                  <span>Universo local válido</span>
-                  <b>{formatearEntero(calidad.universo_local_valido)}</b>
-                </div>
-                <div className="q-bar q-bar--ok">
-                  <i style={{ width: `${Math.min(100, pctUniverso)}%` }} />
-                </div>
-                <small className="q-nota">{formatearPorcentaje(pctUniverso.toFixed(2), 2)} de los leídos · barras E1–E4 relativas al mayor</small>
-              </li>
-            )}
-          </ul>
-        </Panel>
+      </div>
 
-        <Panel
-          className="span-3"
-          eyebrow="CONTROLES"
-          titulo={`Verificaciones · ${recOk}/${reconciliaciones.length} cuadran`}
-          aside={
-            <Link className="recon-pie" href="/verificacion">
-              Ver reconciliaciones →
-            </Link>
-          }
-        >
-          <ul className="recon">
-            {reconciliaciones.map((r) => (
-              <li key={r.reconciliacion} className={r.todas_cuadran ? "ok" : "fallo"}>
-                <span>
-                  {RECON_CORTA[r.reconciliacion] ?? r.descripcion} ({formatearEntero(r.cuadran)}/{formatearEntero(r.comprobaciones)})
-                </span>
-                <b aria-label={r.todas_cuadran ? "Cuadra" : "No cuadra"}>{r.todas_cuadran ? "✔" : "✖"}</b>
-              </li>
-            ))}
-          </ul>
-        </Panel>
+      <div className="dash-estado">
+        {calidad && (
+          <p>
+            <span className="cifra">{formatearEntero(descartados)}</span> registros descartados de{" "}
+            <span className="cifra">{formatearEntero(leidas)}</span> leídos.{" "}
+            <Link href="/calidad">Ver calidad de datos →</Link>
+          </p>
+        )}
+        {reconciliaciones.length > 0 && (
+          <Link
+            href="/verificacion"
+            className={`dash-insignia ${recTodas ? "ok" : "alerta"}`}
+            aria-label={`Reconciliaciones: ${recOk} de ${reconciliaciones.length} cuadran. Ver verificación`}
+          >
+            {recOk}/{reconciliaciones.length} cuadran
+          </Link>
+        )}
       </div>
     </div>
   );

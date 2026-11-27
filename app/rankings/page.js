@@ -23,7 +23,7 @@ import MensajeError from "@/components/MensajeError";
 import TablaOrdenable from "@/components/TablaOrdenable";
 import TarjetaIndicador from "@/components/TarjetaIndicador";
 import { alcanzaPerfil, exigirPerfil } from "@/lib/auth";
-import { movimientos, RANKINGS, rankings, reconciliaciones, subactividades } from "@/lib/consultas";
+import { movimientos, RANKINGS, rankings, subactividades } from "@/lib/consultas";
 import {
   elegirPeriodo,
   fechasDisponibles,
@@ -48,6 +48,7 @@ import RankingsPage, { PestanasVista } from "./_amet/RankingsPage";
 import TarjetasBancos from "./_amet/TarjetasBancos";
 import GraficoRanking from "./GraficoRanking";
 import NotaFuente from "./NotaFuente";
+import TablaConColumnas from "./TablaConColumnas";
 import { urlRankings } from "./urls";
 
 export const dynamic = "force-dynamic"; // los datos cambian al cargar cortes
@@ -77,19 +78,18 @@ async function cargarDatos(pedido, conTarjetas) {
   const { fecha, anterior } = periodo;
   // Vista de tarjetas: saldo y posición del ranking en los cortes hasta el elegido, y los 6 rankings del corte.
   const cortesTarjeta = fechas.slice(0, fechas.indexOf(fecha) + 1).slice(-MAX_CORTES_TARJETA);
-  const [filas, desglose, movs, totales, conciliacion, sb21, historico, todos] = await Promise.all([
+  const [filas, desglose, movs, totales, sb21, historico, todos] = await Promise.all([
     rankings({ fecha, ranking: info.clave }),
     subactividades({ fecha, ranking: info.clave }),
     anterior ? movimientos({ anterior, actual: fecha, ranking: info.clave }) : Promise.resolve([]),
     totalesRanking({ fecha, ranking: info.clave }),
-    reconciliaciones(fecha),
     info.clave === "CONSUMO" ? reclasificacionSB21(fecha) : Promise.resolve(null),
     conTarjetas
       ? Promise.all(cortesTarjeta.map(async (f) => ({ fecha: f, filas: await rankings({ fecha: f, ranking: info.clave }) })))
       : Promise.resolve([]),
     conTarjetas ? rankings({ fecha }) : Promise.resolve([]),
   ]);
-  return { fechas, periodo, info, filas, desglose, movs, totales, conciliacion, sb21, historico, todos };
+  return { fechas, periodo, info, filas, desglose, movs, totales, sb21, historico, todos };
 }
 
 export default async function PaginaRankings({ searchParams }) {
@@ -145,7 +145,7 @@ export default async function PaginaRankings({ searchParams }) {
     );
   }
 
-  const { info, filas, desglose, movs, totales, conciliacion, sb21 } = datos;
+  const { info, filas, desglose, movs, totales, sb21 } = datos;
   const { fecha, anterior } = periodo;
   const ranking = info.clave;
   const esAnalista = alcanzaPerfil(perfil, "analista");
@@ -201,18 +201,13 @@ export default async function PaginaRankings({ searchParams }) {
     },
     { clave: "Cambio_Posicion", titulo: "Movimiento", tipo: "movimiento", ayuda: anterior ? `Cambio de posición frente a ${textoAnterior}` : "Sin período anterior" },
     { clave: "Posicion_Anterior", titulo: "Posición anterior", tipo: "entero", alinear: "centro" },
-    { clave: "Var_Saldo_Pct", titulo: "Var. saldo", tipo: "porcentaje", decimales: 4, ayuda: "Var_Saldo_Pct frente al período anterior" },
+    { clave: "Var_Saldo_Pct", titulo: "Var. saldo %", tipo: "porcentaje", decimales: 4, ayuda: "Var_Saldo_Pct frente al período anterior" },
     { clave: "Significativo", titulo: "Signif.", alinear: "centro", ayuda: "Movimiento significativo según la regla configurable; pulse el banco para ver el motivo" },
   ];
 
-  // ---------- Desglose por subactividad (con la reconciliación 1 a la vista) ----------
+  // ---------- Desglose por subactividad ----------
   const subVisibles = subactividad ? [subactividad] : nombresSub;
   const saldoSub = new Map(desglose.map((d) => [`${d.codigo_banco}|${d.subactividad}`, d]));
-  const cuadreR1 = new Map(
-    conciliacion.detalle
-      .filter((d) => d.reconciliacion === 1 && d.ranking === ranking)
-      .map((d) => [d.codigo_banco, d.cuadra === "SI" ? "Cuadra" : "No cuadra"]),
-  );
   const sb21PorBanco = new Map((sb21?.bancos ?? []).map((b) => [b.codigo_banco, b]));
   const filasDesglose = filas.map((f) => {
     const fila = { Posicion: f.posicion, Codigo_Banco: f.codigo_banco, Banco: sinCortes(f.banco) };
@@ -220,7 +215,6 @@ export default async function PaginaRankings({ searchParams }) {
       fila[`sub_${i}`] = saldoSub.get(`${f.codigo_banco}|${s}`)?.saldo ?? "0.00";
     });
     fila.Saldo_Actividad = f.saldo_actividad;
-    fila.Reconciliacion = cuadreR1.get(f.codigo_banco) ?? null;
     if (sb21) fila.Reclasificado = sb21PorBanco.get(f.codigo_banco)?.saldo ?? "0.00";
     return fila;
   });
@@ -236,7 +230,6 @@ export default async function PaginaRankings({ searchParams }) {
     { clave: "Banco", titulo: "Banco", enlace: enlaceBanco },
     ...subVisibles.map((s, i) => ({ clave: `sub_${i}`, titulo: nombreSubactividad(s), tipo: "monto", ayuda: `Saldo de la subactividad ${s}` })),
     { clave: "Saldo_Actividad", titulo: "Saldo de la actividad", tipo: "monto", ayuda: "Suma de todas las subactividades del ranking" },
-    { clave: "Reconciliacion", titulo: "Reconciliación 1", alinear: "centro", ayuda: "Suma de subactividades = saldo de la actividad, al centavo" },
     ...(sb21
       ? [{ clave: "Reclasificado", titulo: "Movido a Tarjeta (SB21)", tipo: "monto", ayuda: "Ya incluido en Tarjeta y restado de Crédito personal" }]
       : []),
@@ -381,8 +374,7 @@ export default async function PaginaRankings({ searchParams }) {
         grupos={gruposChips}
         selector={selectorPeriodo}
         incluye={nombresSub.map((s) => nombreSubactividad(s))}
-      />
-
+      >
       <Filtros
         campos={[
           {
@@ -401,6 +393,7 @@ export default async function PaginaRankings({ searchParams }) {
           },
         ]}
       />
+      </RankingsPage>
 
       {avisos.length > 0 && (
         <div className="mb-6">
@@ -470,7 +463,9 @@ export default async function PaginaRankings({ searchParams }) {
         <section aria-labelledby="titulo-posiciones" className="mb-10">
           <h2 id="titulo-posiciones" className="mb-3">Posiciones de los 12 bancos</h2>
           {/* La tabla va a todo el ancho (tiene la cifra oficial y 11 columnas); el gráfico, debajo. */}
-          <TablaOrdenable
+          <TablaConColumnas
+            ocultasInicial={["Posicion_Anterior", "Significativo"]}
+            fijas={["Posicion", "Banco"]}
             titulo={`Ranking ${info.nombre} · ${formatearFecha(fecha)}`}
             columnas={columnasRanking}
             filas={filasTabla}

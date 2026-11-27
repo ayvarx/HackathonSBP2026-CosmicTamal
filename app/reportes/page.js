@@ -13,7 +13,8 @@ import { exigirPerfil, puede } from "@/lib/auth";
 import { RANKINGS, catalogos, periodos } from "@/lib/consultas";
 import { ErrorExportacion, COLUMNAS_PERSONALIZADO, leerFiltros, reportePersonalizado } from "@/lib/consultas-reportes";
 import { formatearEntero, formatearFecha, nombreBanco, nombreRanking } from "@/lib/formato";
-import ExportPanel from "./_amet/ExportPanel";
+import DescargaMovimientos from "./DescargaMovimientos";
+import { etiquetaColumna } from "./etiquetas";
 import FormularioPersonalizado from "./FormularioPersonalizado";
 
 export const dynamic = "force-dynamic"; // los datos cambian al cargar cortes
@@ -81,7 +82,7 @@ export default async function PaginaReportes({ searchParams }) {
   }
 
   const columnasTabla = vista?.columnas.map(([campo, encabezado]) => ({
-    clave: campo, titulo: encabezado, tipo: TIPO_COLUMNA[campo] ?? "texto", decimales: 4,
+    clave: campo, titulo: etiquetaColumna(campo, encabezado), tipo: TIPO_COLUMNA[campo] ?? "texto", decimales: 4,
   }));
   const filasVista = vista?.filas.slice(0, MAXIMO_VISTA_PREVIA).map((f, i) => ({ ...f, _n: i }));
   const hrefPersonalizado = (ruta) => (consultaPersonalizada ? `${ruta}?${consultaPersonalizada}` : ruta);
@@ -93,19 +94,19 @@ export default async function PaginaReportes({ searchParams }) {
         descripcion="Descargas en CSV, Excel o PDF."
       />
 
-      <section aria-label="Acceso rápido" className="mb-6">
-        <ExportPanel periodo={periodo || lista[lista.length - 1].fecha} textoPeriodo={formatearFecha(periodo || lista[lista.length - 1].fecha)} />
-      </section>
-
       <section aria-labelledby="t-alcance" className="tarjeta mb-6">
-        <h2 id="t-alcance" className="mb-3">Alcance de las descargas</h2>
+        <h2 id="t-alcance" className="mb-3">Alcance</h2>
         <Filtros
           campos={[
             { nombre: "periodo", etiqueta: "Período", textoTodos: "Todos los períodos", opciones: lista.map((p) => ({ valor: p.fecha, texto: formatearFecha(p.fecha) })) },
             { nombre: "ranking", etiqueta: "Ranking", textoTodos: "Todos los rankings", opciones: RANKINGS.map((r) => ({ valor: r.clave, texto: r.nombre })) },
           ]}
         />
-        <p className="mt-3 text-sm text-texto-suave">Las descargas incluirán: {textoAlcance}. Sin filtros se descarga todo.</p>
+        <p className="mt-3 text-sm text-texto-suave">Todas las descargas de esta pantalla incluirán: {textoAlcance}. Sin filtros se descarga todo.</p>
+        <div className="mt-3 flex flex-row flex-wrap items-start gap-2" role="group" aria-label="Acceso rápido">
+          <BotonDescarga href="/api/exportar/rankings" parametros={{ ...unPeriodo, ...unRanking }} texto="Rankings consolidados" variante="primario" />
+          <BotonDescarga href="/api/exportar/subactividades" parametros={{ ...unPeriodo, ...unRanking }} texto="Desglose por subactividad" />
+        </div>
       </section>
 
       <section aria-labelledby="t-descargas" className="mb-8">
@@ -136,10 +137,7 @@ export default async function PaginaReportes({ searchParams }) {
               <div className="tarjeta">
                 <h3>Movimientos de posición</h3>
                 <p className="mb-3 text-sm text-texto-suave">Cambio de posición y de saldo entre períodos; sin período, todos los pares.</p>
-                <BotonDescarga href="/api/exportar/movimientos" parametros={{ actual: periodo, ...unRanking }} texto="Descargar movimientos" descripcion={periodo ? "Con período elegido: movimientos hacia ese período." : undefined} />
-                <p className="mt-2 text-xs text-texto-tenue">
-                  Para incluir las columnas Significativo y Motivo agregue <code>extendido=1</code> a la dirección de descarga.
-                </p>
+                <DescargaMovimientos parametros={{ actual: periodo, ...unRanking }} descripcion={periodo ? "Con período elegido: movimientos hacia ese período." : undefined} />
               </div>
             </>
           ) : (
@@ -162,7 +160,7 @@ export default async function PaginaReportes({ searchParams }) {
             periodos={lista.map((p) => ({ valor: p.fecha, texto: formatearFecha(p.fecha) }))}
             rankings={RANKINGS.map((r) => ({ valor: r.clave, texto: r.nombre }))}
             bancos={catalogoBancos.map((b) => ({ valor: b.codigo_banco, texto: nombreBanco(b.codigo_banco, b.nombre_ficticio) }))}
-            columnas={COLUMNAS_PERSONALIZADO.map(([campo, encabezado]) => ({ valor: encabezado, texto: encabezado, campo }))}
+            columnas={COLUMNAS_PERSONALIZADO.map(([campo, encabezado]) => ({ valor: encabezado, texto: etiquetaColumna(campo, encabezado), campo }))}
             seleccion={filtrosPersonalizado ?? { fechas: [], rankings: [], bancos: [], columnas: [] }}
           />
 

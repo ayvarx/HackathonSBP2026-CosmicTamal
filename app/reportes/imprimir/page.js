@@ -10,6 +10,7 @@ import {
   formatearEntero, formatearFecha, formatearFechaHora, formatearMonto, formatearPorcentaje, nombreRanking,
 } from "@/lib/formato";
 import BotonImprimir from "./BotonImprimir";
+import { etiquetaColumna } from "../etiquetas";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Reporte imprimible" };
@@ -84,7 +85,7 @@ export default async function PaginaImprimir({ searchParams }) {
           <div className="marco-tabla">
             <table className="tabla-datos">
               <thead>
-                <tr>{columnas.map(([campo, encabezado]) => <th key={campo} scope="col" className={esNumerica(campo) ? "num" : ""}>{encabezado}</th>)}</tr>
+                <tr>{columnas.map(([campo, encabezado]) => <th key={campo} scope="col" className={esNumerica(campo) ? "num" : ""}>{etiquetaColumna(campo, encabezado)}</th>)}</tr>
               </thead>
               <tbody>
                 {visibles.map((f, i) => (
