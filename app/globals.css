@@ -15,51 +15,51 @@
 
 /* Variables del tema Radar (copiadas de amet-frontend/src/sbp/styles.css :root). No redefinir en otros archivos. */
 :root {
-  --bg: #f4f6fb;
+  --bg: #f5fbf4;
   --sidebar: #ffffff;
   --surface: #ffffff;
-  --surface-2: #f0f4fb;
-  --border: #d7dde9;
-  --border-soft: #e5eaf3;
-  --text: #0f172a;
-  --text-2: #334155;
-  --muted: #64748b;
-  --blue: #1D3E7F;
-  --blue-2: #0F2D69;
-  --green: #1D3E7F;
+  --surface-2: #f2faf1;
+  --border: #d9e9d7;
+  --border-soft: #e7f3e5;
+  --text: #122a0f;
+  --text-2: #375533;
+  --muted: #698b64;
+  --blue: #287f1d;
+  --blue-2: #1a690f;
+  --green: #287f1d;
   --amber: #f5a524;
-  --purple: #5B82C8;
+  --purple: #68c85b;
   --danger: #f87171;
   --radius: 14px;
 }
 
 @theme {
   /* Superficies */
-  --color-fondo: #f4f6fb;           /* = --bg */
+  --color-fondo: #f5fbf4;           /* = --bg */
   --color-superficie: #ffffff;      /* = --surface: tarjetas, tablas, formularios */
-  --color-superficie-alt: #f0f4fb;  /* = --surface-2: encabezados de tabla, zonas secundarias */
+  --color-superficie-alt: #f2faf1;  /* = --surface-2: encabezados de tabla, zonas secundarias */
 
   /* Texto */
-  --color-texto: #0f172a;           /* = --text    17.8:1 sobre blanco */
-  --color-texto-suave: #334155;     /* = --text-2  10.3:1 — descripciones, etiquetas */
-  --color-texto-tenue: #556274;     /* 6.2:1 sobre blanco, 5.7:1 sobre el fondo — notas, ayudas */
+  --color-texto: #122a0f;           /* = --text    17.8:1 sobre blanco */
+  --color-texto-suave: #375533;     /* = --text-2  10.3:1 — descripciones, etiquetas */
+  --color-texto-tenue: #597455;     /* 6.2:1 sobre blanco, 5.7:1 sobre el fondo — notas, ayudas */
 
   /* Bordes */
-  --color-borde: #d7dde9;           /* = --border */
-  --color-borde-suave: #e5eaf3;     /* = --border-soft */
-  --color-borde-fuerte: #7d8fb3;    /* 3.2:1: borde de controles de formulario */
+  --color-borde: #d9e9d7;           /* = --border */
+  --color-borde-suave: #e7f3e5;     /* = --border-soft */
+  --color-borde-fuerte: #83b37d;    /* 3.2:1: borde de controles de formulario */
 
   /* Identidad Radar: azul marino */
-  --color-primario: #1D3E7F;        /* = --blue    10.2:1 con texto blanco */
-  --color-primario-oscuro: #0F2D69; /* = --blue-2 */
-  --color-primario-suave: #e6edf8;
+  --color-primario: #287f1d;        /* = --blue    10.2:1 con texto blanco */
+  --color-primario-oscuro: #1a690f; /* = --blue-2 */
+  --color-primario-suave: #e9f6e8;
   --color-sobre-primario: #ffffff;
-  --color-sobre-primario-suave: #c9d7ee; /* texto secundario sobre la cabecera azul */
-  --color-enlace: #1D3E7F;
-  --color-acento: #5B82C8;          /* = --purple */
+  --color-sobre-primario-suave: #cfebcc; /* texto secundario sobre la cabecera azul */
+  --color-enlace: #287f1d;
+  --color-acento: #68c85b;          /* = --purple */
 
   /* Foco de teclado (visible sobre fondos claros y oscuros) */
-  --color-foco: #2f6fd6;
+  --color-foco: #42d62f;
   --color-foco-oscuro: #ffd166;
 
   /* Aviso de datos ficticios (ámbar oscuro para que el texto conserve contraste AA) */
@@ -70,7 +70,7 @@
   /* Movimientos de posición (siempre acompañados de flecha y texto, nunca solo color) */
   --color-sube: #1d6b3a;
   --color-baja: #a12a2a;
-  --color-neutro: #475569;
+  --color-neutro: #4b6947;
 
   /* Mensajes */
   --color-error-fondo: #fdeeee;
@@ -80,7 +80,7 @@
   --color-exito-borde: #9fcdb0;
 
   /* Fila resaltada en tablas (p. ej. el banco seleccionado) */
-  --color-resaltado: #e3ebf8;
+  --color-resaltado: #e7f5e6;
 
   /* Tipografía: Inter si está instalada; si no, la del sistema (funciona sin internet en la demo) */
   --font-sans: Inter, "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Roboto, Arial, sans-serif;
@@ -106,8 +106,8 @@
     margin: 0;
     min-width: 320px;
     background:
-      radial-gradient(900px 500px at 85% -10%, rgba(29, 62, 127, 0.14), transparent 60%),
-      radial-gradient(700px 400px at -10% 110%, rgba(54, 85, 145, 0.06), transparent 60%),
+      radial-gradient(900px 500px at 85% -10%, rgba(40, 127, 29, 0.14), transparent 60%),
+      radial-gradient(700px 400px at -10% 110%, rgba(65, 145, 54, 0.06), transparent 60%),
       var(--color-fondo);
     color: var(--color-texto);
     font-family: var(--font-sans);
@@ -187,7 +187,7 @@
     border: 1px solid var(--color-borde);
     border-radius: var(--radius-tarjeta);
     padding: 1.1rem 1.35rem;
-    box-shadow: 0 12px 30px -18px rgba(15, 23, 42, 0.12);
+    box-shadow: 0 12px 30px -18px rgba(18, 42, 15, 0.12);
   }
 
   /* Tarjeta de indicador: círculo radial decorativo en la esquina, como .metric-card */
@@ -203,7 +203,7 @@
     width: 110px;
     height: 110px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(29, 62, 127, 0.16), transparent 70%);
+    background: radial-gradient(circle, rgba(40, 127, 29, 0.16), transparent 70%);
     pointer-events: none;
   }
 
@@ -223,12 +223,12 @@
     text-decoration: none;
     cursor: pointer;
     white-space: nowrap;
-    box-shadow: 0 8px 22px -10px rgba(29, 62, 127, 0.7);
+    box-shadow: 0 8px 22px -10px rgba(40, 127, 29, 0.7);
     transition: background 0.15s, box-shadow 0.15s, transform 0.15s;
   }
   .boton:hover {
     color: var(--color-sobre-primario);
-    background: linear-gradient(135deg, var(--color-primario-oscuro), #0b2452);
+    background: linear-gradient(135deg, var(--color-primario-oscuro), #13520b);
     text-decoration: none;
   }
   .boton:disabled,
@@ -240,8 +240,8 @@
   .boton-secundario {
     background: var(--color-superficie);
     color: var(--color-primario-oscuro);
-    border-color: #b9c8e6;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    border-color: #bfe5ba;
+    box-shadow: 0 1px 2px rgba(18, 42, 15, 0.06);
   }
   .boton-secundario:hover {
     background: var(--color-primario-suave);
@@ -263,7 +263,7 @@
     padding: 0.45rem 0.75rem;
     border: 1px solid var(--color-borde-fuerte);
     border-radius: var(--radius-control);
-    background: #f5f7fc;
+    background: #f6fbf6;
     color: var(--color-texto);
     font-size: 0.9rem;
   }
@@ -276,7 +276,7 @@
     border: 1px solid var(--color-borde);
     border-radius: var(--radius-tarjeta);
     background: var(--color-superficie);
-    box-shadow: 0 12px 30px -18px rgba(15, 23, 42, 0.12);
+    box-shadow: 0 12px 30px -18px rgba(18, 42, 15, 0.12);
   }
   .tabla-datos {
     width: 100%;
@@ -311,7 +311,7 @@
     z-index: 1;
   }
   .tabla-datos tbody tr { transition: background 0.12s; }
-  .tabla-datos tbody tr:hover td { background: #eef3fb; }
+  .tabla-datos tbody tr:hover td { background: #f1f9f0; }
   .tabla-datos tbody tr:last-child td { border-bottom: 0; }
   .tabla-datos tfoot td {
     border-top: 2px solid var(--color-borde);
@@ -325,9 +325,9 @@
   .tabla-datos tr.fila-resaltada td {
     background: var(--color-resaltado);
     font-weight: 600;
-    box-shadow: inset 0 1px 0 #b9c8e6, inset 0 -1px 0 #b9c8e6;
+    box-shadow: inset 0 1px 0 #bfe5ba, inset 0 -1px 0 #bfe5ba;
   }
-  .tabla-datos tr.fila-resaltada td:first-child { box-shadow: inset 3px 0 var(--color-primario), inset 0 1px 0 #b9c8e6, inset 0 -1px 0 #b9c8e6; }
+  .tabla-datos tr.fila-resaltada td:first-child { box-shadow: inset 3px 0 var(--color-primario), inset 0 1px 0 #bfe5ba, inset 0 -1px 0 #bfe5ba; }
   .tabla-compacta th,
   .tabla-compacta td { padding: 0.35rem 0.6rem; }
 
@@ -357,12 +357,12 @@
   .etiqueta {
     display: inline-block;
     padding: 0.1rem 0.55rem;
-    border: 1px solid #b9c8e6;
+    border: 1px solid #bfe5ba;
     border-radius: 999px;
     font-size: 0.72rem;
     font-weight: 600;
-    color: #021335;
-    background: #eef3fb;
+    color: #083502;
+    background: #f1f9f0;
     white-space: nowrap;
   }
 
@@ -386,7 +386,7 @@
     top: 0;
     z-index: 30;
     padding-block: 0.5rem;
-    background: rgba(244, 246, 251, 0.94);
+    background: rgba(245, 251, 244, 0.94);
     backdrop-filter: blur(6px);
     border-bottom: 1px solid var(--color-borde-suave);
   }
@@ -396,9 +396,9 @@
     align-items: center;
     gap: 0.25rem 1.4rem;
     padding: 0.55rem 0.9rem;
-    border: 1px solid #c9d6ea;
+    border: 1px solid #cdeac9;
     border-radius: var(--radius-control);
-    background: rgba(29, 62, 127, 0.06);
+    background: rgba(40, 127, 29, 0.06);
     color: var(--color-texto-suave);
     font-size: 0.8rem;
     line-height: 1.4;

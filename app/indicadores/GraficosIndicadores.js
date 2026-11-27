@@ -33,13 +33,13 @@ export function MapaCalor({ celdas, rankings, bancos }) {
     yAxis: { type: "category", data: bancos, inverse: true, splitArea: { show: true } },
     visualMap: {
       min: 0, max: maximo, calculable: false, orient: "horizontal", left: "center", bottom: 4,
-      text: ["Mayor ponderación", "Menor"], inRange: { color: ["#eaf1fa", "#8db7e3", "#0d3b66"] },
+      text: ["Mayor ponderación", "Menor"], inRange: { color: ["#eef8ec", "#a0d898", "#17660d"] },
     },
     series: [{
       type: "heatmap",
       data: datos.map((d) => ({
         ...d,
-        label: { show: true, formatter: () => d.value[2].toFixed(1), color: d.value[2] > maximo * 0.55 ? "#ffffff" : "#17212b" },
+        label: { show: true, formatter: () => d.value[2].toFixed(1), color: d.value[2] > maximo * 0.55 ? "#ffffff" : "#192b17" },
       })),
       itemStyle: { borderColor: "#ffffff", borderWidth: 2 },
     }],
@@ -85,11 +85,11 @@ export function MapaArbol({ filas, bancoElegido }) {
       type: "treemap", data: datos, roam: false, nodeClick: false, breadcrumb: { show: false },
       width: "100%", height: "100%", top: 0, bottom: 0, left: 0, right: 0,
       label: { show: true, color: "#ffffff", fontSize: 12, overflow: "truncate" },
-      upperLabel: { show: !bancoElegido, height: 20, color: "#17212b", fontWeight: 600 },
+      upperLabel: { show: !bancoElegido, height: 20, color: "#192b17", fontWeight: 600 },
       itemStyle: { borderColor: "#ffffff", borderWidth: 2, gapWidth: 2 },
       levels: bancoElegido
         ? [{ itemStyle: { borderWidth: 0, gapWidth: 2 } }]
-        : [{ itemStyle: { borderColor: "#e3e8ed", borderWidth: 2, gapWidth: 3, color: "#f4f6f8" } }, { itemStyle: { gapWidth: 1 } }],
+        : [{ itemStyle: { borderColor: "#e4ede3", borderWidth: 2, gapWidth: 3, color: "#f4f8f4" } }, { itemStyle: { gapWidth: 1 } }],
     }],
   };
   return (
@@ -176,9 +176,9 @@ export function EscaleraTramos({ tramos }) {
 /** Barras apiladas al 100 %: cómo se reparte el saldo de cada banco por plazo y mora. */
 export function BarrasApiladasVencimientos({ filas }) {
   const bloques = [
-    { clave: "hasta_1a", nombre: "Por vencer hasta 1 año", color: "#1f63b0" },
-    { clave: "de_1_a_5a", nombre: "Por vencer de 1 a 5 años", color: "#7fb0e0" },
-    { clave: "mas_5a", nombre: "Por vencer a más de 5 años", color: "#0d3b66" },
+    { clave: "hasta_1a", nombre: "Por vencer hasta 1 año", color: "#30b01f" },
+    { clave: "de_1_a_5a", nombre: "Por vencer de 1 a 5 años", color: "#94d38c" },
+    { clave: "mas_5a", nombre: "Por vencer a más de 5 años", color: "#17660d" },
     { clave: "vencido_hasta_90", nombre: "Vencido hasta 90 días", color: "#d99a00" },
     { clave: "vencido_mas_90", nombre: "Vencido a más de 90 días", color: "#c93f3e" },
   ];

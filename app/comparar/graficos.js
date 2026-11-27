@@ -12,9 +12,9 @@ import { aNumeroParaGrafico, formatearFecha, formatearMonto, nombreRanking } fro
 
 // Misma paleta que components/Grafico.js (COLORES_GRAFICO). Se copia porque un componente
 // de servidor no puede leer constantes exportadas por un módulo "use client".
-export const COLORES = ["#1f63b0", "#d9622b", "#1a9a72", "#d99a00", "#d0679a", "#16801f", "#6250d6", "#c93f3e"];
-const GRIS = "#9aa6b2";
-const AZUL_TOTAL = "#0d3b66";
+export const COLORES = ["#30b01f", "#d9622b", "#1a9a72", "#d99a00", "#d0679a", "#16801f", "#60d650", "#c93f3e"];
+const GRIS = "#9db29a";
+const AZUL_TOTAL = "#17660d";
 const VERDE_SUBE = "#1d6b3a";
 const ROJO_BAJA = "#a12a2a";
 
@@ -59,7 +59,7 @@ export function opcionPosiciones({ fechas, filas, resaltados = [], anterior, act
         formatter: "{a}",
         distance: 8,
         fontSize: 11,
-        color: destacado ? "#17212b" : "#5f6b78",
+        color: destacado ? "#192b17" : "#62785f",
         fontWeight: destacado ? 600 : 400,
       },
       emphasis: { focus: "series" },
@@ -70,7 +70,7 @@ export function opcionPosiciones({ fechas, filas, resaltados = [], anterior, act
   if (series.length && anterior && actual) {
     series[0].markArea = {
       silent: true,
-      itemStyle: { color: "rgba(13, 59, 102, 0.07)" },
+      itemStyle: { color: "rgba(23, 102, 13, 0.07)" },
       label: { show: false },
       data: [[{ xAxis: formatearFecha(anterior, "corta") }, { xAxis: formatearFecha(actual, "corta") }]],
     };
@@ -155,7 +155,7 @@ export function opcionCascada({ m, d }) {
         data: pasos.map((p) => ({
           value: p.alto,
           itemStyle: { color: p.color, borderRadius: 0 },
-          label: { show: true, position: "top", formatter: p.texto, fontSize: 11, color: "#17212b" },
+          label: { show: true, position: "top", formatter: p.texto, fontSize: 11, color: "#192b17" },
           tooltip: { formatter: `${p.nombre}<br/>${p.texto} · ${p.detalle}` },
         })),
       },

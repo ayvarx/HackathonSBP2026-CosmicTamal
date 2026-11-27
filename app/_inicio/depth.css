@@ -3,9 +3,9 @@
 .chip, .chips .chip, .dash .chip, .ver-mas, .bd-cerrar, .bc-descargar,
 .portada-acciones button, .chips-visitante button, .navegacion button, .periodo-barra select, .desc-card {
   background: #ffffff;
-  border: 1px solid #B9C8E6;
-  color: #1f2937;
-  box-shadow: 0 4px 0 #B9C8E6, 0 7px 12px rgba(15,23,42,0.12);
+  border: 1px solid #bfe5ba;
+  color: #22371f;
+  box-shadow: 0 4px 0 #bfe5ba, 0 7px 12px rgba(18, 42, 15,0.12);
   transform: translateY(0);
   transition: transform .08s ease, box-shadow .08s ease, background .15s;
   cursor: pointer;
@@ -13,29 +13,29 @@
 .chip:hover, .chips .chip:hover, .dash .chip:hover, .ver-mas:hover, .bd-cerrar:hover, .bc-descargar:hover,
 .portada-acciones button:hover, .chips-visitante button:hover, .navegacion button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 0 #B9C8E6, 0 10px 16px rgba(15,23,42,0.14);
+  box-shadow: 0 6px 0 #bfe5ba, 0 10px 16px rgba(18, 42, 15,0.14);
 }
 .chip:active, .chips .chip:active, .dash .chip:active, .ver-mas:active, .bd-cerrar:active, .bc-descargar:active,
 .portada-acciones button:active, .chips-visitante button:active, .navegacion button:active {
   transform: translateY(4px);
-  box-shadow: 0 0 0 #B9C8E6, 0 2px 4px rgba(15,23,42,0.10);
+  box-shadow: 0 0 0 #bfe5ba, 0 2px 4px rgba(18, 42, 15,0.10);
 }
 
 /* Botones activos o principales: verde en relieve */
 .chip.on, .chips .chip.on, .dash .chip.on, .chips-visitante button.on,
 .portada-acciones button.principal, .volver, .primary-button, .segmento button.on {
-  background: linear-gradient(to bottom, #3B6FBF 0%, #1D3E7F 100%);
-  border-color: #0F2D69;
+  background: linear-gradient(to bottom, #4abf3b 0%, #287f1d 100%);
+  border-color: #1a690f;
   color: #ffffff;
-  box-shadow: 0 4px 0 #0B2452, 0 8px 14px rgba(29,62,127,0.35);
+  box-shadow: 0 4px 0 #13520b, 0 8px 14px rgba(40, 127, 29,0.35);
 }
 .chip.on:hover, .chips .chip.on:hover, .dash .chip.on:hover, .volver:hover, .primary-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 0 #0B2452, 0 12px 18px rgba(29,62,127,0.4);
-  background: linear-gradient(to bottom, #3B6FBF 0%, #1D3E7F 100%);
+  box-shadow: 0 6px 0 #13520b, 0 12px 18px rgba(40, 127, 29,0.4);
+  background: linear-gradient(to bottom, #4abf3b 0%, #287f1d 100%);
 }
 .chip.on:active, .chips .chip.on:active, .dash .chip.on:active, .volver:active, .primary-button:active {
   transform: translateY(4px);
-  box-shadow: 0 0 0 #0B2452, 0 2px 4px rgba(29,62,127,0.3);
+  box-shadow: 0 0 0 #13520b, 0 2px 4px rgba(40, 127, 29,0.3);
 }
 .primary-button:disabled, .navegacion button:disabled { transform: none; }

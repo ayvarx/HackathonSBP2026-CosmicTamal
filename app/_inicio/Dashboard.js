@@ -22,8 +22,8 @@ import "./depth.css";
 import "./inicio.css";
 
 // Paleta del tema Radar (la de Amet, sin el azul repetido).
-const PALETA = ["#1D3E7F", "#5B82C8", "#f5a524", "#f87171", "#2dd4bf", "#e879f9", "#94a3b8"];
-const AZUL = "#1D3E7F";
+const PALETA = ["#287f1d", "#68c85b", "#f5a524", "#f87171", "#2dd4bf", "#e879f9", "#98b894"];
+const AZUL = "#287f1d";
 const AMBAR = "#f5a524";
 
 function Panel({ titulo, eyebrow, lectura, aside, className = "", children }) {
@@ -63,7 +63,7 @@ function Sparkline({ valores, color }) {
               symbol: "circle",
               lineStyle: { color, width: 2 },
               itemStyle: { color },
-              markLine: { silent: true, symbol: "none", label: { show: false }, lineStyle: { color: "#B9C8E6", type: "dashed" }, data: [{ type: "max" }] },
+              markLine: { silent: true, symbol: "none", label: { show: false }, lineStyle: { color: "#bfe5ba", type: "dashed" }, data: [{ type: "max" }] },
             },
           ],
         }}
@@ -123,7 +123,7 @@ export default function Dashboard({
     grid: { top: 52, right: 16, left: 8, bottom: 8, containLabel: true },
     tooltip: { trigger: "axis", valueFormatter: (v) => `${formatearEntero(v)} préstamos` },
     xAxis: { type: "category", data: tendencia.map((t) => formatearFecha(t.fecha, "corta")) },
-    yAxis: { type: "value", name: "N° de préstamos", nameTextStyle: { color: "#64748b", fontSize: 11 }, splitLine: { lineStyle: { color: "#e3e8f2", type: "dashed" } } },
+    yAxis: { type: "value", name: "N° de préstamos", nameTextStyle: { color: "#698b64", fontSize: 11 }, splitLine: { lineStyle: { color: "#e5f2e3", type: "dashed" } } },
     series: [
       {
         type: "bar",
@@ -142,7 +142,7 @@ export default function Dashboard({
             return `${linea1}\n{${sube ? "s" : "b"}|${sube ? "▲ +" : "▼ "}${formatearEntero(t.delta)} (${sube ? "+" : ""}${t.pct.toFixed(1)} %)}`;
           },
           rich: {
-            n: { color: "#1e293b", fontSize: 12, fontWeight: 600, lineHeight: 16 },
+            n: { color: "#213b1e", fontSize: 12, fontWeight: 600, lineHeight: 16 },
             s: { color: "#1d6b3a", fontSize: 11, fontWeight: 600, lineHeight: 16 },
             b: { color: "#a12a2a", fontSize: 11, fontWeight: 600, lineHeight: 16 },
           },
@@ -172,7 +172,7 @@ export default function Dashboard({
   const filasActivo = activo?.filas ?? [];
   const opcionBancos = {
     grid: { top: 4, right: 24, left: 8, bottom: 4, containLabel: true },
-    xAxis: { type: "value", splitLine: { lineStyle: { color: "#e3e8f2", type: "dashed" } } },
+    xAxis: { type: "value", splitLine: { lineStyle: { color: "#e5f2e3", type: "dashed" } } },
     yAxis: { type: "category", inverse: true, data: filasActivo.map((f) => f.banco), axisLabel: { interval: 0 } },
     series: [
       {
@@ -234,7 +234,7 @@ export default function Dashboard({
         <Kpi
           etiqueta="Saldo del universo local válido"
           valor={formatearMontoCompacto(universo.saldo_universo_local_valido)}
-          color="#5B82C8"
+          color="#68c85b"
           detalle={`Exacto: ${formatearMonto(universo.saldo_universo_local_valido)}`}
         />
         <Kpi
