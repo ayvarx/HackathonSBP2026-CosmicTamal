@@ -1,0 +1,187 @@
+/* Acceso: formulario claro a la izquierda y panel verde de presentación a la derecha. */
+.login { min-height: calc(100vh - 220px); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); background: #f4f8f2; font-family: inherit; }
+
+.login-formulario { display: flex; flex-direction: column; padding: 28px 48px; position: relative; }
+.login-marca { display: flex; align-items: center; gap: 10px; color: #0b2a05; }
+.login-marca strong { font-size: 16px; font-weight: 700; }
+
+.login-centro { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px 0; }
+.login-icono { width: 64px; height: 64px; border-radius: 18px; display: grid; place-items: center; background: linear-gradient(160deg, #6fb24a, #267F18); box-shadow: 0 10px 22px rgba(38,127,24,0.3); margin-bottom: 18px; }
+.login-icono svg { width: 40px; height: 40px; }
+.login-centro h1 { margin: 0; font-size: 28px; font-weight: 700; color: #0b2a05; letter-spacing: -0.01em; }
+.login-centro > p { margin: 8px 0 26px; font-size: 14px; color: #5b6b58; max-width: 340px; }
+
+.login-form { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 16px; text-align: left; }
+.login-form label { display: flex; flex-direction: column; gap: 6px; }
+.login-form label span { font-size: 13px; font-weight: 600; color: #1f2d1b; }
+.login-form input { border: 1px solid #d5e3cf; border-radius: 999px; padding: 13px 18px; font: inherit; font-size: 15px; background: #ffffff; color: #0b2a05; }
+.login-form input::placeholder { color: #9aa894; }
+.login-form input:focus { outline: 2px solid #267F18; outline-offset: 1px; }
+.login-error { margin: 0; color: #991b1b; background: #fee2e2; padding: 10px 14px; border-radius: 12px; font-size: 13px; }
+.login-form .login-entrar { margin-top: 6px; border: 0; border-radius: 999px; padding: 14px; font: inherit; font-size: 15px; font-weight: 700; color: #ffffff; cursor: pointer; background: linear-gradient(180deg, #2c3a2a 0%, #0b1a08 100%); box-shadow: 0 8px 18px rgba(11,26,8,0.25); }
+.login-form .login-entrar:hover { transform: translateY(-1px); }
+.login-form .login-entrar:disabled { opacity: .6; cursor: default; transform: none; }
+
+.login-pie { margin: 0; text-align: center; font-size: 12px; color: #7a8a76; }
+
+.login-presentacion { position: relative; overflow: hidden; background: linear-gradient(160deg, #52a33a 0%, #267F18 45%, #0d4a06 100%); color: #ffffff; padding: 56px 56px 0; display: flex; flex-direction: column; min-height: calc(100vh - 220px); }
+.login-presentacion::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 80% 10%, rgba(255,255,255,0.22), transparent 50%); pointer-events: none; }
+.login-presentacion h2 { position: relative; margin: 0; font-size: 34px; font-weight: 700; line-height: 1.18; letter-spacing: -0.01em; max-width: 520px; }
+.login-presentacion > p { position: relative; margin: 14px 0 0; font-size: 15px; opacity: .92; max-width: 470px; line-height: 1.55; }
+.login-puntos { position: relative; display: flex; gap: 8px; margin: 22px 0 0; }
+.login-puntos i { width: 8px; height: 8px; border-radius: 999px; background: rgba(255,255,255,0.4); }
+.login-puntos i.activo { width: 26px; background: #ffffff; }
+
+@media (max-width: 900px) {
+  .login { grid-template-columns: 1fr; }
+  .login-presentacion { display: none; }
+  .login-formulario { padding: 24px 22px; }
+}
+
+/* Vista previa de la aplicación: de lado (alineada a la derecha), nítida y con más detalle. */
+.login-vista {
+  position: relative; margin: auto 0 56px auto; width: 92%; max-width: 560px;
+  background: #ffffff; border-radius: 22px; padding: 24px 26px 22px; color: #0b2a05;
+  box-shadow: 0 24px 60px rgba(0,30,0,0.35), 0 2px 0 rgba(255,255,255,0.4) inset;
+}
+.lv-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+.lv-cabecera { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; }
+.lv-periodo { font-size: 12px; color: #267F18; background: #eef8e8; padding: 5px 10px; border-radius: 999px; font-weight: 600; }
+.lv-tarjetas { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+.lv-tarjetas > div { background: linear-gradient(160deg, #f5fbf1, #e9f6e1); border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; box-shadow: inset 0 0 0 1px #dbeccf; }
+.lv-tarjetas small { font-size: 12px; color: #5b6b58; }
+.lv-tarjetas strong { font-size: 24px; color: #1f7a12; font-variant-numeric: tabular-nums; }
+.lv-barras { display: flex; flex-direction: column; gap: 11px; }
+.lv-barras > div { display: grid; grid-template-columns: 150px 1fr 64px; align-items: center; gap: 12px; font-size: 12px; color: #2f3e2b; }
+.lv-barras > div > span { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.lv-puesto { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 6px; background: #eef8e8; color: #1f7a12; font-size: 11px; font-weight: 700; }
+.lv-pista { height: 12px; border-radius: 999px; background: #eef5ea; overflow: hidden; }
+.lv-pista i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #7fcf5c, #1f8a12); box-shadow: 0 2px 6px rgba(31,138,18,0.35); }
+.lv-barras em { font-style: normal; text-align: right; font-weight: 600; color: #1f3d17; font-variant-numeric: tabular-nums; }
+.lv-pie { margin-top: 18px; padding-top: 14px; border-top: 1px solid #e3efd9; font-size: 12px; color: #5b6b58; display: flex; justify-content: space-between; }
+
+/* Ajustes de acabado de la vista previa: profundidad, franja de acento y barras con brillo. */
+.login-vista { isolation: isolate; border: 1px solid rgba(255,255,255,0.6); overflow: visible; }
+.login-vista::before {
+  content: ""; position: absolute; inset: 16px -16px -16px 16px; z-index: -1;
+  border-radius: 22px; background: rgba(255,255,255,0.16); box-shadow: 0 16px 40px rgba(0,30,0,0.25);
+}
+.login-vista::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 5px; border-radius: 22px 22px 0 0;
+  background: linear-gradient(90deg, #7fcf5c, #267F18, #0d4a06);
+}
+.lv-pista { height: 14px; background: #edf5e6; box-shadow: inset 0 1px 2px rgba(0,0,0,0.06); }
+.lv-pista i { position: relative; overflow: hidden; }
+.lv-pista i::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 45%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.45), rgba(255,255,255,0));
+}
+.lv-puesto { box-shadow: 0 1px 0 #d4e8c4; }
+.lv-tarjetas > div { transition: transform .2s; }
+
+/* Colocación: texto y tarjeta juntos, centrados verticalmente en el panel verde. */
+.login-presentacion { justify-content: center; padding: 48px 56px; }
+.login-vista { margin: 44px 0 0 auto; }
+.login-vista::after { display: none; }
+
+/* Tipografía y movimiento */
+.login-centro h1 { font-weight: 800; letter-spacing: -0.02em; }
+.login-presentacion h2 { font-weight: 800; letter-spacing: -0.025em; }
+.login-marca strong { font-weight: 800; letter-spacing: -0.01em; }
+.login-form label span { font-weight: 700; letter-spacing: .01em; }
+
+/* Campo de clave con botón para ver u ocultar */
+.login-clave { position: relative; }
+.login-clave input { width: 100%; padding-right: 74px; }
+.login-ojo { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); border: 0; background: transparent; color: #267F18; font-size: 13px; font-weight: 700; cursor: pointer; padding: 6px 10px; border-radius: 999px; }
+.login-ojo:hover { background: #eaf5e3; }
+.login-form input { transition: box-shadow .2s, border-color .2s; }
+.login-form input:focus { outline: none; border-color: #267F18; box-shadow: 0 0 0 4px rgba(38,127,24,0.15); }
+
+/* Entrada escalonada del formulario */
+@keyframes subir { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes flotar { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes crecer { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes fluir { 0% { background-position: 0% 0%; } 50% { background-position: 100% 100%; } 100% { background-position: 0% 0%; } }
+@keyframes respirar { 0%, 100% { transform: scale(1); opacity: .9; } 50% { transform: scale(1.15); opacity: 1; } }
+
+.login-icono { animation: subir .6s ease-out both, flotar 5s ease-in-out 0.8s infinite; }
+.login-centro h1 { animation: subir .6s ease-out .08s both; }
+.login-centro > p { animation: subir .6s ease-out .16s both; }
+.login-form label:nth-of-type(1) { animation: subir .6s ease-out .24s both; }
+.login-form label:nth-of-type(2) { animation: subir .6s ease-out .32s both; }
+.login-entrar { animation: subir .6s ease-out .4s both; transition: transform .15s, box-shadow .15s; }
+.login-form .login-entrar:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(11,26,8,0.3); }
+.login-form .login-entrar:active { transform: translateY(1px); }
+
+.login-presentacion { background-size: 200% 200%; animation: fluir 18s ease-in-out infinite; }
+.login-brillo { position: absolute; width: 420px; height: 420px; right: -120px; top: -140px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.28), transparent 68%); animation: respirar 7s ease-in-out infinite; pointer-events: none; }
+.login-presentacion h2 { animation: subir .7s ease-out .1s both; position: relative; }
+.login-presentacion > p { animation: subir .7s ease-out .2s both; }
+.login-vista { animation: subir .8s ease-out .3s both, flotar 6s ease-in-out 1.2s infinite; }
+.lv-pista i { transform-origin: left; animation: crecer .9s cubic-bezier(.2,.8,.2,1) both; }
+
+
+
+/* Botón "Ver/Ocultar" de la clave: dentro del campo, sin heredar el estilo del botón Entrar. */
+.login-form .login-ojo { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); margin: 0; padding: 6px 12px; width: auto; height: auto; border: 0; border-radius: 999px; background: transparent; color: #267F18; font-size: 13px; font-weight: 700; box-shadow: none; cursor: pointer; }
+.login-form .login-ojo:hover { background: #eaf5e3; transform: translateY(-50%); }
+
+/* Logotipo animado: el dibujo flota sobre una sombra fija; el radar tiene ondas, barrido y puntos. */
+.login-icono { width: auto; height: auto; background: transparent; box-shadow: none; border-radius: 0; margin-bottom: 14px; filter: drop-shadow(0 14px 20px rgba(38,127,24,0.35)); animation: none; }
+.login-icono svg { width: 104px; height: 104px; display: block; animation: flotar 5s ease-in-out infinite; }
+
+
+/* Cada punto se enciende cuando el barrido pasa por su posición */
+.lv-cabecera { gap: 0; }
+
+/* Panel verde más lleno: patrón, anillos decorativos, beneficios e insignias flotantes. */
+.login-presentacion { position: relative; overflow: hidden; }
+.login-patron { position: absolute; inset: 0; pointer-events: none; opacity: .5;
+  background-image: radial-gradient(rgba(255,255,255,0.28) 1.4px, transparent 1.6px); background-size: 26px 26px;
+  -webkit-mask-image: linear-gradient(160deg, rgba(0,0,0,0.9), transparent 70%); mask-image: linear-gradient(160deg, rgba(0,0,0,0.9), transparent 70%); }
+.login-anillo { position: absolute; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.22); pointer-events: none; }
+.login-anillo.a1 { width: 520px; height: 520px; right: -190px; bottom: -170px; }
+.login-anillo.a2 { width: 340px; height: 340px; right: -100px; bottom: -80px; border-color: rgba(255,255,255,0.18); }
+
+.login-presentacion h2, .login-presentacion > p, .login-beneficios, .login-escena { position: relative; z-index: 1; }
+.login-beneficios { list-style: none; margin: 22px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+.login-beneficios li { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.28); font-size: 13px; font-weight: 600; backdrop-filter: blur(6px); }
+.login-beneficios i { font-style: normal; display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: #ffffff; color: #1f7a12; font-size: 11px; font-weight: 800; }
+
+.login-escena { position: relative; margin-top: 28px; margin-left: auto; width: 92%; max-width: 560px; }
+.login-escena .login-vista { margin: 0; width: 100%; max-width: none; }
+.login-flotante { position: absolute; z-index: 2; background: #ffffff; color: #0b2a05; border-radius: 14px; padding: 10px 14px; display: flex; flex-direction: column; gap: 2px; box-shadow: 0 14px 30px rgba(0,30,0,0.28); }
+.login-flotante b { font-size: 15px; color: #1f7a12; font-variant-numeric: tabular-nums; }
+.login-flotante small { font-size: 11px; color: #5b6b58; }
+.login-flotante.f1 { top: -26px; right: -14px; animation: flotar 5s ease-in-out infinite; }
+.login-flotante.f2 { bottom: 34px; left: -34px; animation: flotar 6.5s ease-in-out .8s infinite; }
+@media (max-width: 1100px) { .login-flotante.f2 { left: -10px; } .login-flotante.f1 { right: -6px; } }
+
+/* Animaciones más fluidas: solo se animan transformaciones y opacidad (se ejecutan en la GPU). */
+@keyframes flotar { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(0, -9px, 0); } }
+.login-presentacion { animation: none; background-size: 100% 100%; }
+.login-icono { filter: none; position: relative; }
+.login-icono::after { content: ""; position: absolute; left: 50%; bottom: -12px; width: 76px; height: 14px; transform: translateX(-50%); background: radial-gradient(ellipse at center, rgba(38,127,24,0.5), transparent 70%); z-index: -1; }
+.login-icono svg { animation: flotar 6s ease-in-out infinite; will-change: transform; }
+.login-vista { animation: subir .9s cubic-bezier(.2,.8,.2,1) .3s both, flotar 7s ease-in-out 1.3s infinite; will-change: transform; }
+.login-flotante { will-change: transform; }
+.login-flotante.f1 { animation: flotar 6s ease-in-out infinite; }
+.login-flotante.f2 { animation: flotar 7.5s ease-in-out .9s infinite; }
+.login-brillo { will-change: transform, opacity; animation: respirar 9s ease-in-out infinite; }
+
+/* Acceso como visitante */
+.login-ayuda { margin: -2px 0 0; text-align: center; font-size: 12px; color: #6b7c67; }
+.login-form .login-visitante { margin: 0; padding: 12px; border: 1.5px solid #cfe3c4; border-radius: 999px; background: transparent; color: #1f7a12; font-size: 14px; font-weight: 700; cursor: pointer; transition: background .2s, transform .15s; }
+.login-form .login-visitante:hover { background: #eaf5e3; transform: translateY(-1px); }
+.login-form .login-visitante:disabled { opacity: .6; cursor: default; }
+
+/* Adaptación a la app: el acceso vive dentro del contenido, con esquinas redondeadas. */
+.login { border-radius: 24px; overflow: hidden; box-shadow: 0 10px 30px rgba(5,34,0,0.12); }
+.login-rapido { width: 100%; max-width: 380px; margin-top: 22px; padding-top: 16px; border-top: 1px dashed #d5e3cf; text-align: center; }
+.login-rapido > span { display: block; font-size: 12px; font-weight: 700; color: #6b7c67; margin-bottom: 10px; }
+.login-rapido-fila { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.login-rapido button { border: 1px solid #cfe3c4; background: #ffffff; color: #106003; border-radius: 999px; padding: 7px 14px; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.login-rapido button:hover { background: #eaf5e3; }
+@media (prefers-reduced-motion: reduce) { .login * { animation: none !important; } }
+.lv-barras > div { grid-template-columns: minmax(0, 140px) 1fr auto; }

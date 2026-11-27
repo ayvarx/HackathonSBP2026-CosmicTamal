@@ -13,7 +13,8 @@
     "test": "node --test tests/",
     "setup": "node scripts/setup.mjs && node scripts/db-setup.mjs",
     "e2e": "node scripts/prueba-e2e.mjs",
-    "verificar": "npm run lint && npm test && npm run e2e"
+    "verificar": "npm run lint && npm test && npm run e2e",
+    "usuario": "node scripts/crear-usuario.mjs"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.6.0",
