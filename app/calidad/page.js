@@ -1,5 +1,5 @@
 // Calidad de datos (/calidad) — cascada E1→E4, universo local válido, alertas y filas excluidas.
-// Pública: cualquier perfil puede consultarla. Todo viene de lib/consultas.js (motor SQL).
+// Pública: cualquier perfil puede consultarla. Datos de lib/consultas.js.
 import EncabezadoPagina from "@/components/EncabezadoPagina";
 import EstadoVacio from "@/components/EstadoVacio";
 import MensajeError from "@/components/MensajeError";
@@ -8,8 +8,9 @@ import Paginacion from "@/components/Paginacion";
 import TablaOrdenable from "@/components/TablaOrdenable";
 import BotonDescarga from "@/components/BotonDescarga";
 import EmbudoCascada from "./EmbudoCascada";
+import CalidadPage from "./_amet/CalidadPage";
 import { exigirPerfil } from "@/lib/auth";
-import { alertas, calidad, catalogos, exclusiones, FILTROS, periodos } from "@/lib/consultas";
+import { alertas, calidad, catalogos, exclusiones, FILTROS, periodos, reconciliaciones } from "@/lib/consultas";
 import { elegirPeriodo } from "@/lib/consultas-calidad";
 import { formatearEntero, formatearFecha, nombreBanco } from "@/lib/formato";
 
@@ -40,13 +41,14 @@ export default async function PaginaCalidad({ searchParams }) {
       const banco = un(sp.banco);
       const busqueda = un(sp.busqueda).trim().slice(0, 40);
       const pagina = Math.max(1, Number.parseInt(un(sp.pagina), 10) || 1);
-      const [todas, al, ex, cat] = await Promise.all([
+      const [todas, al, ex, cat, rec] = await Promise.all([
         calidad(),
         alertas(fecha),
         exclusiones({ fecha, filtro: filtro || undefined, banco: banco || undefined, busqueda: busqueda || undefined, pagina, tamano: POR_PAGINA }),
         catalogos(),
+        reconciliaciones(fecha),
       ]);
-      datos = { lista, fecha, filtro, banco, busqueda, pagina, todas, al, ex, bancos: cat.bancos };
+      datos = { lista, fecha, filtro, banco, busqueda, pagina, todas, al, ex, bancos: cat.bancos, verificaciones: rec.resumen };
     }
   } catch (e) {
     return (
@@ -68,7 +70,7 @@ export default async function PaginaCalidad({ searchParams }) {
     );
   }
 
-  const { lista, fecha, filtro, banco, busqueda, pagina, todas, al, ex, bancos } = datos;
+  const { lista, fecha, filtro, banco, busqueda, pagina, todas, al, ex, bancos, verificaciones } = datos;
   const q = todas.find((x) => x.fecha === fecha);
   // Clave única por fila (una misma fila del archivo puede tener varias alertas).
   const conClave = (filas) => filas.map((f, i) => ({ ...f, clave: `${f.archivo}-${f.fila_archivo}-${f.tipo ?? f.filtro}-${i}` }));
@@ -95,6 +97,16 @@ export default async function PaginaCalidad({ searchParams }) {
       </EncabezadoPagina>
 
       <Filtros campos={campos} reiniciar={["pagina"]} />
+
+      <section className="mt-6" aria-label="Resumen de calidad">
+        <CalidadPage
+          q={q}
+          todas={todas}
+          fecha={fecha}
+          verificaciones={verificaciones}
+          totalAlertas={al.resumen.reduce((s, r) => s + Number(r.cantidad || 0), 0)}
+        />
+      </section>
 
       <section className="mt-6" aria-labelledby="t-cascada">
         <h2 id="t-cascada">Cascada de exclusión E1 → E4</h2>
