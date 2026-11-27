@@ -3,7 +3,7 @@ import Link from "next/link";
 import EncabezadoPagina from "@/components/EncabezadoPagina";
 import { exigirPerfil } from "@/lib/auth";
 import { parametros } from "@/lib/consultas";
-import { efectoRegla, reglaSignificativo } from "@/lib/consultas-admin";
+import { efectoRegla } from "@/lib/consultas-admin";
 import { formatearEntero, formatearFecha } from "@/lib/formato";
 import FormularioParametro from "./FormularioParametro";
 
@@ -25,7 +25,7 @@ function etiquetaLegible(clave) {
 
 export default async function PaginaParametros() {
   await exigirPerfil("administrador");
-  const [todos, regla, efecto] = await Promise.all([parametros(), reglaSignificativo(), efectoRegla()]);
+  const [todos, efecto] = await Promise.all([parametros(), efectoRegla()]);
   // Orden lógico de la regla (posición, líder, saldo); un parámetro nuevo va al final.
   const orden = Object.keys(CONTROL);
   const posicion = (clave) => (orden.includes(clave) ? orden.indexOf(clave) : orden.length);
@@ -33,7 +33,7 @@ export default async function PaginaParametros() {
 
   return (
     <>
-      <EncabezadoPagina titulo="Parámetros de movimiento significativo" descripcion={regla.texto} />
+      <EncabezadoPagina titulo="Parámetros de movimiento significativo" />
 
       <section aria-labelledby="titulo-parametros" className="mb-8">
         <h2 id="titulo-parametros" className="mb-3">Umbrales</h2>

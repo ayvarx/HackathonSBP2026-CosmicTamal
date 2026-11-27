@@ -48,7 +48,6 @@ export default function FormularioParametro({ clave, valor, control }) {
             inputMode={control.tipo === "entero" ? "numeric" : "decimal"}
             value={texto}
             onChange={(e) => setTexto(e.target.value)}
-            aria-describedby={control.tipo === "entero" || control.tipo === "decimal" ? `${id}-ayuda` : undefined}
           />
         )}
         {control.unidad && <span className="text-sm text-texto-suave">{control.unidad}</span>}
@@ -56,11 +55,6 @@ export default function FormularioParametro({ clave, valor, control }) {
           {estado.tipo === "guardando" ? "Guardando…" : "Guardar"}
         </button>
       </div>
-      {(control.tipo === "entero" || control.tipo === "decimal") && (
-        <p id={`${id}-ayuda`} className="text-xs text-texto-tenue">
-          {control.tipo === "entero" ? `Entre ${control.min} y ${control.max}.` : "Por ejemplo 10 o 7.5."}
-        </p>
-      )}
       <p aria-live="polite" className="text-sm">
         {estado.tipo === "ok" && <span className="font-semibold text-sube">{estado.mensaje}</span>}
         {estado.tipo === "error" && <span role="alert" className="font-semibold text-error-texto">{estado.mensaje}</span>}
