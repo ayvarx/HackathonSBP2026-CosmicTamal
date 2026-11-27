@@ -41,10 +41,8 @@ export default function ReglaAplicada({ parametros = [], esAdministrador = false
       </ul>
       <p className="mt-3 text-xs text-texto-tenue">
         Parámetros vigentes
-        {ultima ? ` · última actualización ${ultima.actualizado_en} por ${ultima.actualizado_por}` : ""}. Los cambia el
-        perfil Administrador{" "}
-        {esAdministrador ? <Link href="/admin">en Administración</Link> : "en Administración"}; el motor vuelve a marcar
-        los movimientos con los valores nuevos sin cambiar el código.
+        {ultima ? ` · última actualización ${ultima.actualizado_en} por ${ultima.actualizado_por}` : ""}. Se ajustan{" "}
+        {esAdministrador ? <Link href="/admin">en Administración</Link> : "en Administración"}.
       </p>
     </section>
   );

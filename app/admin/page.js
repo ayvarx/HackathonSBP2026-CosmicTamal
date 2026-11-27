@@ -22,7 +22,7 @@ export default async function PaginaAdmin() {
     <>
       <EncabezadoPagina
         titulo="Administración de cortes AT03"
-        descripcion="Cargue un nuevo corte mensual: se valida, se guarda, los rankings se recalculan solos y se muestra qué cambió frente al período anterior. Sin editar código."
+        descripcion="Cargue, valide o reemplace cortes mensuales AT03."
       />
 
       <section aria-labelledby="titulo-carga" className="mb-8">
@@ -34,15 +34,13 @@ export default async function PaginaAdmin() {
         <h2 id="titulo-cortes" className="mb-3">Cortes cargados</h2>
         {cortes.length === 0 ? (
           <EstadoVacio titulo="Aún no hay cortes cargados">
-            Use el formulario de arriba para cargar el primer archivo AT03 (por ejemplo{" "}
-            <code>AT03_sintetico_202607.csv</code>). También puede sembrar la base desde la terminal con{" "}
-            <code>npm run db:seed</code>.
+            Use el formulario de arriba para cargar el primer archivo AT03.
           </EstadoVacio>
         ) : (
           <div className="marco-tabla" role="region" aria-label="Cortes cargados" tabIndex={0}>
             <table className="tabla-datos">
               <caption>
-                {cortes.length} período(s) cargado(s). Cada fila del archivo se asigna al período de su columna Fecha.
+                {cortes.length} período(s) cargado(s).
               </caption>
               <thead>
                 <tr>

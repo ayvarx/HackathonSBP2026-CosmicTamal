@@ -21,7 +21,7 @@ export default function NotaFuente({ fecha, anterior }) {
               {" "}· comparado con <span className="cifra">{formatearFecha(anterior)} ({anterior})</span>
             </>
           )}
-          . Cifras calculadas por el motor SQL con aritmética decimal exacta; montos con 2 decimales.
+          .
         </p>
       )}
       <p className="mt-1 font-semibold">{AVISO_DATOS_FICTICIOS}</p>

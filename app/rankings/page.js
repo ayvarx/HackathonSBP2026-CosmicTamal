@@ -54,9 +54,9 @@ export const dynamic = "force-dynamic"; // los datos cambian al cargar cortes
 export const metadata = { title: "Rankings" };
 
 const TIPO_RANKING = {
-  obligatorio: { grupo: "Obligatorios", texto: "Ranking obligatorio" },
-  recomendado: { grupo: "Recomendado", texto: "Ranking recomendado adicional" },
-  bonus: { grupo: "Bonus", texto: "Ranking bonus" },
+  obligatorio: { grupo: "Principales" },
+  recomendado: { grupo: "Adicionales" },
+  bonus: { grupo: "Otros" },
 };
 
 /** Une las palabras con espacios irrompibles para que el nombre del banco no se parta en la tabla. */
@@ -109,7 +109,6 @@ export default async function PaginaRankings({ searchParams }) {
   const encabezadoBase = (
     <EncabezadoPagina
       titulo="Rankings de crédito"
-      descripcion="Posición, saldo, cartera local válida y ponderación de los 12 bancos en cada actividad económica."
     />
   );
 
@@ -259,7 +258,6 @@ export default async function PaginaRankings({ searchParams }) {
 
   const filaBanco = banco ? filas.find((f) => f.codigo_banco === banco) : null;
   const movBanco = banco ? movPorBanco.get(banco) : null;
-  const tipo = TIPO_RANKING[info.tipo];
 
   // ---------- Cabecera de actividad y pestañas (componentes de Amet) ----------
   const base = { periodo: fecha, ranking, subactividad, vista }; // filtros actuales SIN banco
@@ -357,7 +355,7 @@ export default async function PaginaRankings({ searchParams }) {
         titulo={`Ranking ${info.nombre}`}
         descripcion={
           <>
-            {tipo.texto} · corte de <strong>{formatearFecha(fecha)}</strong> (Fecha = {fecha})
+            Corte de <strong>{formatearFecha(fecha)}</strong> (Fecha = {fecha})
             {anterior ? <> · movimientos frente a {textoAnterior}</> : <> · primer corte cargado, sin período anterior para comparar</>}.
           </>
         }
@@ -368,13 +366,11 @@ export default async function PaginaRankings({ searchParams }) {
           parametros={{ fecha, ranking }}
           texto="Descargar ranking"
           variante="primario"
-          descripcion="Entregable 2, columnas oficiales."
         />
         <BotonDescarga
           href="/api/exportar/subactividades"
           parametros={{ fecha, ranking }}
           texto="Descargar desglose"
-          descripcion="Entregable 3, por subactividad."
         />
         </div>
       </EncabezadoPagina>
@@ -485,11 +481,10 @@ export default async function PaginaRankings({ searchParams }) {
             compacta
           />
           <p className="mb-4 mt-2 text-xs text-texto-tenue">
-            Movimiento = posición anterior − posición actual (positivo sube, negativo baja). Pulse un encabezado para ordenar.
+            Movimiento = posición anterior − posición actual (positivo sube, negativo baja).
           </p>
           <GraficoRanking
             titulo={`Saldo de ${info.nombre} por banco · ${formatearFecha(fecha)}`}
-            descripcion="Barras en orden de posición. La cifra exacta está en la tabla."
             barras={filas.map((f) => ({
               codigo: f.codigo_banco,
               etiqueta: f.banco,
@@ -510,7 +505,6 @@ export default async function PaginaRankings({ searchParams }) {
           {subactividad
             ? `Saldo de ${nombreSubactividad(subactividad)} por banco. `
             : `Las ${nombresSub.length} subactividades de ${info.nombre}. `}
-          La columna «Reconciliación 1» confirma que la suma de las subactividades es igual al saldo de la actividad.
         </p>
 
         {sb21 && (
@@ -518,8 +512,8 @@ export default async function PaginaRankings({ searchParams }) {
             <p className="font-semibold">Regla SB21 aplicada en Tarjeta</p>
             <p className="mt-1">
               Los préstamos con actividad CINU de Crédito personal y facilidad crediticia <span className="font-mono">07</span>{" "}
-              (tarjeta de crédito, tabla SB21) se cuentan en <strong>Tarjeta</strong> y se restan de{" "}
-              <strong>Crédito personal</strong>, para que ninguna operación se cuente dos veces. En {formatearFecha(fecha)} se
+              (tarjeta de crédito, tabla SB21) se cuentan en <strong>Tarjeta</strong> y no en{" "}
+              <strong>Crédito personal</strong>. En {formatearFecha(fecha)} se
               reclasificaron <strong>{formatearEntero(sb21.total.operaciones)}</strong> préstamos por{" "}
               <strong className="cifra">{formatearMonto(sb21.total.saldo)}</strong>
               {filaBanco && (
@@ -528,7 +522,7 @@ export default async function PaginaRankings({ searchParams }) {
                   {formatearMonto(sb21PorBanco.get(banco)?.saldo ?? "0")} de {filaBanco.banco})
                 </>
               )}
-              . La regla solo mueve saldo entre subactividades: el saldo total de Consumo de cada banco no cambia.
+              .
             </p>
           </div>
         )}
@@ -548,8 +542,7 @@ export default async function PaginaRankings({ searchParams }) {
           {!conTarjetas && (
             <Grafico
               titulo={`Composición de ${info.nombre} por subactividad · ${formatearFecha(fecha)}`}
-              descripcion="Barras apiladas: cada color es una subactividad. Pulse la leyenda para ocultar o mostrar una."
-              opcion={opcionApilada}
+                opcion={opcionApilada}
               altura={Math.max(340, filas.length * 34 + 60)}
               formatoValor="monto"
             />
@@ -565,8 +558,7 @@ export default async function PaginaRankings({ searchParams }) {
             <p className="mt-1 max-w-3xl text-sm text-texto-suave">
               Lista paginada de los préstamos del universo local válido que suman el saldo
               {banco ? ` de ${filaBanco?.banco}` : " de los 12 bancos"}
-              {subactividad ? ` en ${nombreSubactividad(subactividad)}` : ` en ${info.nombre}`}. Incluye la comprobación de que la
-              suma cuadra con el ranking. No muestra datos personales del cliente.
+              {subactividad ? ` en ${nombreSubactividad(subactividad)}` : ` en ${info.nombre}`}.
             </p>
             <Link href={urlRankings({ periodo: fecha, ranking, banco, subactividad }, "/rankings/detalle")} className="boton mt-3">
               Ver el detalle de préstamos

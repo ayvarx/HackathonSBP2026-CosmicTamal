@@ -86,10 +86,10 @@ export default async function PaginaCalidad({ searchParams }) {
     <>
       <EncabezadoPagina
         titulo="Calidad de datos"
-        descripcion={`Qué filas se leyeron, cuáles se excluyeron y por qué, y cuántas quedaron en el universo local válido. Período: ${formatearFecha(fecha)}.`}
+        descripcion={`Período: ${formatearFecha(fecha)}.`}
       >
         <div className="flex flex-row flex-wrap items-start gap-2">
-        <BotonDescarga href="/api/exportar/calidad" texto="Reporte de calidad" descripcion="Los períodos cargados (entregable 4)." />
+        <BotonDescarga href="/api/exportar/calidad" texto="Reporte de calidad" descripcion="Todos los períodos cargados." />
         <BotonDescarga href="/api/exportar/exclusiones" parametros={{ fecha }} texto="Filas excluidas" descripcion={`Todas las excluidas de ${formatearFecha(fecha)}.`} />
         </div>
       </EncabezadoPagina>
@@ -127,14 +127,13 @@ export default async function PaginaCalidad({ searchParams }) {
       </section>
 
       <section className="mt-8" aria-labelledby="t-indep">
-        <h2 id="t-indep">Conteos independientes (no oficiales)</h2>
+        <h2 id="t-indep">Conteos independientes</h2>
         <p className="mb-3 text-texto-suave">
-          Aquí cada filtro se cuenta por separado sobre todas las filas leídas, sin la cascada. Una misma fila puede
-          incumplir varios filtros, por eso estas cifras no suman al total y <strong>no son las del reporte oficial</strong>:
-          sirven solo para entender cuánto se solapan los motivos.
+          Cada filtro contado por separado sobre todas las filas leídas. Una misma fila puede
+          incumplir varios filtros, por eso estas cifras no suman al total.
         </p>
         <TablaOrdenable
-          titulo="Conteos independientes por filtro (no oficiales)"
+          titulo="Conteos independientes por filtro"
           claveFila="fecha"
           filaResaltada={fecha}
           filas={todas}
@@ -151,7 +150,7 @@ export default async function PaginaCalidad({ searchParams }) {
       <section className="mt-8" aria-labelledby="t-alertas">
         <h2 id="t-alertas">Alertas de integridad y coherencia</h2>
         <p className="mb-3 text-texto-suave">
-          Las alertas no excluyen filas: avisan de datos que merecen revisión. {hayAlertas ? "Hay alertas en este período." : "Este período no tiene alertas."}
+          Las alertas no excluyen filas. {hayAlertas ? "Hay alertas en este período." : "Este período no tiene alertas."}
         </p>
         <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {TIPOS_ALERTA.map((t) => (

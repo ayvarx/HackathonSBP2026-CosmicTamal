@@ -277,7 +277,7 @@ export default function Dashboard({
         <Panel className="span-2" eyebrow="TENDENCIA" titulo="Préstamos válidos por período">
           {serie.length < 2 ? (
             <p className="dash-empty">
-              La evolución aparece cuando hay al menos dos cortes cargados hasta este período. Hoy hay {serie.length}.
+              Se necesitan al menos dos cortes cargados. Hoy hay {serie.length}.
             </p>
           ) : (
             <Grafico opcion={opcionTendencia} altura={260} />

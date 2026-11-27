@@ -17,10 +17,6 @@ export default function TarjetasBancos({ tarjetas, detalle }) {
   return (
     <div className="rk-amet rk-contenido">
       <div className="rk-sub-head">
-        <p className="nota-corta">
-          Una tarjeta por banco: su saldo total en esta actividad, la evolución en los cortes cargados y el reparto por
-          subactividad. Pulse una tarjeta para ver el detalle del banco.
-        </p>
         <label className="field buscador">
           <span>Buscar banco</span>
           <input value={busqueda} onChange={(e) => setBusqueda(e.target.value)} placeholder="Nombre o código del banco" />

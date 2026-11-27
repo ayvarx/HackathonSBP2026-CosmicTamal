@@ -238,9 +238,6 @@ export default async function PaginaDetalle({ searchParams }) {
         compacta
       />
       <Paginacion paginaActual={pedido.pagina} totalPaginas={totalPaginas} totalFilas={detalle.total_operaciones} porPagina={POR_PAGINA} />
-      <p className="mt-2 text-xs text-texto-tenue">
-        El orden al pulsar un encabezado se aplica a la página visible; el listado completo viene ordenado por saldo descendente.
-      </p>
 
       <NotaFuente fecha={fecha} anterior={null} />
     </>

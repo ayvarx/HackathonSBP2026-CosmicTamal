@@ -36,7 +36,7 @@ export default async function PaginaParametros() {
     <>
       <EncabezadoPagina
         titulo="Parámetros de movimiento significativo"
-        descripcion="Defina cuándo un cambio entre dos períodos se marca como significativo. El cambio aplica de inmediato en todas las pantallas y reportes, y queda registrado en la bitácora."
+        descripcion="Umbrales que definen cuándo un cambio entre dos períodos es significativo."
       />
 
       <p className="tarjeta mb-6 text-sm">
@@ -62,8 +62,7 @@ export default async function PaginaParametros() {
       <section aria-labelledby="titulo-efecto">
         <h2 id="titulo-efecto" className="mb-1">Efecto de la regla vigente</h2>
         <p className="mb-3 text-sm text-texto-suave">
-          Cuántos movimientos (banco × ranking) marca hoy la regla en cada par de períodos consecutivos. Cambie un
-          umbral y esta tabla se actualiza al instante. Un movimiento puede cumplir varios criterios a la vez.
+          Movimientos (banco × ranking) marcados en cada par de períodos consecutivos.
         </p>
         {efecto.length === 0 ? (
           <p className="tarjeta text-sm">Se necesitan al menos dos períodos cargados para comparar.</p>

@@ -52,7 +52,7 @@ const ORDEN_RANKINGS = RANKINGS.map((r) => r.clave);
 const ENCABEZADO = {
   titulo: "Comparar períodos y bancos",
   descripcion:
-    "Cambios de posición y variación de saldo entre dos cortes, con la regla de movimiento significativo y la explicación de cada movimiento.",
+    "Cambios de posición y variación de saldo entre dos cortes.",
 };
 
 // --------------------------------------------------------------------------------------
@@ -199,7 +199,7 @@ export default async function PaginaComparar({ searchParams }) {
         <EncabezadoPagina {...ENCABEZADO} />
         <Filtros campos={camposFiltro} />
         <EstadoVacio titulo="No hay movimientos para ese par de períodos">
-          El motor no devolvió movimientos entre {formatearFecha(anterior)} y {formatearFecha(actual)}. Pruebe con otro par
+          No hay movimientos entre {formatearFecha(anterior)} y {formatearFecha(actual)}. Pruebe con otro par
           de períodos.
         </EstadoVacio>
       </>
@@ -282,7 +282,7 @@ export default async function PaginaComparar({ searchParams }) {
           parametros={{ anterior, actual }}
           texto="Descargar reporte de movimientos"
           variante="primario"
-          descripcion={`Entregable 5 · ${textoPar} · los 6 rankings, con la marca de significativo y su motivo.`}
+          descripcion={`${textoPar} · los 6 rankings.`}
         />
       </EncabezadoPagina>
 
@@ -376,7 +376,7 @@ export default async function PaginaComparar({ searchParams }) {
         </h2>
 
         <article className="tarjeta mb-4" aria-labelledby="titulo-explicacion">
-          <h3 id="titulo-explicacion">Explicación automática de los principales movimientos</h3>
+          <h3 id="titulo-explicacion">Principales movimientos</h3>
           <p className="mt-2">{introduccionRanking(ranking, movsRanking, anterior, actual)}</p>
           <ul className="mt-3 space-y-3">
             {explicaciones.map((e) => (
@@ -390,10 +390,6 @@ export default async function PaginaComparar({ searchParams }) {
               </li>
             ))}
           </ul>
-          <p className="mt-3 text-xs text-texto-tenue">
-            Texto generado con plantillas fijas a partir de las cifras del motor (posiciones, saldos y descomposición por
-            préstamo). No usa inteligencia artificial: con los mismos datos siempre dice lo mismo.
-          </p>
         </article>
 
         <TablaOrdenable
@@ -524,7 +520,7 @@ export default async function PaginaComparar({ searchParams }) {
           </div>
         ) : (
           <EstadoVacio titulo="No hay descomposición para este movimiento">
-            El motor no devolvió el detalle por préstamo para este banco y ranking.
+            No hay detalle por préstamo para este banco y ranking.
           </EstadoVacio>
         )}
       </section>

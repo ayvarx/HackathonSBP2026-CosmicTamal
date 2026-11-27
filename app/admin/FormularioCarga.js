@@ -124,8 +124,7 @@ export default function FormularioCarga({ periodosCargados = [] }) {
           }}
         />
         <p className="mt-1 text-xs text-texto-tenue">
-          El período de cada fila se toma de la columna Fecha, no del nombre del archivo. Antes de guardar se
-          revisan las 61 columnas, las fechas, los saldos y los ceros a la izquierda de los códigos.
+          CSV AT03 de 61 columnas; el período se toma de la columna Fecha.
         </p>
       </div>
 

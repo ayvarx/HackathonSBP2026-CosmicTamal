@@ -1,6 +1,6 @@
 // Indicadores (/indicadores) — análisis adicionales sobre el universo local válido:
 // morosidad, escalera de vencimientos, tasa ponderada y concentración.
-// No sustituyen a los seis rankings del reto. Todo se calcula en SQL (db/03_indicadores.sql).
+// Todo se calcula en SQL (db/03_indicadores.sql).
 import EncabezadoPagina from "@/components/EncabezadoPagina";
 import EstadoVacio from "@/components/EstadoVacio";
 import MensajeError from "@/components/MensajeError";
@@ -22,7 +22,7 @@ export const dynamic = "force-dynamic"; // los datos cambian al cargar cortes
 export const metadata = { title: "Indicadores" };
 
 function Nota({ children }) {
-  return <p className="mt-1 text-sm text-texto-suave"><strong>Cómo se calcula:</strong> {children}</p>;
+  return <p className="mt-1 text-sm text-texto-suave">{children}</p>;
 }
 
 function Seccion({ id, titulo, nota, children }) {
@@ -44,7 +44,7 @@ export default async function PaginaIndicadores({ searchParams }) {
   const encabezado = (
     <EncabezadoPagina
       titulo="Indicadores complementarios"
-      descripcion="Morosidad, vencimientos, tasa de interés y concentración del crédito. No sustituyen a los seis rankings del reto."
+      descripcion="Morosidad, vencimientos, tasa de interés y concentración del crédito."
     />
   );
 
@@ -90,7 +90,7 @@ export default async function PaginaIndicadores({ searchParams }) {
         ]}
       />
       <p className="mt-3 text-sm text-texto-suave">
-        Cartera analizada: <strong>{alcance}</strong>, corte de {formatearFecha(fecha, "mes")}. Universo local válido (después de las exclusiones E1 a E4).
+        Cartera analizada: <strong>{alcance}</strong>, corte de {formatearFecha(fecha, "mes")}. Universo local válido.
       </p>
 
       {!cartera ? (
@@ -108,12 +108,11 @@ export default async function PaginaIndicadores({ searchParams }) {
             <TarjetaIndicador titulo="Tasa promedio ponderada" valor={formatearPorcentaje(cartera.tasa_ponderada)} detalle="Anual, ponderada por saldo" />
           </div>
           <Nota>
-            morosidad = saldo vencido (suma de los 7 tramos Monto_Vencido_*) ÷ saldo. Mora mayor a 90 días = saldo de los préstamos con Dias_Mora mayor a 90 ÷ saldo.
-            Tasa ponderada = Σ(Tasa_Interes × Saldo) ÷ Σ Saldo. Todo con decimales exactos.
+            Morosidad = saldo vencido ÷ saldo.
           </Nota>
           <p className="mt-2 text-sm text-texto-suave">
-            Comprobación del diccionario: saldo por vencer {formatearMonto(cartera.por_vencer)} + saldo vencido {formatearMonto(cartera.vencido)} = saldo {formatearMonto(cartera.saldo)}.{" "}
-            Préstamos donde la suma de los 16 tramos no es igual al Saldo: <strong>{formatearEntero(cartera.filas_descuadradas)}</strong>.
+            Saldo por vencer {formatearMonto(cartera.por_vencer)} + saldo vencido {formatearMonto(cartera.vencido)} = saldo {formatearMonto(cartera.saldo)}.{" "}
+            Préstamos con tramos descuadrados: <strong>{formatearEntero(cartera.filas_descuadradas)}</strong>.
           </p>
         </>
       )}
@@ -121,7 +120,7 @@ export default async function PaginaIndicadores({ searchParams }) {
       <Seccion
         id="morosidad"
         titulo={`Morosidad por banco${ranking ? ` en ${nombreRanking(ranking)}` : ""}`}
-        nota="para cada banco, saldo vencido ÷ saldo de su cartera local válida (o de la actividad elegida) en el corte."
+        nota="Saldo vencido ÷ saldo de la cartera local válida del banco."
       >
         <BarrasMorosidad filas={porBanco} bancoElegido={banco} />
         <TablaOrdenable
@@ -160,7 +159,7 @@ export default async function PaginaIndicadores({ searchParams }) {
       <Seccion
         id="vencimientos"
         titulo="Escalera de vencimientos"
-        nota="se suma, en cada uno de los 16 tramos del AT03, el capital de los préstamos válidos: 9 tramos de Monto_por_Vencer_* (plazo restante) y 7 de Monto_Vencido_* (días de atraso). El porcentaje es el tramo ÷ saldo."
+        nota="Capital por tramo de plazo restante (por vencer) y de días de atraso (vencido)."
       >
         {cartera ? (
           <>
@@ -188,7 +187,7 @@ export default async function PaginaIndicadores({ searchParams }) {
       <Seccion
         id="concentracion"
         titulo="Concentración del mercado por ranking"
-        nota="participación de cada banco = su saldo en la actividad ÷ saldo de los 12 bancos en esa actividad. HHI (índice de Herfindahl-Hirschman) = suma de las participaciones al cuadrado en %, de 0 a 10,000; con 12 bancos el mínimo es 833. Menos de 1,500 = baja, de 1,500 a 2,500 = moderada, más de 2,500 = alta. Top 3 = participación conjunta de los tres mayores."
+        nota="HHI = suma de las participaciones al cuadrado (en %): menos de 1,500 baja, 1,500 a 2,500 moderada, más de 2,500 alta."
       >
         <TablaOrdenable
           titulo={`HHI y participación de los 3 mayores · ${formatearFecha(fecha, "mes")}`}
@@ -227,7 +226,7 @@ export default async function PaginaIndicadores({ searchParams }) {
       <Seccion
         id="concentracion-banco"
         titulo="Concentración de la cartera de cada banco"
-        nota="para cada banco, HHI propio = suma de los pesos de sus 6 macroactividades al cuadrado (en %). El mínimo posible con 6 actividades es 1,667; 10,000 significaría todo el crédito en una sola actividad. El peso es el saldo de la actividad ÷ cartera local válida del banco (la ponderación de los rankings)."
+        nota="HHI de la cartera = suma de los pesos de sus 6 actividades al cuadrado (en %); 10,000 es todo en una sola actividad."
       >
         <TablaOrdenable
           titulo={`Concentración por actividad de cada banco · ${formatearFecha(fecha, "mes")}`}

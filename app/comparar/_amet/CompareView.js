@@ -54,7 +54,7 @@ export default function CompareView({ ranking, textoPar, filas }) {
               </tbody>
             </table>
           </div>
-          <p className="helper-text">Cambio = posición anterior − posición actual. ▲ sube, ▼ baja, • se mantiene. Esta vista no recalcula el ranking.</p>
+          <p className="helper-text">Cambio = posición anterior − posición actual. ▲ sube, ▼ baja, • se mantiene.</p>
         </div>
       </div>
     </div>

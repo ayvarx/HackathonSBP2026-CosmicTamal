@@ -97,8 +97,8 @@ export default async function PaginaResumenCorte({ searchParams }) {
         titulo={`Qué cambió con el corte de ${resumen.etiqueta}`}
         descripcion={
           conAnterior
-            ? `Comparación automática de ${resumen.etiqueta} frente a ${resumen.etiqueta_anterior}. Todas las cifras salen del motor de rankings; las explicaciones se arman con plantillas fijas.`
-            : `${resumen.etiqueta} es el primer período cargado: todavía no hay un período anterior con qué compararlo.`
+            ? `${resumen.etiqueta} frente a ${resumen.etiqueta_anterior}.`
+            : `${resumen.etiqueta} es el primer período cargado.`
         }
       >
         {conAnterior && (
@@ -107,7 +107,7 @@ export default async function PaginaResumenCorte({ searchParams }) {
             parametros={{ anterior: resumen.anterior, actual: periodo }}
             texto="Descargar reporte de movimientos"
             variante="primario"
-            descripcion="Entregable 5: posiciones, variación de saldo, cambio de líder y marca de significativo."
+            descripcion="Posiciones, variación de saldo, cambio de líder y marca de significativo."
           />
         )}
       </EncabezadoPagina>
@@ -170,7 +170,7 @@ export default async function PaginaResumenCorte({ searchParams }) {
       <section aria-labelledby="titulo-cascada" className="mb-8">
         <h2 id="titulo-cascada" className="mb-1">Cascada de exclusiones E1–E4</h2>
         <p className="mb-3 text-sm text-texto-suave">
-          Cada fila excluida se cuenta una sola vez, en el primer filtro que incumple. Control:{" "}
+          Cada fila excluida se cuenta una vez, en el primer filtro que incumple:{" "}
           filas leídas = E1 + E2 + E3 + E4 + universo local válido →{" "}
           <span className="font-semibold">{c.cuadre_cascada === "SI" ? "cuadra" : "NO cuadra"}</span>.
         </p>
@@ -239,8 +239,7 @@ export default async function PaginaResumenCorte({ searchParams }) {
           <section aria-labelledby="titulo-principales" className="mb-8">
             <h2 id="titulo-principales" className="mb-1">Principales movimientos explicados</h2>
             <p className="mb-3 text-sm text-texto-suave">
-              {resumen.regla.texto} Orden: primero los cambios de líder, luego el mayor salto de posición y luego la mayor
-              variación porcentual de saldo.
+              {resumen.regla.texto}
             </p>
             {resumen.principales.length === 0 ? (
               <p className="tarjeta text-sm">Con la regla vigente no hay movimientos significativos entre estos dos períodos.</p>

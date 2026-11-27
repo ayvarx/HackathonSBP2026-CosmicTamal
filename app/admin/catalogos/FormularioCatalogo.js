@@ -55,8 +55,7 @@ export default function FormularioCatalogo() {
         </div>
       </div>
       <p className="text-xs text-texto-tenue">
-        Encabezado exigido: <code>{opcion.encabezado}</code>. Se reemplaza el catálogo completo y se recalculan todos los
-        períodos. Si el archivo tiene errores, no se cambia nada.
+        Encabezado: <code>{opcion.encabezado}</code>. Reemplaza el catálogo completo.
       </p>
       <div>
         <button type="submit" className="boton boton-secundario" disabled={!archivo || estado.tipo === "procesando"}>

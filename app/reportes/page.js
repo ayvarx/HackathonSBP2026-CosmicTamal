@@ -90,7 +90,7 @@ export default async function PaginaReportes({ searchParams }) {
     <>
       <EncabezadoPagina
         titulo="Reportes y descargas"
-        descripcion="Rankings por período, desglose por subactividad, reporte de calidad y movimientos de posición en CSV (UTF-8, montos con 2 decimales)."
+        descripcion="Descargas en CSV, Excel o PDF."
       />
 
       <section aria-label="Acceso rápido" className="mb-6">
@@ -109,21 +109,21 @@ export default async function PaginaReportes({ searchParams }) {
       </section>
 
       <section aria-labelledby="t-descargas" className="mb-8">
-        <h2 id="t-descargas" className="mb-3">Entregables (CSV, Excel o PDF)</h2>
+        <h2 id="t-descargas" className="mb-3">Descargas</h2>
         <div className="grid gap-4 md:grid-cols-2">
           <div className="tarjeta">
             <h3>Rankings por período</h3>
-            <p className="mb-3 text-sm text-texto-suave">Entregable 2. Posición, saldo de la actividad, cartera local válida, ponderación y número de préstamos de cada banco.</p>
+            <p className="mb-3 text-sm text-texto-suave">Posición, saldo de la actividad, cartera local válida, ponderación y número de préstamos de cada banco.</p>
             <BotonDescarga href="/api/exportar/rankings" parametros={{ ...unPeriodo, ...unRanking }} texto="Descargar rankings" variante="primario" descripcion="Fecha, Ranking, Posicion, Codigo_Banco, Banco, Saldo_Actividad, Total_Cartera_Local_Valida, Ponderacion_Pct, Operaciones_Validas" />
           </div>
           <div className="tarjeta">
             <h3>Desglose por subactividad</h3>
-            <p className="mb-3 text-sm text-texto-suave">Entregable 3. Saldo de cada banco en cada subactividad de cada ranking.</p>
+            <p className="mb-3 text-sm text-texto-suave">Saldo de cada banco en cada subactividad de cada ranking.</p>
             <BotonDescarga href="/api/exportar/subactividades" parametros={{ ...unPeriodo, ...unRanking }} texto="Descargar subactividades" variante="primario" descripcion="Fecha, Ranking, Subactividad, Codigo_Banco, Saldo" />
           </div>
           <div className="tarjeta">
             <h3>Calidad de datos</h3>
-            <p className="mb-3 text-sm text-texto-suave">Entregable 4. Conteos en cascada E1 a E4, universo local válido y cuadre.</p>
+            <p className="mb-3 text-sm text-texto-suave">Conteos en cascada E1 a E4, universo local válido y cuadre.</p>
             <BotonDescarga href="/api/exportar/calidad" parametros={unPeriodo} texto="Descargar calidad" descripcion="Un renglón por período (el filtro de ranking no aplica)." />
           </div>
           <div className="tarjeta">
@@ -135,7 +135,7 @@ export default async function PaginaReportes({ searchParams }) {
             <>
               <div className="tarjeta">
                 <h3>Movimientos de posición</h3>
-                <p className="mb-3 text-sm text-texto-suave">Entregable 5. Cambio de posición y de saldo entre períodos; sin período, todos los pares.</p>
+                <p className="mb-3 text-sm text-texto-suave">Cambio de posición y de saldo entre períodos; sin período, todos los pares.</p>
                 <BotonDescarga href="/api/exportar/movimientos" parametros={{ actual: periodo, ...unRanking }} texto="Descargar movimientos" descripcion={periodo ? "Con período elegido: movimientos hacia ese período." : undefined} />
                 <p className="mt-2 text-xs text-texto-tenue">
                   Para incluir las columnas Significativo y Motivo agregue <code>extendido=1</code> a la dirección de descarga.

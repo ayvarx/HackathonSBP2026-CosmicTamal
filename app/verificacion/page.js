@@ -1,4 +1,4 @@
-// Verificación (/verificacion) — los seis puntos que revisa el jurado, juntos y para un período.
+// Verificación (/verificacion) — los seis puntos de verificación de un período.
 // Pública. Cada sección tiene ancla (#p1 ... #p6) para llegar al dato en pocos segundos.
 import EncabezadoPagina from "@/components/EncabezadoPagina";
 import EstadoVacio from "@/components/EstadoVacio";
@@ -17,7 +17,7 @@ export const metadata = { title: "Verificación" };
 
 const PUNTOS = [
   ["p1", "1. Calidad"],
-  ["p2", "2. Rankings obligatorios"],
+  ["p2", "2. Rankings principales"],
   ["p3", "3. Comercio y Consumo"],
   ["p4", "4. Cartera y ponderación"],
   ["p5", "5. Subactividades y SB21"],
@@ -118,7 +118,7 @@ export default async function PaginaVerificacion({ searchParams }) {
     <>
       <EncabezadoPagina
         titulo="Verificación y reconciliaciones"
-        descripcion={`Los seis puntos de control del reto, juntos, para ${formatearFecha(fecha)}. Cada cifra sale del motor SQL y se puede contrastar con las exportaciones.`}
+        descripcion={`Período: ${formatearFecha(fecha)}.`}
       >
         <BotonDescarga href="/api/exportar/rankings" parametros={{ periodo: fecha }} texto="Rankings del período" />
       </EncabezadoPagina>
@@ -136,13 +136,12 @@ export default async function PaginaVerificacion({ searchParams }) {
 
       <section id="p1" className="mt-8 scroll-mt-24" aria-labelledby="h-p1">
         <h2 id="h-p1">1. Reporte de calidad</h2>
-        <p className="mb-3 text-texto-suave">Conteos E1–E4 y universo local válido de {formatearFecha(fecha)}. El detalle y las filas excluidas están en <a href={`/calidad?periodo=${fecha}`}>Calidad de datos</a>.</p>
+        <p className="mb-3 text-texto-suave">Detalle y filas excluidas en <a href={`/calidad?periodo=${fecha}`}>Calidad de datos</a>.</p>
         <EmbudoCascada q={q} />
       </section>
 
       <section id="p2" className="mt-8 scroll-mt-24" aria-labelledby="h-p2">
-        <h2 id="h-p2">2. Rankings obligatorios</h2>
-        <p className="mb-3 text-texto-suave">Hipotecario, Construcción, Industria y Agropecuario: posición y saldo de los 12 bancos.</p>
+        <h2 id="h-p2">2. Rankings principales</h2>
         <div className="grid gap-6 xl:grid-cols-2">
           {RANKINGS.filter((r) => r.tipo === "obligatorio").map((r) => <TablaRanking key={r.clave} clave={r.clave} filas={porRanking(r.clave)} />)}
         </div>
@@ -150,7 +149,6 @@ export default async function PaginaVerificacion({ searchParams }) {
 
       <section id="p3" className="mt-8 scroll-mt-24" aria-labelledby="h-p3">
         <h2 id="h-p3">3. Comercio y Consumo</h2>
-        <p className="mb-3 text-texto-suave">Rankings recomendado (Comercio) y bonus (Consumo).</p>
         <div className="grid gap-6 xl:grid-cols-2">
           {RANKINGS.filter((r) => r.tipo !== "obligatorio").map((r) => <TablaRanking key={r.clave} clave={r.clave} filas={porRanking(r.clave)} />)}
         </div>
@@ -159,8 +157,7 @@ export default async function PaginaVerificacion({ searchParams }) {
       <section id="p4" className="mt-8 scroll-mt-24" aria-labelledby="h-p4">
         <h2 id="h-p4">4. Total de cartera local válida y ponderación</h2>
         <p className="mb-3 text-texto-suave">
-          El denominador es el total de cartera local válida del banco con las 6 actividades, el mismo en todos los rankings.
-          Ponderación = saldo de la actividad ÷ total de cartera del banco × 100, redondeada a 4 decimales.
+          Ponderación = saldo de la actividad ÷ total de cartera local válida del banco × 100, a 4 decimales.
         </p>
         <TablaOrdenable
           titulo="Total de cartera local válida y ponderación por ranking"
@@ -175,7 +172,7 @@ export default async function PaginaVerificacion({ searchParams }) {
           ]}
         />
         <p className="mt-2 text-sm text-texto-suave">
-          Por el redondeo, las 6 ponderaciones de un banco pueden diferir de 100.0000 en la cuarta cifra. Saldo del universo local válido: {formatearMonto(q.saldo_universo_local_valido)}.
+          Saldo del universo local válido: {formatearMonto(q.saldo_universo_local_valido)}.
         </p>
       </section>
 
@@ -232,7 +229,7 @@ export default async function PaginaVerificacion({ searchParams }) {
             { clave: "rec3", titulo: "Reconciliación 3", tipo: "texto", alinear: "centro" },
           ]}
         />
-        <p className="mt-2 text-sm text-texto-suave">&laquo;Cuadra&raquo; significa diferencia exacta de 0.00 (comparación en NUMERIC, sin decimales flotantes). Entre paréntesis: comprobaciones que cuadran / total.</p>
+        <p className="mt-2 text-sm text-texto-suave">&laquo;Cuadra&raquo;: diferencia de 0.00. Entre paréntesis: comprobaciones que cuadran / total.</p>
         <details className="mt-4">
           <summary className="cursor-pointer font-medium">Ver las comprobaciones de {formatearFecha(fecha)} una por una ({detalleRec.length})</summary>
           <div className="mt-3">
@@ -256,20 +253,6 @@ export default async function PaginaVerificacion({ searchParams }) {
         </details>
       </section>
 
-      <section className="mt-10" aria-labelledby="h-como">
-        <h2 id="h-como">Cómo se calcula</h2>
-        <ol className="list-decimal space-y-2 pl-5">
-          <li><strong>E1, duplicados:</strong> dentro de cada período, si un número de préstamo se repite, se conserva la primera aparición y las demás se excluyen.</li>
-          <li><strong>E2, destino extranjero:</strong> se excluye toda fila cuyo destino no sea L (local).</li>
-          <li><strong>E3, saldo no positivo:</strong> se excluyen saldos iguales o menores que cero.</li>
-          <li><strong>E4, actividad no catalogada:</strong> se excluye la fila cuyo Tipo_Actividad no está en el catálogo CINU/SB109. Lo que queda es el universo local válido.</li>
-          <li><strong>Clasificación:</strong> el Tipo_Actividad (código CINU) decide la actividad económica y la subactividad, solo con los catálogos suministrados.</li>
-          <li><strong>Regla SB21:</strong> Crédito personal con facilidad 07 pasa a Tarjeta, dentro de Consumo.</li>
-          <li><strong>Ranking:</strong> por actividad, los 12 bancos se ordenan de mayor a menor saldo; la posición 1 es la de mayor saldo.</li>
-          <li><strong>Ponderación:</strong> saldo de la actividad del banco ÷ total de su cartera local válida (las 6 actividades) × 100, a 4 decimales.</li>
-          <li><strong>Reconciliaciones:</strong> 1) subactividades = actividad; 2) las 6 actividades = total de cartera del banco; 3) los 12 totales = saldo del universo. Todas al centavo.</li>
-        </ol>
-      </section>
     </>
   );
 }

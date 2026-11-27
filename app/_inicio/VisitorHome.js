@@ -33,11 +33,10 @@ export default function VisitorHome({ fecha, cortes, obligatorios, actividades, 
   return (
     <div className="visitante">
       <header className="hero">
-        <span className="hero-etiqueta">HACKATHON SBP 2026 · PORTADA PÚBLICA</span>
+        <span className="hero-etiqueta">PORTADA</span>
         <h1>Rankings de crédito por actividad</h1>
         <p className="hero-sub">
-          Bienvenido. Aquí puede ver qué bancos lideran cada actividad económica de la cartera local, cómo se
-          compone su saldo y descargar los datos. Todas las cifras salen del motor SQL a partir de los archivos AT03.
+          Qué bancos lideran cada actividad económica de la cartera local y cómo se compone su saldo.
         </p>
         <div className="hero-acciones">
           <Link href={urlRankings}>Ver rankings completos →</Link>
@@ -51,7 +50,7 @@ export default function VisitorHome({ fecha, cortes, obligatorios, actividades, 
             <strong>{formatearEntero(actividades.length)}</strong>
           </div>
           <div>
-            <span>Rankings obligatorios</span>
+            <span>Rankings principales</span>
             <strong>{formatearEntero(obligatorios)}</strong>
           </div>
           <div>

@@ -150,7 +150,6 @@ export default async function PaginaPanel({ searchParams }) {
   const encabezadoBase = (
     <EncabezadoPagina
       titulo="Panel principal"
-      descripcion="Resumen del corte: universo local válido, líderes de cada ranking y movimientos principales."
     />
   );
 
@@ -180,8 +179,7 @@ export default async function PaginaPanel({ searchParams }) {
           titulo="Aún no hay cortes cargados"
           accion={alcanzaPerfil(perfil, "administrador") ? { href: "/admin", texto: "Cargar un corte AT03" } : undefined}
         >
-          La plataforma calcula los rankings a partir de los archivos AT03. Cuando un administrador cargue el primer
-          corte, aquí verá el resumen del período.
+          Cuando se cargue el primer corte, aquí verá el resumen del período.
         </EstadoVacio>
       </>
     );

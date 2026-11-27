@@ -43,7 +43,7 @@ export default async function PaginaBitacora({ searchParams }) {
     <>
       <EncabezadoPagina
         titulo="Bitácora de operaciones"
-        descripcion={`Últimas ${LIMITE} operaciones registradas (la más reciente primero): cargas, validaciones, reemplazos y eliminaciones de cortes, cambios de parámetros e intentos rechazados.`}
+        descripcion={`Últimas ${LIMITE} operaciones, la más reciente primero.`}
       />
       <Filtros
         campos={[

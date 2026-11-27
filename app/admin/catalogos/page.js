@@ -18,7 +18,7 @@ export default async function PaginaCatalogos() {
     <>
       <EncabezadoPagina
         titulo="Catálogos de referencia"
-        descripcion="Catálogos con los que el motor clasifica cada préstamo. Se cargan desde la carpeta datos/ al instalar; el catálogo CINU/SB109 está congelado y es la única versión válida."
+        descripcion="Bancos, actividades CINU/SB109 y facilidades SB21 usados para clasificar cada préstamo."
       />
 
       <section aria-labelledby="titulo-bancos" className="mb-8">
@@ -42,8 +42,7 @@ export default async function PaginaCatalogos() {
       <section aria-labelledby="titulo-cinu" className="mb-8">
         <h2 id="titulo-cinu" className="mb-1">Catálogo CINU / SB109 ({cinu.length} actividades)</h2>
         <p className="mb-3 text-sm text-texto-suave">
-          Llave de cruce: AT03.Tipo_Actividad = Codigo_CINU. Codigo_SB08_Referencia es solo referencial (el código 2103
-          se repite en dos subactividades). Un Tipo_Actividad que no esté aquí se excluye en el filtro E4.
+          Se cruza con AT03.Tipo_Actividad; un código que no esté aquí se excluye en el filtro E4.
         </p>
         <TablaOrdenable
           titulo="Catalogo_CINU_SB109_reto.csv"
@@ -63,8 +62,7 @@ export default async function PaginaCatalogos() {
       <section aria-labelledby="titulo-sb21">
         <h2 id="titulo-sb21" className="mb-1">Tabla SB21 simplificada ({sb21.length} facilidades)</h2>
         <p className="mb-3 text-sm text-texto-suave">
-          Regla especial de CONSUMO: un préstamo con CINU de Crédito personal y facilidad 07 (tarjeta de crédito) se
-          reclasifica a la subactividad Tarjeta. Una facilidad que no esté aquí se reporta como alerta de calidad.
+          Crédito personal con facilidad 07 (tarjeta de crédito) se reclasifica a la subactividad Tarjeta.
         </p>
         <TablaOrdenable
           titulo="Tabla_SB21_simplificada.csv"
@@ -81,9 +79,6 @@ export default async function PaginaCatalogos() {
 
       <section aria-labelledby="titulo-actualizar" className="mt-8">
         <h2 id="titulo-actualizar" className="mb-1">Actualizar un catálogo</h2>
-        <p className="mb-3 text-sm text-texto-suave">
-          Solo si la Superintendencia publica una nueva versión. Para el reto, los catálogos de datos/ son los oficiales.
-        </p>
         <FormularioCatalogo />
       </section>
     </>

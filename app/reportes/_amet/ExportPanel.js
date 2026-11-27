@@ -15,7 +15,7 @@ export default function ExportPanel({ periodo, textoPeriodo }) {
       <div className="panel export-panel">
         <span className="eyebrow">ACCESO RÁPIDO</span>
         <h2>Exportar resultados</h2>
-        <p className="helper-text">Descarga el archivo del período activo ({textoPeriodo}). Los datos salen del motor SQL, sin recalcular.</p>
+        <p className="helper-text">Descarga el archivo del período activo ({textoPeriodo}).</p>
         <div className="flex flex-row flex-wrap items-start gap-2">
           {Object.entries(TIPOS).map(([k, v], i) => (
             <BotonDescarga key={k} href={v.href} parametros={{ fecha: periodo }} texto={v.texto} variante={i === 0 ? "primario" : "secundario"} />
